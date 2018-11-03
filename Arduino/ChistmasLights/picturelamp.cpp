@@ -8,18 +8,20 @@ PictureLamp::PictureLamp()
 {
   current_red=current_green=current_blue=
   target_red=target_green=target_blue=0.0;
+  transition_duration=0.0;
 }
 
 
 void PictureLamp::updateOutput(byte light_index)
 {
    float interpolated_red, interpolated_green, interpolated_blue;
-   if(!is_in_transition())
+   float normalized_transition_point;
+   float transition_time;
+   if(is_in_transition())
    {
-    float time_of_transition=(millis()-start_transition_time);
-    
-    if(time_of_transition<transition_duration) {
-        float normalized_transition_point=time_of_transition-transition_duration;
+    transition_time=millis()-start_transition_time;   
+    if(transition_time<transition_duration) {
+        normalized_transition_point=transition_time/transition_duration;
         interpolated_red=current_red-(current_red-target_red)*normalized_transition_point;
         interpolated_green=current_green-(current_green-target_green)*normalized_transition_point;
         interpolated_blue=current_blue-(current_blue-target_blue)*normalized_transition_point;
@@ -41,6 +43,9 @@ void PictureLamp::updateOutput(byte light_index)
 #ifdef TRACE_PICTURELAMP
     Serial.print(F("TRACE_PICTURELAMP> "));
     Serial.print(light_index);Serial.print(F("="));
+    Serial.print(start_transition_time);Serial.print(F("T"));
+    Serial.print(transition_time);Serial.print(F("T"));
+    Serial.print(normalized_transition_point);Serial.print(F("|"));  
     Serial.print(interpolated_red);Serial.print(F("/"));
     Serial.print(interpolated_green);Serial.print(F("/"));
     Serial.println(interpolated_blue);
@@ -65,7 +70,7 @@ void PictureLamp::setTargetColor(float red, float green, float blue)
   target_green=green;
   target_blue=blue;
   #ifdef TRACE_PICTURELAMP
-    Serial.print(F("TRACE_PICTURELAMP>::setTargetColor"));
+    Serial.print(F("TRACE_PICTURELAMP>::setTargetColor "));
     Serial.print(target_red);Serial.print(F("/"));
     Serial.print(target_green);Serial.print(F("/"));
     Serial.println(target_blue);
@@ -75,17 +80,21 @@ void PictureLamp::setTargetColor(float red, float green, float blue)
 void PictureLamp::startTransition(unsigned long duration)
 {
   #ifdef TRACE_PICTURELAMP
-    Serial.print(F("TRACE_PICTURELAMP::startTransition"));
+    Serial.print(F("TRACE_PICTURELAMP::startTransition for "));
+    Serial.println(duration);
   #endif
   transition_duration=duration;
   start_transition_time=millis();
 }
 
 void PictureLamp::endTransition() {
+  #ifdef TRACE_PICTURELAMP
+    Serial.println(F("TRACE_PICTURELAMP::endTransition"));
+  #endif
     current_red=target_red;
     current_green=target_green;
     current_blue=target_blue;
-    transition_duration=0;
+    transition_duration=0.0;
     start_transition_time=0;
 };
 

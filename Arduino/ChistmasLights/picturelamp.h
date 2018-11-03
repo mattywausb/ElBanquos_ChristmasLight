@@ -19,7 +19,7 @@ class PictureLamp
 
   protected:
       unsigned long start_transition_time=0;
-      float transition_duration=0.0; /* 0 = not in transition */
+      unsigned long transition_duration=0; /* 0 = not in transition */
       float current_red,current_green,current_blue;
       float target_red,target_green,target_blue;
 };

@@ -3,6 +3,11 @@
   #include <avr/power.h>
 #endif
 
+#ifdef TRACE_ON
+#define TRACE_OUTPUT
+#define TRACE_OUTPUT_HIGH
+#endif
+
 
 #define CHAIN_PIN_1 12
 #define CHAIN_PIN_2 11
@@ -31,7 +36,7 @@ void output_setup()
 }
 
 /* output_setLightColor takes RGB values, from 0,0,0 up to 255,255,255 */
-void output_setLightColor(byte index,byte red,byte green, byte blue)
+void output_setLightColor(byte index,int red,int green, int blue)
 {
   byte light_index=light_index_map[index];
   byte chain_index=light_index/NUMPIXELS;
@@ -41,6 +46,9 @@ void output_setLightColor(byte index,byte red,byte green, byte blue)
 
 void output_show()
 {
+  #ifdef TRACE_OUTPUT_HIGH
+      Serial.println(F(">output_show"));
+  #endif
   for (int i=0;i<NUMCHAINS;i++) 
   {
     light_chain[i].show();                                  

@@ -9,6 +9,7 @@ PictureLamp::PictureLamp()
   current_red=current_green=current_blue=
   target_red=target_green=target_blue=0.0;
   transition_duration=0.0;
+  transition_type=TT_NONE;
 }
 
 
@@ -69,6 +70,11 @@ void PictureLamp::setTargetColor(float red, float green, float blue)
   target_red=red;
   target_green=green;
   target_blue=blue;
+  transition_type=TT_BLEND;
+  if(target_red==0 && target_green==0 && target_blue==0) transition_type=TT_OFF;
+  if(current_red==0 && current_green==0 && current_blue==0) transition_type=TT_ON;
+  if(target_red==current_red && target_green==current_green && target_blue==current_blue) transition_type=TT_NONE;
+  
   #ifdef TRACE_PICTURELAMP
     Serial.print(F("TRACE_PICTURELAMP>::setTargetColor "));
     Serial.print(target_red);Serial.print(F("/"));
@@ -96,17 +102,18 @@ void PictureLamp::endTransition() {
     current_blue=target_blue;
     transition_duration=0.0;
     start_transition_time=0;
+    transition_type=TT_NONE;
 };
 
 /* ---- State information ---- */
+
+
 bool PictureLamp::is_in_transition() 
 {
   return transition_duration>0.0;
 }
 bool PictureLamp::is_transition_pending() 
 {
-  return (current_red!= target_red 
-       || current_green!=target_green 
-       || current_blue!=target_blue);
+  return (transition_type!=TT_NONE);
 }
 

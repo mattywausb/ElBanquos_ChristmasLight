@@ -2,13 +2,14 @@
 #include "picturelamp.h"
 #include "mainSettings.h"
 
-#define TRACE_PICTURELAMP
+//#define TRACE_PICTURELAMP
+#define FLOAT_CONVERSION 10000.0
 
 PictureLamp::PictureLamp()
 {
   current_red=current_green=current_blue=
-  target_red=target_green=target_blue=0.0;
-  transition_duration=0.0;
+  target_red=target_green=target_blue=0;
+  transition_duration=0;
   transition_type=TT_NONE;
 }
 
@@ -23,9 +24,9 @@ void PictureLamp::updateOutput(byte light_index)
     transition_time=millis()-start_transition_time;   
     if(transition_time<transition_duration) {
         normalized_transition_point=transition_time/transition_duration;
-        interpolated_red=current_red-(current_red-target_red)*normalized_transition_point;
-        interpolated_green=current_green-(current_green-target_green)*normalized_transition_point;
-        interpolated_blue=current_blue-(current_blue-target_blue)*normalized_transition_point;
+        interpolated_red=current_red/FLOAT_CONVERSION-(current_red-target_red)/FLOAT_CONVERSION*normalized_transition_point;
+        interpolated_green=current_green/FLOAT_CONVERSION-(current_green-target_green)/FLOAT_CONVERSION*normalized_transition_point;
+        interpolated_blue=current_blue/FLOAT_CONVERSION-(current_blue-target_blue)/FLOAT_CONVERSION*normalized_transition_point;
     } else {
         endTransition();
     }
@@ -60,16 +61,16 @@ void PictureLamp::updateOutput(byte light_index)
 
 void PictureLamp::setCurrentColor(float red, float green, float blue)
 {
-  current_red=red;
-  current_green=green;
-  current_blue=blue;
+  current_red=red*FLOAT_CONVERSION;
+  current_green=green*FLOAT_CONVERSION;
+  current_blue=blue*FLOAT_CONVERSION;
 }
 
 void PictureLamp::setTargetColor(float red, float green, float blue)
 {
-  target_red=red;
-  target_green=green;
-  target_blue=blue;
+  target_red=red*FLOAT_CONVERSION;
+  target_green=green*FLOAT_CONVERSION;
+  target_blue=blue*FLOAT_CONVERSION;
   transition_type=TT_BLEND;
   if(target_red==0 && target_green==0 && target_blue==0) transition_type=TT_OFF;
   if(current_red==0 && current_green==0 && current_blue==0) transition_type=TT_ON;

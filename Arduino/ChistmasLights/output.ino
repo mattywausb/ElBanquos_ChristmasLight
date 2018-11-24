@@ -4,8 +4,8 @@
 #endif
 
 #ifdef TRACE_ON
-#define TRACE_OUTPUT
-#define TRACE_OUTPUT_HIGH
+//#define TRACE_OUTPUT
+//#define TRACE_OUTPUT_HIGH
 #endif
 
 
@@ -39,6 +39,15 @@ void output_setup()
 void output_setLightColor(byte index,int red,int green, int blue)
 {
   byte light_index=light_index_map[index];
+  byte chain_index=light_index/NUMPIXELS;
+  byte pixel_index=light_index%NUMPIXELS;
+  light_chain[chain_index].setPixelColor(pixel_index, light_chain[chain_index].Color(red,green,blue));
+}
+
+/* output_setLightColorUnmapped takes RGB values, from 0,0,0 up to 255,255,255 */
+void output_setLightColorUnmapped(byte index,int red,int green, int blue)
+{
+  byte light_index=index;
   byte chain_index=light_index/NUMPIXELS;
   byte pixel_index=light_index%NUMPIXELS;
   light_chain[chain_index].setPixelColor(pixel_index, light_chain[chain_index].Color(red,green,blue));

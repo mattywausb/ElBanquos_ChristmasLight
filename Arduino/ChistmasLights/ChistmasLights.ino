@@ -6,7 +6,7 @@
 #define TRACE_LOGIC
 #endif 
 
-#define NUMLIGHTS 8
+#define NUMLIGHTS 24
 
 int delayval = 100; // delay between animation steps
 int duration=3000; // Transition duration

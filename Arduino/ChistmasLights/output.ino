@@ -9,9 +9,9 @@
 #endif
 
 
-#define CHAIN_PIN_1 12
-#define CHAIN_PIN_2 11
-#define CHAIN_PIN_3 10
+#define CHAIN_PIN_1 7
+#define CHAIN_PIN_2 8
+#define CHAIN_PIN_3 9
 #define NUMCHAINS 3
 #define NUMPIXELS 8
 

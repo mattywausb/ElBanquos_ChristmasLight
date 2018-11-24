@@ -2,7 +2,7 @@
 #include "picturelamp.h"
 #include "mainSettings.h"
 
-//#define TRACE_PICTURELAMP
+#define TRACE_PICTURELAMP
 #define FLOAT_CONVERSION 10000.0
 
 PictureLamp::PictureLamp()
@@ -34,9 +34,9 @@ void PictureLamp::updateOutput(byte light_index)
  
    if(!is_in_transition())
    {
-        interpolated_red=current_red;
-        interpolated_green=current_green;
-        interpolated_blue=current_blue;
+        interpolated_red=current_red/FLOAT_CONVERSION;
+        interpolated_green=current_green/FLOAT_CONVERSION;
+        interpolated_blue=current_blue/FLOAT_CONVERSION;
    }
    if(interpolated_red>1.0) interpolated_red=1.0;
    if(interpolated_green>1.0) interpolated_green=1.0;
@@ -45,8 +45,8 @@ void PictureLamp::updateOutput(byte light_index)
 #ifdef TRACE_PICTURELAMP
     Serial.print(F("TRACE_PICTURELAMP> "));
     Serial.print(light_index);Serial.print(F("="));
-    Serial.print(start_transition_time);Serial.print(F("T"));
-    Serial.print(transition_time);Serial.print(F("T"));
+    Serial.print(start_transition_time);Serial.print(F(">"));
+    Serial.print(transition_time);Serial.print(F(" N "));
     Serial.print(normalized_transition_point);Serial.print(F("|"));  
     Serial.print(interpolated_red);Serial.print(F("/"));
     Serial.print(interpolated_green);Serial.print(F("/"));
@@ -64,6 +64,7 @@ void PictureLamp::setCurrentColor(float red, float green, float blue)
   current_red=red*FLOAT_CONVERSION;
   current_green=green*FLOAT_CONVERSION;
   current_blue=blue*FLOAT_CONVERSION;
+  transition_type=TT_NONE;
 }
 
 void PictureLamp::setTargetColor(float red, float green, float blue)
@@ -111,7 +112,7 @@ void PictureLamp::endTransition() {
 
 bool PictureLamp::is_in_transition() 
 {
-  return transition_duration>0.0;
+  return (transition_type!=TT_NONE && transition_duration>0.0);
 }
 bool PictureLamp::is_transition_pending() 
 {

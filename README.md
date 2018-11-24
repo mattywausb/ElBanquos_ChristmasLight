@@ -14,4 +14,7 @@ Since you can only buy christmas ligh chains with a steady lighting or with colo
 * Pictures of assembly phases to give you an idea how to build it
 
 ## Needed Hardware
-* Some Arduino board
+* Some Arduino board with 5 Digital I/o and 2 KByte SRAM (I used an UNO)
+* 24 Neopixel 8mm throughole LED (or more or less)
+* enough 3 core cable that is flexible and as thin as possible (I used old USB mouse wires)
+* enough prototype PCB bo

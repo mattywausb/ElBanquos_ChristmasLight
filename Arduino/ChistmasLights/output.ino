@@ -23,9 +23,15 @@ Adafruit_NeoPixel light_chain[3]={ Adafruit_NeoPixel(NUMPIXELS, CHAIN_PIN_1, NEO
 /* This map translates the picture light index in to the physical light index 
    an must be adapted to the current physical setup
  */
-byte light_index_map[24]={ 0, 1, 2, 3, 4, 5, 6, 7
-                         , 8, 9,10,11,12,13,14,15
-                         ,16,17,18,19,20,21,22,23 };
+byte light_index_map[24]={ 9, 4,11,22,18,  // 1-5
+                          14,20,16, 2, 6,  // 6-10
+                          21,19,  // 11-12
+                          17, 8,  // 13-14
+                           1, 3,  // 15-16
+                           5, 7,  // 17-18
+                          13,15,  // 19-20
+                           0,12,23,10  // 21-24
+                          };
 
 void output_setup()
 {

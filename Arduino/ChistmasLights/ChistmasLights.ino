@@ -57,7 +57,8 @@ enum PROCESS_MODES {
   TRANSITION_MODE,
   TEST_MODE_FADE_SOLO,
   TEST_MODE_FADE_IN_ENSEMBLE,
-  TEST_MODE_SCALING
+  TEST_MODE_SCALING,
+  TEST_MODE_PLACEMENT
 };
 
 PROCESS_MODES process_mode = SHOW_MODE; 
@@ -90,6 +91,7 @@ void loop()
    switch(process_mode) {
     case SHOW_MODE: process_SHOW_MODE();break;
     case TRANSITION_MODE:process_TRANSITION_MODE();break;
+    case TEST_MODE_PLACEMENT:process_TEST_MODE_PLACEMENT();break;
     case TEST_MODE_FADE_SOLO:process_TEST_MODE_FADE_SOLO();break;
     case TEST_MODE_FADE_IN_ENSEMBLE:process_TEST_MODE_FADE_IN_ENSEMBLE();break;
     case TEST_MODE_SCALING: process_TEST_MODE_SCALING();break;
@@ -120,7 +122,7 @@ void process_SHOW_MODE()
 {
     if(input_selectGotPressed()) 
     {
-      enter_TEST_MODE_FADE_SOLO();
+      enter_TEST_MODE_PLACEMENT();
       return;
     }
     if(input_stepGotPressed() ||  
@@ -281,6 +283,75 @@ void process_TEST_MODE_SCALING()
       else output_setLightColorUnmapped(i,0,0,0); 
     }
     output_show();
+}
+
+/* ========= TEST_MODE_PLACEMENT ======== */
+
+void enter_TEST_MODE_PLACEMENT() 
+{
+    #ifdef TRACE_MODES
+      Serial.println(F("#TEST_MODE_PLACEMENT"));
+    #endif
+    process_mode=TEST_MODE_PLACEMENT;
+    input_IgnoreUntilRelease();
+    pic_index=4;
+    for(int i=0;i<NUMLIGHTS;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
+    output_setLightColor(0,255,0,0);
+    output_setLightColor(1,255,255,0);
+    output_setLightColor(2,0,255,0);
+    output_setLightColor(3,0,255,255);
+    output_setLightColor(4,0,0,255);
+    output_show();
+}
+
+void process_TEST_MODE_PLACEMENT()
+{
+    
+    if(input_selectGotPressed()) {
+      enter_TEST_MODE_FADE_SOLO();
+      return;
+    }
+    
+    if(input_stepGotPressed()) {  // foreward one patter
+      if(++pic_index>3) pic_index=0;
+      for(int i=0;i<NUMLIGHTS;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
+      switch(pic_index) {
+       case 0:       // inner pentagon
+           output_setLightColor(0,255,0,0);
+           output_setLightColor(1,255,255,0);
+           output_setLightColor(2,0,255,0);
+           output_setLightColor(3,0,255,255);
+           output_setLightColor(4,0,0,255);
+           break;
+       case 1:       // outer pentagon
+           output_setLightColor(5,255,0,0);
+           output_setLightColor(6,255,255,0);
+           output_setLightColor(7,0,255,0);
+           output_setLightColor(8,0,255,255);
+           output_setLightColor(9,0,0,255);
+           break;
+       case 2:       // the circle
+           output_setLightColor(10,128,0,0);
+           output_setLightColor(11,255,0,0);
+           output_setLightColor(12,128,128,0);
+           output_setLightColor(13,255,255,0);
+           output_setLightColor(14,0,128,0);
+           output_setLightColor(15,0,255,0);
+           output_setLightColor(16,0,128,128);
+           output_setLightColor(17,0,255,255);
+           output_setLightColor(18,0,0,128);
+           output_setLightColor(19,0,0,255);
+           break;
+       case 3:       // the additionals
+           output_setLightColor(20,255,0,0);
+           output_setLightColor(21,255,255,0);
+           output_setLightColor(22,0,255,0);
+           output_setLightColor(23,0,255,255);
+           break;
+      }// switch
+      output_show();
+    } // select_got_pressed
+    
 }
 
 

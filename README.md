@@ -1,1 +1,9 @@
-# ElBanquos_ChristmasLight
+# ElBanquos Christmas Lights
+An Ardiuno project using Neopixels to create slowly changing christmal light pictures in my window.
+
+## Why so ?
+I like to amaze people with riddles and "wonders" and wanted to provide some miracles that can only be noticed by people that observe the world around them. A long term vision was ding this with  christmas decoration lights that change their pattern or picture without attracting attention by blinking or fast changing colors.
+
+People should see the picture in the window and next time they come by will see another picture. They may wonder if they remembered it correctly or they might think that the guy behind the window changes it manually every day.  Only if they watch long enough they will see, how the pattern of light evolves slowly from one picture to another. Maybe they get curious enough to wait, what picture will come next, an if they have seen them all.
+
+Since you can only buy chrismas light with a steady lighting or with color chasing patterns that will give you a nervous breakdown

@@ -50,12 +50,14 @@ unsigned long picture_start_time=0;
 unsigned int picture_duration_time=5000;
 
 
+
 /* Control */
 enum PROCESS_MODES {
   SHOW_MODE, 
   TRANSITION_MODE,
   TEST_MODE_FADE_SOLO,
-  TEST_MODE_FADE_IN_ENSEMBLE
+  TEST_MODE_FADE_IN_ENSEMBLE,
+  TEST_MODE_SCALING
 };
 
 PROCESS_MODES process_mode = SHOW_MODE; 
@@ -88,6 +90,9 @@ void loop()
    switch(process_mode) {
     case SHOW_MODE: process_SHOW_MODE();break;
     case TRANSITION_MODE:process_TRANSITION_MODE();break;
+    case TEST_MODE_FADE_SOLO:process_TEST_MODE_FADE_SOLO();break;
+    case TEST_MODE_FADE_IN_ENSEMBLE:process_TEST_MODE_FADE_IN_ENSEMBLE();break;
+    case TEST_MODE_SCALING: process_TEST_MODE_SCALING();break;
    } // switch
 }
 
@@ -99,17 +104,29 @@ void enter_SHOW_MODE()
     #endif
     process_mode=SHOW_MODE;
     input_IgnoreUntilRelease();
+    digitalWrite(LED_BUILTIN, false);
     
-    digitalWrite(LED_BUILTIN, true);
+    for(int i=0;i<NUMLIGHTS;i++) 
+      {
+         picture_lamp[i].endTransition();
+         picture_lamp[i].updateOutput(i);
+       }
+    output_show();
+
     picture_start_time=millis();
 }
 
 void process_SHOW_MODE()
 {
+    if(input_selectGotPressed()) 
+    {
+      enter_TEST_MODE_FADE_SOLO();
+      return;
+    }
     if(input_stepGotPressed() ||  
         millis()-picture_start_time > picture_duration_time) {
           
-        digitalWrite(LED_BUILTIN, false);
+        
         if(++pic_index>=9) pic_index=0;
         enter_TRANSITION_MODE();
         }
@@ -127,19 +144,14 @@ void enter_TRANSITION_MODE()
     
     setTarget_picture(pic_index);
     triggerNextTransition();
+    digitalWrite(LED_BUILTIN, true);
 }
 
 void process_TRANSITION_MODE()
 {
     int transitionsRunningCount=0;
 
-    if(input_stepGotPressed()){   // Fast foreward the transistion
-      for(int i=0;i<NUMLIGHTS;i++) 
-      {
-        picture_lamp[i].endTransition();
-         picture_lamp[i].updateOutput(i);
-       }
-       output_show();
+    if(input_stepGotPressed()){   // Fast foreward the transistion 
        enter_SHOW_MODE();
        return;
     }
@@ -164,6 +176,113 @@ void process_TRANSITION_MODE()
     delay(500);
     #endif
 }
+
+/* ========= TEST_MODE_FADE_SOLO ======== */
+
+void enter_TEST_MODE_FADE_SOLO() 
+{
+    #ifdef TRACE_MODES
+      Serial.println(F("#TEST_MODE_FADE_SOLO"));
+    #endif
+    process_mode=TEST_MODE_FADE_SOLO;
+    input_IgnoreUntilRelease();
+    pic_index=0;
+    for(int i=0;i<NUMLIGHTS;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
+    output_show();
+}
+
+void process_TEST_MODE_FADE_SOLO()
+{
+    unsigned long current_time=millis();
+    byte red=0;
+    byte green=(current_time/10)%255;
+    byte blue=0;
+
+    if(input_selectGotPressed()) {
+      enter_TEST_MODE_FADE_IN_ENSEMBLE();
+      return;
+    }
+    if(input_stepGotPressed()) {
+      output_setLightColorUnmapped(pic_index,0,0,0); // Shut down current light
+      if(++pic_index>=NUMLIGHTS) pic_index=0;
+    }
+
+    output_setLightColorUnmapped(pic_index,red,green,blue);
+     output_show();
+}
+
+/* ========= TEST_MODE_FADE_IN_ENSEMBLE ======== */
+
+void enter_TEST_MODE_FADE_IN_ENSEMBLE() 
+{
+    #ifdef TRACE_MODES
+      Serial.println(F("#TEST_MODE_FADE_IN_ENSEMBLE"));
+    #endif
+    process_mode=TEST_MODE_FADE_IN_ENSEMBLE;
+    input_IgnoreUntilRelease();
+    pic_index=0;
+    for(int i=0;i<NUMLIGHTS;i++)  output_setLightColorUnmapped(i,0,128,128);  // shut down all lights
+    output_show();
+}
+
+void process_TEST_MODE_FADE_IN_ENSEMBLE()
+{
+    unsigned long current_time=millis();
+    byte red=(current_time/10)%255;
+    byte green=0;
+    byte blue=0;
+
+    if(input_selectGotPressed()) {
+      enter_TEST_MODE_SCALING();
+      return;
+    }
+    if(input_stepGotPressed()) {
+      output_setLightColorUnmapped(pic_index,0,128,128); // Shut down current light
+      if(++pic_index>=NUMLIGHTS) pic_index=0;
+    }
+
+    output_setLightColorUnmapped(pic_index,red,green,blue);
+     output_show();
+}
+
+
+/* ========= TEST_MODE_SCALING ======== */
+
+void enter_TEST_MODE_SCALING() 
+{
+    #ifdef TRACE_MODES
+      Serial.println(F("#TEST_MODE_SCALING"));
+    #endif
+    process_mode=TEST_MODE_SCALING;
+    input_IgnoreUntilRelease();
+    pic_index=0;
+    for(int i=0;i<NUMLIGHTS;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
+    output_show();
+}
+
+void process_TEST_MODE_SCALING()
+{
+    unsigned long current_time=millis();
+    byte red=(current_time/10)%255;
+    byte green=(current_time/10)%255;
+    byte blue=(current_time/10)%255;
+
+    if(input_selectGotPressed()) {
+      enter_SHOW_MODE();
+      return;
+    }
+    if(input_stepGotPressed()) {
+      
+      if(++pic_index>=NUMLIGHTS) pic_index=0;
+    }
+    
+    for(int i=0;i<NUMLIGHTS;i++) {
+      if (i<=pic_index) output_setLightColorUnmapped(i,red,green,blue); // Shut down current light
+      else output_setLightColorUnmapped(i,0,0,0); 
+    }
+    output_show();
+}
+
 
 /* ----- internal picture presentation helpers --------- */
 

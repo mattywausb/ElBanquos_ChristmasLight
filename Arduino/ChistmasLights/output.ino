@@ -16,9 +16,9 @@
 #define NUMPIXELS 8
 
 
-Adafruit_NeoPixel light_chain[3]={ Adafruit_NeoPixel(NUMPIXELS, CHAIN_PIN_1, NEO_RGB + NEO_KHZ800),
-                                    Adafruit_NeoPixel(NUMPIXELS, CHAIN_PIN_2, NEO_RGB + NEO_KHZ800),
-                                    Adafruit_NeoPixel(NUMPIXELS, CHAIN_PIN_3, NEO_RGB + NEO_KHZ800)};
+Adafruit_NeoPixel light_chain[3]={ Adafruit_NeoPixel(NUMPIXELS, CHAIN_PIN_1, NEO_RGB + NEO_KHZ400),
+                                    Adafruit_NeoPixel(NUMPIXELS, CHAIN_PIN_2, NEO_RGB + NEO_KHZ400),
+                                    Adafruit_NeoPixel(NUMPIXELS, CHAIN_PIN_3, NEO_RGB + NEO_KHZ400)};
 
 /* This map translates the picture light index in to the physical light index 
    an must be adapted to the current physical setup

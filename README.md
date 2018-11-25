@@ -1,6 +1,9 @@
 # ElBanquos Christmas Lights
 An Ardiuno project using Neopixels to create slowly changing christmas light pictures in my window.
 
+![demo_ensemble](https://raw.githubusercontent.com/mattywausb/ElBanquos_ChristmasLight/master/Documentation/demo_pictures/ensemble.png
+      "some Impressions")
+
 ## Whats the idea ?
 I like to amaze people with riddles and small wonders. My favourinte approach is to establish little miracles that can only be noticed by people that observe the world carefully (its not for the 7x24 smartphone viewers). A long term vision was doing this with christmas decoration lights that change their pattern or picture without attracting attention by blinking or fast changing colors.
 
@@ -8,10 +11,11 @@ People should see the picture in the window and next time they come by will see 
 
 Since there is not programmable christmas light chain in the stores, I have built my own.
 
+The following 
 ## Features
-* Easy maintainable table to describe the light patterns
-  * Picture is described on a logical lamp arrangemant. Translation to physical arrangement on the window is at runtime.
-  * Colorpalette helps to keep colors conistent.
+* Easy maintainable programming of the light patterns
+  * Picture is described on a logical lamp arrangemant. Translation to physical arrangement on the window is done at runtime.
+  * Colorpalette helps to keep colors conistent an save memory.
   * Pixels can be distributed over multiple chains but appear in a linear adressspace
 * Randomized transformation from one picture to the next
   * Random next picture
@@ -71,3 +75,5 @@ After getting into a stable workflow it took me about 10 Minutes for every lamp 
 * 8 Euros for the Sugru Glue Clay (1 Package with 3 portions)
 * Old usb mouse cables should be available at every flea market
 * My dedicated power supply const 10 Eur but mostly you already have some in stock
+
+

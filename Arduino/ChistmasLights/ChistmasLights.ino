@@ -10,7 +10,7 @@
 #define TRACE_MODES
 #endif 
 
-#define NUMLIGHTS 24
+#define LAMP_COUNT 24
 
 
 #ifndef DEBUG_ON
@@ -22,7 +22,7 @@
 
 #else
 // debug timing setting
-#define TRANSITION_DURATION_MINIMAL 500
+#define TRANSITION_DURATION_MINIMAL 1500
 #define TRANSITION_DURATION_VARIANCE 1000
 #define SHOW_DURATION_MINIMAL 3000  
 #define SHOW_DURATION_VARIANCE 1500
@@ -60,7 +60,7 @@ float g_color_palette[][3]={
           {1,1,1}  //7 = white
 };
 
-PictureLamp g_picture_lamp[NUMLIGHTS];
+PictureLamp g_picture_lamp[LAMP_COUNT];
 
 unsigned long g_picture_start_time=0;
 unsigned int g_picture_duration_time=5000;
@@ -95,7 +95,7 @@ void setup() {
   
   pinMode(LED_BUILTIN, OUTPUT);
   output_setup();
-  for (int i=0;i<NUMLIGHTS;i++) {
+  for (int i=0;i<LAMP_COUNT;i++) {
     g_picture_lamp[i].setCurrentColor(0,0,0);
     g_picture_lamp[i].updateOutput(i);
   }
@@ -136,7 +136,7 @@ void enter_SHOW_MODE()
     input_IgnoreUntilRelease();
     digitalWrite(LED_BUILTIN, false);
     
-    for(int i=0;i<NUMLIGHTS;i++) 
+    for(int i=0;i<LAMP_COUNT;i++) 
       {
          g_picture_lamp[i].endTransition();
          g_picture_lamp[i].updateOutput(i);
@@ -216,7 +216,7 @@ void process_TRANSITION_MODE()
     }
     
     // update all transitioning lights
-    for(int i=0;i<NUMLIGHTS;i++) 
+    for(int i=0;i<LAMP_COUNT;i++) 
     {
       if(g_picture_lamp[i].is_in_transition()) 
       {
@@ -237,6 +237,173 @@ void process_TRANSITION_MODE()
 }
 
 
+
+/* ----- internal picture presentation helpers --------- */
+
+/* set_picture
+ *  Orders all lamp objects to go to the defined picuture
+ */
+void set_picture(int picture_index)
+{
+#ifdef TRACE_PICTURES
+  Serial.print(F("TRACE_PICTURES::set_picture"));
+  Serial.println(picture_index);
+#endif
+  for (int i=0;i<LAMP_COUNT;i++) {
+     byte p_index=g_picture_point[picture_index][i];
+     g_picture_lamp[i].setCurrentColor(g_color_palette[p_index][iRED],g_color_palette[p_index][iGREEN],g_color_palette[p_index][iBLUE]);
+     g_picture_lamp[i].updateOutput(i);
+  }
+}
+
+/* Set Target Picture
+ *  Sets the target values of all lamp to the picture defined by the index 
+ */
+void set_target_picture(int picture_index)
+{
+#ifdef TRACE_PICTURES
+  Serial.print(F("TRACE_PICTURES::set_target_picture "));
+  Serial.println(picture_index);
+#endif
+  for (int i=0;i<LAMP_COUNT;i++) {
+     byte p_index=g_picture_point[picture_index][i];
+     g_picture_lamp[i].setTargetColor(g_color_palette[p_index][iRED],g_color_palette[p_index][iGREEN],g_color_palette[p_index][iBLUE]);
+  }
+}
+
+/*  triggerNextTransotion
+ *   Searched for the next lamp that needs a transition and instructs the lamp to start the transition
+ *   Return: true if some lamp got triggered, false: There is no more lamp to start
+ */
+bool triggerNextTransition()
+{
+  #ifdef TRACE_LOGIC
+    Serial.println(F("TRACE_LOGIC::triggerNextTransition "));
+  #endif
+  int on_count=0;
+  int off_count=0;
+  int total_count=0;
+  int duration=TRANSITION_DURATION_MINIMAL+random(TRANSITION_DURATION_VARIANCE);
+
+  for(int i=0;i<LAMP_COUNT;i++) {
+    if(g_picture_lamp[i].is_transition_pending() && !g_picture_lamp[i].is_in_transition())
+    {
+       total_count++;
+       switch (g_picture_lamp[i].getTransitionType())
+       {
+        case TT_ON: on_count++;break;
+        case TT_OFF: off_count++;break;
+       } //switch
+    }
+  } // for LAMP_COUNT
+
+  #ifdef TRACE_LOGIC
+    Serial.print(F("TRACE_LOGIC::total_count="));Serial.print(total_count);
+    Serial.print(F(" on_count="));Serial.print(on_count);
+    Serial.print(F(" off_count="));Serial.println(off_count);
+  #endif
+  
+  if(total_count==0) return false;  // nothing more to start
+
+  int trigger_lamp=getRandomPendingLamp();  // start transition of a random lamp
+  g_picture_lamp[trigger_lamp].startTransition(duration);  
+  #ifdef TRACE_LOGIC
+    Serial.print(F("TRACE_LOGIC::trigger_lamp ")); Serial.println(trigger_lamp);
+  #endif
+  if(g_picture_lamp[trigger_lamp].getTransitionType()==TT_BLEND) return true;  // for a blend, one lamp is enough
+
+  int additional_on_lamps=min(3,off_count>0?on_count/off_count:on_count);  // determine ratio between on and off, use all on when there is no off, but never more then 3
+  int additional_off_lamps=min(3,on_count>0?off_count/on_count:off_count);
+
+  if(g_picture_lamp[trigger_lamp].getTransitionType()==TT_ON) additional_on_lamps--;  // Remove already triggered lamp from count
+  else additional_off_lamps--;
+
+  #ifdef TRACE_LOGIC
+    Serial.print(F("TRACE_LOGIC::additional_on_lamps="));Serial.print(additional_on_lamps);
+    Serial.print(F(" additional_off_lamps="));Serial.println(additional_off_lamps);
+  #endif
+  
+  for(int i=0;i<additional_on_lamps;i++)
+  {
+    g_picture_lamp[getRandomLampOfTransitionType(TT_ON)].startTransition(duration);  
+  }
+
+  for(int i=0;i<additional_off_lamps;i++)
+  {
+    g_picture_lamp[getRandomLampOfTransitionType(TT_OFF)].startTransition(duration);   
+  }
+  return true;
+}
+
+/* getRandomPendingLamp
+ *  return: Return a random lamp index of a pending lamp
+ */
+
+byte getRandomPendingLamp()
+{
+  byte random_lamp=random(LAMP_COUNT);
+  int i;
+  for(i=0;i<LAMP_COUNT;i++) // search only one round
+  {
+    if(g_picture_lamp[random_lamp].is_transition_pending()&& !g_picture_lamp[random_lamp].is_in_transition()) break;  // leave loop when lamp is found
+    if(++random_lamp>=LAMP_COUNT) random_lamp=0;
+  }
+  
+  #ifdef TRACE_LOGIC
+  if(i>=LAMP_COUNT) 
+    Serial.println(F("TRACE_LOGIC::getRandomPendingLamp-ERROR - no pending lamp found "));
+  #endif
+
+  return random_lamp;
+}
+
+/* getRandomLampOfTransitionType
+ *  return: Return a random lamp index of a lamp with a specific transition type
+ */
+byte getRandomLampOfTransitionType(transition_type_t wanted_type)
+{
+  byte random_lamp=random(LAMP_COUNT);
+  int i;
+  for(i=0;i<LAMP_COUNT;i++) // search only one round
+  {
+    if(g_picture_lamp[random_lamp].getTransitionType()==wanted_type && !g_picture_lamp[random_lamp].is_in_transition()) break;  // leave loop when lamp is found
+    if(++random_lamp>=LAMP_COUNT) random_lamp=0;
+  }
+  #ifdef TRACE_LOGIC
+  if(i>=LAMP_COUNT) 
+    Serial.println(F("TRACE_LOGIC::getRandomLampOfTransitionType-ERROR - no lamp of desired transition type found "));
+  #endif
+
+  return random_lamp;
+}
+
+/* getTransisionRunningCount
+ *  return: Number of transitions currently processed by the chain
+ */
+
+int getTransitionsRunningCount()
+{
+  int theCount=0;
+  for(int i=0;i<LAMP_COUNT;i++) {
+    if(!g_picture_lamp[i].is_in_transition()) theCount++;
+  }
+  return theCount;
+}
+
+/* getTransitionsPendingCount
+ *  return: Number of transitions still needed to be triggered
+ */
+int getTransitionsPendingCount()
+{
+  int theCount=0;
+  for(int i=0;i<LAMP_COUNT;i++) {
+    if(!g_picture_lamp[i].is_transition_pending()) theCount++;
+  }
+  return theCount;
+}
+
+
+
 /* ========= TEST_MODE_PLACEMENT ======== */
 
 void enter_TEST_MODE_PLACEMENT() 
@@ -247,7 +414,7 @@ void enter_TEST_MODE_PLACEMENT()
     g_process_mode=TEST_MODE_PLACEMENT;
     input_IgnoreUntilRelease();
     g_pic_index=0;
-    for(int i=0;i<NUMLIGHTS;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
+    for(int i=0;i<LAMP_COUNT;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
     output_setLightColor(0,255,0,0);
     output_setLightColor(1,255,255,0);
     output_setLightColor(2,0,255,0);
@@ -266,7 +433,7 @@ void process_TEST_MODE_PLACEMENT()
     
     if(input_stepGotPressed()) {  // foreward one patter
       if(++g_pic_index>3) g_pic_index=0;
-      for(int i=0;i<NUMLIGHTS;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
+      for(int i=0;i<LAMP_COUNT;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
       switch(g_pic_index) {
        case 0:       // inner pentagon
            output_setLightColor(0,255,0,0);
@@ -346,7 +513,7 @@ void enter_TEST_MODE_FADE_SOLO()
     g_process_mode=TEST_MODE_FADE_SOLO;
     input_IgnoreUntilRelease();
     g_pic_index=0;
-    for(int i=0;i<NUMLIGHTS;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
+    for(int i=0;i<LAMP_COUNT;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
     output_show();
 }
 
@@ -363,7 +530,7 @@ void process_TEST_MODE_FADE_SOLO()
     }
     if(input_stepGotPressed()) {
       output_setLightColorUnmapped(g_pic_index,0,0,0); // Shut down current light
-      if(++g_pic_index>=NUMLIGHTS) g_pic_index=0;
+      if(++g_pic_index>=LAMP_COUNT) g_pic_index=0;
     }
 
     output_setLightColorUnmapped(g_pic_index,red,green,blue);
@@ -380,7 +547,7 @@ void enter_TEST_MODE_FADE_IN_ENSEMBLE()
     g_process_mode=TEST_MODE_FADE_IN_ENSEMBLE;
     input_IgnoreUntilRelease();
     g_pic_index=0;
-    for(int i=0;i<NUMLIGHTS;i++)  output_setLightColorUnmapped(i,0,128,128);  // shut down all lights
+    for(int i=0;i<LAMP_COUNT;i++)  output_setLightColorUnmapped(i,0,128,128);  // shut down all lights
     output_show();
 }
 
@@ -397,7 +564,7 @@ void process_TEST_MODE_FADE_IN_ENSEMBLE()
     }
     if(input_stepGotPressed()) {
       output_setLightColorUnmapped(g_pic_index,0,128,128); // Shut down current light
-      if(++g_pic_index>=NUMLIGHTS) g_pic_index=0;
+      if(++g_pic_index>=LAMP_COUNT) g_pic_index=0;
     }
 
     output_setLightColorUnmapped(g_pic_index,red,green,blue);
@@ -415,7 +582,7 @@ void enter_TEST_MODE_SCALING()
     g_process_mode=TEST_MODE_SCALING;
     input_IgnoreUntilRelease();
     g_pic_index=0;
-    for(int i=0;i<NUMLIGHTS;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
+    for(int i=0;i<LAMP_COUNT;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
     output_show();
 }
 
@@ -432,10 +599,10 @@ void process_TEST_MODE_SCALING()
     }
     if(input_stepGotPressed()) {
       
-      if(++g_pic_index>=NUMLIGHTS) g_pic_index=0;
+      if(++g_pic_index>=LAMP_COUNT) g_pic_index=0;
     }
     
-    for(int i=0;i<NUMLIGHTS;i++) {
+    for(int i=0;i<LAMP_COUNT;i++) {
       if (i<=g_pic_index) output_setLightColorUnmapped(i,red,green,blue); // Shut down current light
       else output_setLightColorUnmapped(i,0,0,0); 
     }
@@ -443,104 +610,5 @@ void process_TEST_MODE_SCALING()
 }
 
 
-
-
-/* ----- internal picture presentation helpers --------- */
-
-/* set_picture
- *  Orders all lamp objects to go to the defined picuture
- */
-void set_picture(int picture_index)
-{
-#ifdef TRACE_PICTURES
-  Serial.print(F("TRACE_PICTURES::set_picture"));
-  Serial.println(picture_index);
-#endif
-  for (int i=0;i<NUMLIGHTS;i++) {
-     byte p_index=g_picture_point[picture_index][i];
-     g_picture_lamp[i].setCurrentColor(g_color_palette[p_index][iRED],g_color_palette[p_index][iGREEN],g_color_palette[p_index][iBLUE]);
-     g_picture_lamp[i].updateOutput(i);
-  }
-}
-
-/* Set Target Picture
- *  Sets the target values of all lamp to the picture defined by the index 
- */
-void set_target_picture(int picture_index)
-{
-#ifdef TRACE_PICTURES
-  Serial.print(F("TRACE_PICTURES::set_target_picture "));
-  Serial.println(picture_index);
-#endif
-  for (int i=0;i<NUMLIGHTS;i++) {
-     byte p_index=g_picture_point[picture_index][i];
-     g_picture_lamp[i].setTargetColor(g_color_palette[p_index][iRED],g_color_palette[p_index][iGREEN],g_color_palette[p_index][iBLUE]);
-  }
-}
-
-/*  triggerNextTransotion
- *   Searched for the next lamp that needs a transition and instructs the lamp to start the transition
- *   Return: true if some lamp got triggered, false: There is no more lamp to start
- */
-bool triggerNextTransition()
-{
-  #ifdef TRACE_LOGIC
-    Serial.println(F("TRACE_LOGIC::triggerNextTransition "));
-  #endif
-  int on_count=0;
-  int off_count=0;
-  int total_count=0;
-
-  for(int i=0;i<NUMLIGHTS;i++) {
-    if(!g_picture_lamp[i].is_in_transition())
-    {
-      total_count++;
-       switch (g_picture_lamp[i].getTransitionType())
-       {
-        case TT_ON: on_count++;break;
-        case TT_OFF: off_count++;break;
-       } //switch
-    }
-  } // for NUMLIGHTS
-  
-  if(total_count==0) return false;  /* nothing more to start */
-
- int trigger_count=0;
-  
-  for(int i=0;i<NUMLIGHTS;i++) {
-    if(g_picture_lamp[i].is_transition_pending() && !g_picture_lamp[i].is_in_transition())
-    {
-      g_picture_lamp[i].startTransition(TRANSITION_DURATION_MINIMAL+random(TRANSITION_DURATION_VARIANCE));
-      trigger_count++;
-      if (trigger_count>=2) break;
-    }
-  }
-  return trigger_count!=0;
-}
-
-/* getTransisionRunningCount
- *  return: Number of transitions currently processed by the chain
- */
- 
-int getTransitionsRunningCount()
-{
-  int theCount=0;
-  for(int i=0;i<NUMLIGHTS;i++) {
-    if(!g_picture_lamp[i].is_in_transition()) theCount++;
-  }
-  return theCount;
-}
-
-/* getTransitionsPendingCount
- *  return: Number of transitions still needed to be triggered
- */
-int getTransitionsPendingCount()
-{
-  int theCount=0;
-  for(int i=0;i<NUMLIGHTS;i++) {
-    if(!g_picture_lamp[i].is_transition_pending()) theCount++;
-  }
-  return theCount;
-}
 
 

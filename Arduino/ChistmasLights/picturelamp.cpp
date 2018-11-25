@@ -2,7 +2,13 @@
 #include "picturelamp.h"
 #include "mainSettings.h"
 
+#ifdef TRACE_ON
 //#define TRACE_PICTURELAMP
+//#define TRACE_PICTURELAMP_OPERATIONS
+//#define TRACE_PICTURELAMP_OPERATIONS_HIGH
+#endif
+
+
 #define FLOAT_CONVERSION 10000.0
 
 PictureLamp::PictureLamp()
@@ -19,6 +25,11 @@ void PictureLamp::updateOutput(byte light_index)
    float interpolated_red, interpolated_green, interpolated_blue;
    float normalized_transition_point;
    float transition_time;
+
+   #ifdef TRACE_PICTURELAMP_OPERATIONS_HIGH
+      Serial.print(F("TRACE_PICTURELAMP_OPERATIONS_HIGH:updateOutput >"));
+      Serial.println(light_index);      
+   #endif
    if(is_in_transition())
    {
     transition_time=millis()-start_transition_time;   
@@ -87,8 +98,8 @@ void PictureLamp::setTargetColor(float red, float green, float blue)
 
 void PictureLamp::startTransition(unsigned long duration)
 {
-  #ifdef TRACE_PICTURELAMP
-    Serial.print(F("TRACE_PICTURELAMP::startTransition for "));
+  #ifdef TRACE_PICTURELAMP_OPERATIONS
+    Serial.print(F("TRACE_PICTURELAMP_OPERATIONS::startTransition for "));
     Serial.println(duration);
   #endif
   transition_duration=duration;
@@ -96,8 +107,8 @@ void PictureLamp::startTransition(unsigned long duration)
 }
 
 void PictureLamp::endTransition() {
-  #ifdef TRACE_PICTURELAMP
-    Serial.println(F("TRACE_PICTURELAMP::endTransition"));
+  #ifdef TRACE_PICTURELAMP_OPERATIONS
+    Serial.println(F("TRACE_PICTURELAMP_OPERATIONS::endTransition"));
   #endif
     current_red=target_red;
     current_green=target_green;

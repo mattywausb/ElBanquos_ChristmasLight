@@ -15,8 +15,8 @@
 
 #ifndef DEBUG_ON
 // normal timing setting
-#define TRANSITION_DURATION_MINIMAL 8000
-#define TRANSITION_DURATION_VARIANCE 3500
+#define TRANSITION_DURATION_MINIMAL 4000
+#define TRANSITION_DURATION_VARIANCE 2500
 #define SHOW_DURATION_MINIMAL 150000  
 #define SHOW_DURATION_VARIANCE 60000
 
@@ -29,21 +29,25 @@
 #endif
 
 
-#define PICTURE_COUNT 10
+#define PICTURE_COUNT 9
 
-byte g_picture_point[][24]= {
-// 01 02 03 04 05  06 07 08 09 10  11 12 13 14 15 16 17 18 19 20  21 22 23 24
-{   1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 0}, //0 Star
-{   0, 2, 2, 2, 2,  2, 0, 0, 0, 0,  0, 0, 2, 2, 2, 2, 2, 2, 2, 2,  2, 2, 2, 0}, //1 Angel
-{   3, 3, 3, 3, 3,  3, 0, 0, 0, 0,  3, 3, 0, 0, 3, 3, 3, 3, 0, 0,  4, 0, 0, 3}, //2 Tree
-{   7, 0, 7, 7, 0,  0, 0, 0, 0, 0,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 0}, //3 Moon
-{   2, 2, 2, 2, 2,  3, 3, 3, 3, 3,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0}, //4 Pentagons
-{   1, 1, 1, 1, 1,  0, 0, 0, 0, 0,  1, 1, 0, 0, 1, 0, 0, 1, 0, 0,  1, 0, 0, 0}, //5 Bell
-{   0, 0, 5, 5, 0,  0, 0, 0, 0, 0,  0, 0, 5, 5, 5, 5, 5, 5, 5, 5,  5, 0, 0, 5}, //6 Heart
-{   0, 0, 0, 0, 0,  2, 2, 2, 2, 2,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 7}, //7 center star
-{   0, 6, 0, 0, 0,  0, 0, 0, 0, 6,  0, 0, 0, 6, 6, 0, 0, 0, 0, 0,  0, 0, 0, 6}, //8 cassiopeia
-{   0, 0, 7, 7, 0,  7, 0, 0, 0, 0,  0, 0, 0, 7, 7, 0, 0, 7, 7, 0,  7, 7, 7, 0}  //9 snow man
-};
+//                                      01 02 03 04 05  06 07 08 09 10  11 12 13 14 15 16 17 18 19 20  21 22 23 24
+const byte pic_star[24]        PROGMEM ={   1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 0};
+const byte pic_angel[24]       PROGMEM ={   0, 2, 2, 2, 2,  2, 0, 0, 0, 0,  0, 0, 2, 2, 2, 2, 2, 2, 2, 2,  2, 2, 2, 0};
+const byte pic_tree[24]        PROGMEM ={   3, 3, 3, 3, 3,  3, 0, 0, 0, 0,  3, 3, 0, 0, 3, 3, 3, 3, 0, 0,  4, 0, 0, 3}; //2 Tree
+const byte pic_moon[24]        PROGMEM ={   7, 0, 7, 7, 0,  0, 0, 0, 0, 0,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 0}; //3 Moon
+const byte pic_pentagons[24]   PROGMEM ={   2, 2, 2, 2, 2,  3, 3, 3, 3, 3,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0}; //4 Pentagons
+const byte pic_bell[24]        PROGMEM ={   1, 1, 1, 1, 1,  0, 0, 0, 0, 0,  1, 1, 0, 0, 1, 0, 0, 1, 0, 0,  1, 0, 0, 0}; //5 Bell
+const byte pic_heart[24]       PROGMEM ={   0, 0, 5, 5, 0,  0, 0, 0, 0, 0,  0, 0, 5, 5, 5, 5, 5, 5, 5, 5,  5, 0, 0, 5}; //6 Heart
+const byte pic_center_star[24] PROGMEM ={   0, 0, 0, 0, 0,  2, 2, 2, 2, 2,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 7}; //7 center star
+const byte pic_cassiopeia[24]  PROGMEM ={   0, 6, 0, 0, 0,  0, 0, 0, 0, 6,  0, 0, 0, 6, 6, 0, 0, 0, 0, 0,  0, 0, 0, 6}; //8 cassiopeia
+const byte pic_snow_man[24]    PROGMEM ={   0, 0, 7, 7, 0,  7, 0, 0, 0, 0,  0, 0, 0, 7, 7, 0, 0, 7, 7, 0,  7, 7, 7, 0}; //9 snow man
+
+
+
+const byte* const g_pic_table [] ={pic_star,pic_angel,pic_tree,pic_moon,pic_pentagons,pic_bell,pic_heart,pic_center_star,pic_snow_man};
+
+#define PICTURE_POINT(pic,lamp) pgm_read_byte_near(g_pic_table[pic]+lamp*sizeof(byte))
 
 #define iRED 0
 #define iGREEN 1
@@ -250,7 +254,7 @@ void set_picture(int picture_index)
   Serial.println(picture_index);
 #endif
   for (int i=0;i<LAMP_COUNT;i++) {
-     byte p_index=g_picture_point[picture_index][i];
+     byte p_index=PICTURE_POINT(picture_index,i);
      g_picture_lamp[i].setCurrentColor(g_color_palette[p_index][iRED],g_color_palette[p_index][iGREEN],g_color_palette[p_index][iBLUE]);
      g_picture_lamp[i].updateOutput(i);
   }
@@ -266,7 +270,7 @@ void set_target_picture(int picture_index)
   Serial.println(picture_index);
 #endif
   for (int i=0;i<LAMP_COUNT;i++) {
-     byte p_index=g_picture_point[picture_index][i];
+     byte p_index=PICTURE_POINT(picture_index,i);
      g_picture_lamp[i].setTargetColor(g_color_palette[p_index][iRED],g_color_palette[p_index][iGREEN],g_color_palette[p_index][iBLUE]);
   }
 }

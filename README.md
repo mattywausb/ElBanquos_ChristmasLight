@@ -1,5 +1,5 @@
 # ElBanquos Christmas Lights
-An Ardiuno project using Neopixels to create slowly changing christmal light pictures in my window.
+An Ardiuno project using Neopixels to create slowly changing christmas light pictures in my window.
 
 ## Whats the idea ?
 I like to amaze people with riddles and small wonders. My favourinte approach is to establish little miracles that can only be noticed by people that observe the world carefully (its not for the 7x24 smartphone viewers). A long term vision was doing this with christmas decoration lights that change their pattern or picture without attracting attention by blinking or fast changing colors.
@@ -39,6 +39,7 @@ Since there is not programmable christmas light chain in the stores, I have buil
 * small breadboard (I used the Uno starterkit)
 * "sugru" glue clay to protect the led mounting PCB's
 * powert supply 5V / 1,5 A (for 24 pixels)
+* scotchtape
 
 ## Softwarelist
 * Arduino 
@@ -46,11 +47,27 @@ Since there is not programmable christmas light chain in the stores, I have buil
 * Fritzing (optional)
 * Inkscape (optional)
 
+## Tools
+* Soldering iron 
+* soldering holder
+* wire stripper for very small diameters
+* wire cutter
+* pcb cutting tool (I used a saw)
+
 ## Main steps to build
 * Assemble test circuit on the breadboard
 * Test LED's on the breadboard (up to 8 when using 5V Adrunio board power)
 * assemble every chain
   * Cut the small PCB boards (1 for the plug and 1 for every lamp)
   * Cut the mouse cable an remove isolations (1 for every lamp, 1st should be longer to reach from the window to the uno)
-  * Create a 3 pin at one end of the long whire
+  * Create a 3 pin plug at one end of the long whire
   * Add pcb/Neopixel and continuation whire as often as needed (I made 3 chains of 8 pixels)
+### Build effort
+Initial time is needed to set up the uno and breadboard for testing.
+After getting into a stable workflow it took me about 10 Minutes for every lamp (Cut pcb, cut cable, solder lamp, test). So all in all 240 Minutes for 24 Lamps (4 Hours) for assembling the chains. With better soldering technique and tools this might get better.
+
+### Main material costs 43 EUR
+* roundabout 25 Euro for 25 Neopixels (I killed one by testing with wrong polarity, thats why i have only 24)
+* 8 Euros for the Sugru Glue Clay (1 Package with 3 portions)
+* Old usb mouse cables should be available at every flea market
+* My dedicated power supply const 10 Eur but mostly you already have some in stock

@@ -29,23 +29,32 @@
 #endif
 
 
-#define PICTURE_COUNT 9
+#define PICTURE_COUNT sizeof(g_pic_table)/sizeof(g_pic_table[0])
 
-//                                      01 02 03 04 05  06 07 08 09 10  11 12 13 14 15 16 17 18 19 20  21 22 23 24
-const byte pic_star[24]        PROGMEM ={   1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 0};
+//                                         01 02 03 04 05  06 07 08 09 10  11 12 13 14 15 16 17 18 19 20  21 22 23 24
+const byte pic_star_yellow[24] PROGMEM ={   1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 0};
 const byte pic_angel[24]       PROGMEM ={   0, 2, 2, 2, 2,  2, 0, 0, 0, 0,  0, 0, 2, 2, 2, 2, 2, 2, 2, 2,  2, 2, 2, 0};
 const byte pic_tree[24]        PROGMEM ={   3, 3, 3, 3, 3,  3, 0, 0, 0, 0,  3, 3, 0, 0, 3, 3, 3, 3, 0, 0,  4, 0, 0, 3}; //2 Tree
-const byte pic_moon[24]        PROGMEM ={   7, 0, 7, 7, 0,  0, 0, 0, 0, 0,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 0}; //3 Moon
+const byte pic_moon[24]        PROGMEM ={   0, 0, 7, 7, 0,  0, 0, 0, 0, 0,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 5}; //3 Moon
 const byte pic_pentagons[24]   PROGMEM ={   2, 2, 2, 2, 2,  3, 3, 3, 3, 3,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0}; //4 Pentagons
 const byte pic_bell[24]        PROGMEM ={   1, 1, 1, 1, 1,  0, 0, 0, 0, 0,  1, 1, 0, 0, 1, 0, 0, 1, 0, 0,  1, 0, 0, 0}; //5 Bell
 const byte pic_heart[24]       PROGMEM ={   0, 0, 5, 5, 0,  0, 0, 0, 0, 0,  0, 0, 5, 5, 5, 5, 5, 5, 5, 5,  5, 0, 0, 5}; //6 Heart
 const byte pic_center_star[24] PROGMEM ={   0, 0, 0, 0, 0,  2, 2, 2, 2, 2,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 7}; //7 center star
-const byte pic_cassiopeia[24]  PROGMEM ={   0, 6, 0, 0, 0,  0, 0, 0, 0, 6,  0, 0, 0, 6, 6, 0, 0, 0, 0, 0,  0, 0, 0, 6}; //8 cassiopeia
+const byte pic_cassiopeia[24]  PROGMEM ={   0, 0, 0, 0, 6,  0, 6, 0, 0, 6,  0, 0, 0, 0, 0, 0, 0, 6, 6, 0,  0, 0, 0, 6}; //8 cassiopeia
 const byte pic_snow_man[24]    PROGMEM ={   0, 0, 7, 7, 0,  7, 0, 0, 0, 0,  0, 0, 0, 7, 7, 0, 0, 7, 7, 0,  7, 7, 7, 0}; //9 snow man
+const byte pic_krippe[24]      PROGMEM ={   0, 9, 0, 0, 9,  0, 0, 9, 9, 0,  0, 0, 0, 0, 9, 0, 0, 9, 0, 0,  1, 0, 7, 9}; //10 krippe
+const byte pic_ichtys[24]      PROGMEM ={   6, 6, 0, 6, 6,  6, 0, 6, 0, 6,  0, 0, 0, 0, 6, 6, 0, 7, 6, 6,  0, 0, 6, 0}; //11 ychtis
+const byte pic_flake_pple[24]  PROGMEM ={   0, 0, 0, 0, 0,  8, 8, 8, 8, 8,  0, 8, 0, 8, 0, 8, 0, 8, 0, 8,  0, 0, 0, 6}; //12 flake_pple
+const byte pic_flake_oran[24]  PROGMEM ={   0, 0, 0, 0, 0,  9, 9, 9, 9, 9,  9, 0, 9, 0, 9, 0, 9, 0, 9, 0,  0, 0, 0, 1}; //13 flake_oran
+const byte pic_star_color[24]  PROGMEM ={   6, 6, 6, 6, 6,  5, 5, 5, 5, 5, 10, 1,10, 1,10, 1,10, 1,10, 1,  0, 0, 0, 0}; //14 star_color
+const byte pic_half_moon[24]   PROGMEM ={   1, 0, 0, 1, 1,  0, 0, 0, 0, 0,  0, 1, 1, 1, 1, 1, 1, 1, 0, 0,  1, 0, 0, 0}; //15 half_moon
+
+//const byte pic_######[24]      PROGMEM ={   0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0}; //## #####
 
 
-
-const byte* const g_pic_table [] ={pic_star,pic_angel,pic_tree,pic_moon,pic_pentagons,pic_bell,pic_heart,pic_center_star,pic_snow_man};
+const byte* const g_pic_table [] ={pic_star_yellow,pic_angel,pic_tree,pic_moon,pic_pentagons,   // 1-5
+                                   pic_bell,pic_heart,pic_center_star,pic_snow_man,pic_krippe, //6-10
+                                   pic_ichtys,pic_flake_pple,pic_flake_oran,pic_star_color,pic_half_moon}; // 11-15
 
 #define PICTURE_POINT(pic,lamp) pgm_read_byte_near(g_pic_table[pic]+lamp*sizeof(byte))
 
@@ -54,14 +63,17 @@ const byte* const g_pic_table [] ={pic_star,pic_angel,pic_tree,pic_moon,pic_pent
 #define iBLUE 2
 
 float g_color_palette[][3]={
-          {0,0,0},  //0 = black
-          {1,0.8,0},  //1 = yellow
-          {0,1,1},  //2 = cyan
-          {0,0.6,0.1}, //3 = mid green
-          {0.5,0.15,0},  //4 = dark brown
-          {0.8,0.0,0},  //5 = red
-          {0,0,0.8},  //6 = blue
-          {1,1,1}  //7 = white
+          {0  ,0  ,0  },  //0 = black
+          {1  ,0.8,0  },  //1 = yellow
+          {0  ,1  ,1  },  //2 = cyan
+          {0  ,0.5,0.08}, //3 = mid green
+          {0.2,0.1,0 },  //4 = dark brown
+          {0.8,0.0,0  },  //5 = red
+          {0  ,0  ,0.8},  //6 = blue
+          {1  ,1  ,1  },  //7 = white
+          {1  ,0  ,1  },  //8 = purple
+          {1  ,0.3,0  },  //9 = orange
+          {0  ,1  ,0  }  // 10 =bright green
 };
 
 PictureLamp g_picture_lamp[LAMP_COUNT];
@@ -71,7 +83,7 @@ unsigned int g_picture_duration_time=5000;
 
 byte g_pic_index=0; //
 
-#define PICTURE_HISTORY_COUNT 3
+#define PICTURE_HISTORY_COUNT 4
 byte g_picture_history [PICTURE_HISTORY_COUNT];
 byte g_picture_history_next_entry_index=0;
 

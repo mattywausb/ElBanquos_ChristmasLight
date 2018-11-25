@@ -2,22 +2,36 @@
 #include "picturelamp.h"
 #include "mainSettings.h"
 
+#define DEBUG_ON
+
 #ifdef TRACE_ON
 //#define TRACE_LOGIC
+#define TRACE_PICTURES
 #define TRACE_MODES
 #endif 
 
 #define NUMLIGHTS 24
 
+
+#ifndef DEBUG_ON
+// normal timing setting
 #define TRANSITION_DURATION_MINIMAL 8000
 #define TRANSITION_DURATION_VARIANCE 3500
+#define SHOW_DURATION_MINIMAL 150000  
+#define SHOW_DURATION_VARIANCE 60000
 
-int duration=3000; // Transition duration
-int pic_index=0; //
+#else
+// debug timing setting
+#define TRANSITION_DURATION_MINIMAL 500
+#define TRANSITION_DURATION_VARIANCE 1000
+#define SHOW_DURATION_MINIMAL 3000  
+#define SHOW_DURATION_VARIANCE 1500
+#endif
+
 
 #define PICTURE_COUNT 10
 
-byte picture_point[][24]= {
+byte g_picture_point[][24]= {
 // 01 02 03 04 05  06 07 08 09 10  11 12 13 14 15 16 17 18 19 20  21 22 23 24
 {   1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 0}, //0 Star
 {   0, 2, 2, 2, 2,  2, 0, 0, 0, 0,  0, 0, 2, 2, 2, 2, 2, 2, 2, 2,  2, 2, 2, 0}, //1 Angel
@@ -35,7 +49,7 @@ byte picture_point[][24]= {
 #define iGREEN 1
 #define iBLUE 2
 
-float color_palette[][3]={
+float g_color_palette[][3]={
           {0,0,0},  //0 = black
           {1,0.8,0},  //1 = yellow
           {0,1,1},  //2 = cyan
@@ -46,12 +60,16 @@ float color_palette[][3]={
           {1,1,1}  //7 = white
 };
 
-PictureLamp picture_lamp[NUMLIGHTS];
+PictureLamp g_picture_lamp[NUMLIGHTS];
 
-unsigned long picture_start_time=0;
-unsigned int picture_duration_time=5000;
+unsigned long g_picture_start_time=0;
+unsigned int g_picture_duration_time=5000;
 
+byte g_pic_index=0; //
 
+#define PICTURE_HISTORY_COUNT 3
+byte g_picture_history [PICTURE_HISTORY_COUNT];
+byte g_picture_history_next_entry_index=0;
 
 /* Control */
 enum PROCESS_MODES {
@@ -64,7 +82,7 @@ enum PROCESS_MODES {
   TEST_MODE_SCALING,
 };
 
-PROCESS_MODES process_mode = SHOW_MODE; 
+PROCESS_MODES g_process_mode = SHOW_MODE; 
 
 /* **************** setup ******************************* */
 
@@ -77,13 +95,19 @@ void setup() {
   
   pinMode(LED_BUILTIN, OUTPUT);
   output_setup();
-  input_setup();
   for (int i=0;i<NUMLIGHTS;i++) {
-    picture_lamp[i].setCurrentColor(0,0,0);
-    picture_lamp[i].updateOutput(i);
+    g_picture_lamp[i].setCurrentColor(0,0,0);
+    g_picture_lamp[i].updateOutput(i);
   }
   output_show();
-  enter_TRANSITION_MODE();
+  input_setup();
+  
+  for (int i=0;i<PICTURE_HISTORY_COUNT;i++) {
+      g_picture_history[i]=0;
+  };
+  set_target_picture( g_pic_index);
+  randomSeed(analogRead(0));
+  enter_SHOW_MODE();
 }
 
 /* **************** LOOP ******************************* */
@@ -91,7 +115,7 @@ void loop()
 {
    input_switches_scan_tick();
 
-   switch(process_mode) {
+   switch(g_process_mode) {
     case SHOW_MODE: process_SHOW_MODE();break;
     case TRANSITION_MODE:process_TRANSITION_MODE();break;
     case TEST_MODE_PLACEMENT:process_TEST_MODE_PLACEMENT();break;
@@ -108,35 +132,57 @@ void enter_SHOW_MODE()
     #ifdef TRACE_MODES
       Serial.println(F("#SHOW_MODE"));
     #endif
-    process_mode=SHOW_MODE;
+    g_process_mode=SHOW_MODE;
     input_IgnoreUntilRelease();
     digitalWrite(LED_BUILTIN, false);
     
     for(int i=0;i<NUMLIGHTS;i++) 
       {
-         picture_lamp[i].endTransition();
-         picture_lamp[i].updateOutput(i);
+         g_picture_lamp[i].endTransition();
+         g_picture_lamp[i].updateOutput(i);
        }
     output_show();
 
-    picture_start_time=millis();
-    picture_duration_time=(120+random(30))*60000;
+    g_picture_start_time=millis();
+    g_picture_duration_time=SHOW_DURATION_MINIMAL+random(SHOW_DURATION_VARIANCE);
 }
 
 void process_SHOW_MODE()
 {
     if(input_selectGotPressed()) 
     {
-      enter_TEST_MODE_PLACEMENT();
+      if(++g_pic_index>=PICTURE_COUNT) g_pic_index=0;  // Switch to next picture in list
+      enter_TRANSITION_MODE();
       return;
     }
-    if(input_stepGotPressed() ||  
-        millis()-picture_start_time > picture_duration_time) {
-          
-        
-        if(++pic_index>=PICTURE_COUNT) pic_index=0;
-        enter_TRANSITION_MODE();
+    
+    if(input_stepGotPressed()) {    // Switch to next picture in list
+        if(++g_pic_index>=PICTURE_COUNT) g_pic_index=0;  
+        set_target_picture(g_pic_index);
+        enter_SHOW_MODE();
         }
+
+     if(millis()-g_picture_start_time > g_picture_duration_time) {  // start transition to a random picture 
+      g_pic_index=255;
+      while (g_pic_index==255)
+      {
+        g_pic_index=random(PICTURE_COUNT);
+        for(byte i=0;i<PICTURE_HISTORY_COUNT;i++) { // check history
+          if(g_pic_index==g_picture_history[i]) 
+          { 
+            g_pic_index=255;  //bad choice
+            break;
+          }
+        }
+      }
+      
+      // finally a valid choice
+      g_picture_history[g_picture_history_next_entry_index]=g_pic_index; // put choice into the history
+      if(++g_picture_history_next_entry_index>=PICTURE_HISTORY_COUNT) g_picture_history_next_entry_index=0;
+      
+      enter_TRANSITION_MODE();
+      return;  
+     }
 }
 
 /* ========= TRANSITION_MODE ======== */
@@ -146,10 +192,10 @@ void enter_TRANSITION_MODE()
     #ifdef TRACE_MODES
       Serial.println(F("#TRANSITION_MODE"));
     #endif
-    process_mode=TRANSITION_MODE;
+    g_process_mode=TRANSITION_MODE;
     input_IgnoreUntilRelease();
     
-    setTarget_picture(pic_index);
+    set_target_picture(g_pic_index);
     triggerNextTransition();
     digitalWrite(LED_BUILTIN, true);
 }
@@ -157,6 +203,12 @@ void enter_TRANSITION_MODE()
 void process_TRANSITION_MODE()
 {
     int transitionsRunningCount=0;
+
+    if(input_selectGotPressed()) 
+    {
+      enter_TEST_MODE_PLACEMENT();
+      return;
+    }
 
     if(input_stepGotPressed()){   // Fast foreward the transistion 
        enter_SHOW_MODE();
@@ -166,9 +218,9 @@ void process_TRANSITION_MODE()
     // update all transitioning lights
     for(int i=0;i<NUMLIGHTS;i++) 
     {
-      if(picture_lamp[i].is_in_transition()) 
+      if(g_picture_lamp[i].is_in_transition()) 
       {
-        picture_lamp[i].updateOutput(i);
+        g_picture_lamp[i].updateOutput(i);
         transitionsRunningCount++;
       }
     }
@@ -192,9 +244,9 @@ void enter_TEST_MODE_PLACEMENT()
     #ifdef TRACE_MODES
       Serial.println(F("#TEST_MODE_PLACEMENT"));
     #endif
-    process_mode=TEST_MODE_PLACEMENT;
+    g_process_mode=TEST_MODE_PLACEMENT;
     input_IgnoreUntilRelease();
-    pic_index=0;
+    g_pic_index=0;
     for(int i=0;i<NUMLIGHTS;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
     output_setLightColor(0,255,0,0);
     output_setLightColor(1,255,255,0);
@@ -213,9 +265,9 @@ void process_TEST_MODE_PLACEMENT()
     }
     
     if(input_stepGotPressed()) {  // foreward one patter
-      if(++pic_index>3) pic_index=0;
+      if(++g_pic_index>3) g_pic_index=0;
       for(int i=0;i<NUMLIGHTS;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
-      switch(pic_index) {
+      switch(g_pic_index) {
        case 0:       // inner pentagon
            output_setLightColor(0,255,0,0);
            output_setLightColor(1,255,255,0);
@@ -260,10 +312,10 @@ void enter_TEST_MODE_PICTURES()
     #ifdef TRACE_MODES
       Serial.println(F("#TEST_MODE_PICTURES"));
     #endif
-    process_mode=TEST_MODE_PICTURES;
+    g_process_mode=TEST_MODE_PICTURES;
     input_IgnoreUntilRelease();
-    pic_index=0;
-    set_picture( pic_index);
+    g_pic_index=0;
+    set_picture( g_pic_index);
     output_show();
 }
 
@@ -276,8 +328,8 @@ void process_TEST_MODE_PICTURES()
     }
     
     if(input_stepGotPressed()) {  // foreward one patter
-      if(++pic_index>=PICTURE_COUNT) pic_index=0;
-          set_picture( pic_index);
+      if(++g_pic_index>=PICTURE_COUNT) g_pic_index=0;
+          set_picture( g_pic_index);
           output_show(); 
     }
       
@@ -291,9 +343,9 @@ void enter_TEST_MODE_FADE_SOLO()
     #ifdef TRACE_MODES
       Serial.println(F("#TEST_MODE_FADE_SOLO"));
     #endif
-    process_mode=TEST_MODE_FADE_SOLO;
+    g_process_mode=TEST_MODE_FADE_SOLO;
     input_IgnoreUntilRelease();
-    pic_index=0;
+    g_pic_index=0;
     for(int i=0;i<NUMLIGHTS;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
     output_show();
 }
@@ -310,11 +362,11 @@ void process_TEST_MODE_FADE_SOLO()
       return;
     }
     if(input_stepGotPressed()) {
-      output_setLightColorUnmapped(pic_index,0,0,0); // Shut down current light
-      if(++pic_index>=NUMLIGHTS) pic_index=0;
+      output_setLightColorUnmapped(g_pic_index,0,0,0); // Shut down current light
+      if(++g_pic_index>=NUMLIGHTS) g_pic_index=0;
     }
 
-    output_setLightColorUnmapped(pic_index,red,green,blue);
+    output_setLightColorUnmapped(g_pic_index,red,green,blue);
      output_show();
 }
 
@@ -325,9 +377,9 @@ void enter_TEST_MODE_FADE_IN_ENSEMBLE()
     #ifdef TRACE_MODES
       Serial.println(F("#TEST_MODE_FADE_IN_ENSEMBLE"));
     #endif
-    process_mode=TEST_MODE_FADE_IN_ENSEMBLE;
+    g_process_mode=TEST_MODE_FADE_IN_ENSEMBLE;
     input_IgnoreUntilRelease();
-    pic_index=0;
+    g_pic_index=0;
     for(int i=0;i<NUMLIGHTS;i++)  output_setLightColorUnmapped(i,0,128,128);  // shut down all lights
     output_show();
 }
@@ -344,11 +396,11 @@ void process_TEST_MODE_FADE_IN_ENSEMBLE()
       return;
     }
     if(input_stepGotPressed()) {
-      output_setLightColorUnmapped(pic_index,0,128,128); // Shut down current light
-      if(++pic_index>=NUMLIGHTS) pic_index=0;
+      output_setLightColorUnmapped(g_pic_index,0,128,128); // Shut down current light
+      if(++g_pic_index>=NUMLIGHTS) g_pic_index=0;
     }
 
-    output_setLightColorUnmapped(pic_index,red,green,blue);
+    output_setLightColorUnmapped(g_pic_index,red,green,blue);
      output_show();
 }
 
@@ -360,9 +412,9 @@ void enter_TEST_MODE_SCALING()
     #ifdef TRACE_MODES
       Serial.println(F("#TEST_MODE_SCALING"));
     #endif
-    process_mode=TEST_MODE_SCALING;
+    g_process_mode=TEST_MODE_SCALING;
     input_IgnoreUntilRelease();
-    pic_index=0;
+    g_pic_index=0;
     for(int i=0;i<NUMLIGHTS;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
     output_show();
 }
@@ -380,11 +432,11 @@ void process_TEST_MODE_SCALING()
     }
     if(input_stepGotPressed()) {
       
-      if(++pic_index>=NUMLIGHTS) pic_index=0;
+      if(++g_pic_index>=NUMLIGHTS) g_pic_index=0;
     }
     
     for(int i=0;i<NUMLIGHTS;i++) {
-      if (i<=pic_index) output_setLightColorUnmapped(i,red,green,blue); // Shut down current light
+      if (i<=g_pic_index) output_setLightColorUnmapped(i,red,green,blue); // Shut down current light
       else output_setLightColorUnmapped(i,0,0,0); 
     }
     output_show();
@@ -400,29 +452,29 @@ void process_TEST_MODE_SCALING()
  */
 void set_picture(int picture_index)
 {
-#ifdef TRACE_LOGIC
-  Serial.print(F("TRACE_LOGIC::set_picture"));
+#ifdef TRACE_PICTURES
+  Serial.print(F("TRACE_PICTURES::set_picture"));
   Serial.println(picture_index);
 #endif
   for (int i=0;i<NUMLIGHTS;i++) {
-     byte p_index=picture_point[picture_index][i];
-     picture_lamp[i].setCurrentColor(color_palette[p_index][iRED],color_palette[p_index][iGREEN],color_palette[p_index][iBLUE]);
-     picture_lamp[i].updateOutput(i);
+     byte p_index=g_picture_point[picture_index][i];
+     g_picture_lamp[i].setCurrentColor(g_color_palette[p_index][iRED],g_color_palette[p_index][iGREEN],g_color_palette[p_index][iBLUE]);
+     g_picture_lamp[i].updateOutput(i);
   }
 }
 
 /* Set Target Picture
  *  Sets the target values of all lamp to the picture defined by the index 
  */
-void setTarget_picture(int picture_index)
+void set_target_picture(int picture_index)
 {
-#ifdef TRACE_LOGIC
-  Serial.print(F("TRACE_LOGIC::setTarget_picture "));
+#ifdef TRACE_PICTURES
+  Serial.print(F("TRACE_PICTURES::set_target_picture "));
   Serial.println(picture_index);
 #endif
   for (int i=0;i<NUMLIGHTS;i++) {
-     byte p_index=picture_point[picture_index][i];
-     picture_lamp[i].setTargetColor(color_palette[p_index][iRED],color_palette[p_index][iGREEN],color_palette[p_index][iBLUE]);
+     byte p_index=g_picture_point[picture_index][i];
+     g_picture_lamp[i].setTargetColor(g_color_palette[p_index][iRED],g_color_palette[p_index][iGREEN],g_color_palette[p_index][iBLUE]);
   }
 }
 
@@ -440,10 +492,10 @@ bool triggerNextTransition()
   int total_count=0;
 
   for(int i=0;i<NUMLIGHTS;i++) {
-    if(!picture_lamp[i].is_in_transition())
+    if(!g_picture_lamp[i].is_in_transition())
     {
       total_count++;
-       switch (picture_lamp[i].getTransitionType())
+       switch (g_picture_lamp[i].getTransitionType())
        {
         case TT_ON: on_count++;break;
         case TT_OFF: off_count++;break;
@@ -456,9 +508,9 @@ bool triggerNextTransition()
  int trigger_count=0;
   
   for(int i=0;i<NUMLIGHTS;i++) {
-    if(picture_lamp[i].is_transition_pending() && !picture_lamp[i].is_in_transition())
+    if(g_picture_lamp[i].is_transition_pending() && !g_picture_lamp[i].is_in_transition())
     {
-      picture_lamp[i].startTransition(TRANSITION_DURATION_MINIMAL+random(TRANSITION_DURATION_VARIANCE));
+      g_picture_lamp[i].startTransition(TRANSITION_DURATION_MINIMAL+random(TRANSITION_DURATION_VARIANCE));
       trigger_count++;
       if (trigger_count>=2) break;
     }
@@ -474,7 +526,7 @@ int getTransitionsRunningCount()
 {
   int theCount=0;
   for(int i=0;i<NUMLIGHTS;i++) {
-    if(!picture_lamp[i].is_in_transition()) theCount++;
+    if(!g_picture_lamp[i].is_in_transition()) theCount++;
   }
   return theCount;
 }
@@ -486,7 +538,7 @@ int getTransitionsPendingCount()
 {
   int theCount=0;
   for(int i=0;i<NUMLIGHTS;i++) {
-    if(!picture_lamp[i].is_transition_pending()) theCount++;
+    if(!g_picture_lamp[i].is_transition_pending()) theCount++;
   }
   return theCount;
 }

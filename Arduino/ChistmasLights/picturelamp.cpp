@@ -2,7 +2,7 @@
 #include "picturelamp.h"
 #include "mainSettings.h"
 
-#define TRACE_PICTURELAMP
+//#define TRACE_PICTURELAMP
 #define FLOAT_CONVERSION 10000.0
 
 PictureLamp::PictureLamp()

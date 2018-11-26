@@ -65,9 +65,9 @@ void PictureLamp::updateOutput(byte light_index)
  #endif
 
    output_setLightColor(light_index,
-                  static_cast<int>(255.0*interpolated_red),
-                  static_cast<int>(255.0*interpolated_green),
-                  static_cast<int>(255.0*interpolated_blue));
+                  static_cast<int>(180.0*interpolated_red),
+                  static_cast<int>(180.0*interpolated_green),
+                  static_cast<int>(180.0*interpolated_blue));
 }
 
 void PictureLamp::setCurrentColor(float red, float green, float blue)

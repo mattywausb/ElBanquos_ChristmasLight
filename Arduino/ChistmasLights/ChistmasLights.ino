@@ -2,12 +2,13 @@
 #include "picturelamp.h"
 #include "mainSettings.h"
 
-#define DEBUG_ON
+//#define DEBUG_ON
 
 #ifdef TRACE_ON
 //#define TRACE_LOGIC
 #define TRACE_PICTURES
 #define TRACE_MODES
+#define TRACE_TIMING
 #endif 
 
 #define LAMP_COUNT 24
@@ -15,15 +16,19 @@
 
 #ifndef DEBUG_ON
 // normal timing setting
-#define TRANSITION_DURATION_MINIMAL 4000
+#define TRANSITION_RYTHM_MINIMAL 3000
+#define TRANSITION_RYTHM_VARIANCE 5000
+#define TRANSITION_DURATION_MINIMAL 6000
 #define TRANSITION_DURATION_VARIANCE 2500
-#define SHOW_DURATION_MINIMAL 150000  
-#define SHOW_DURATION_VARIANCE 60000
+#define SHOW_DURATION_MINIMAL 180000  
+#define SHOW_DURATION_VARIANCE 90000
 
 #else
 // debug timing setting
+#define TRANSITION_RYTHM_MINIMAL 700
+#define TRANSITION_RYTHM_VARIANCE 5000
 #define TRANSITION_DURATION_MINIMAL 1500
-#define TRANSITION_DURATION_VARIANCE 1000
+#define TRANSITION_DURATION_VARIANCE 4000
 #define SHOW_DURATION_MINIMAL 3000  
 #define SHOW_DURATION_VARIANCE 1500
 #endif
@@ -32,15 +37,15 @@
 #define PICTURE_COUNT sizeof(g_pic_table)/sizeof(g_pic_table[0])
 
 //                                         01 02 03 04 05  06 07 08 09 10  11 12 13 14 15 16 17 18 19 20  21 22 23 24
-const byte pic_star_yellow[24] PROGMEM ={   1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 0};
-const byte pic_angel[24]       PROGMEM ={   0, 2, 2, 2, 2,  2, 0, 0, 0, 0,  0, 0, 2, 2, 2, 2, 2, 2, 2, 2,  2, 2, 2, 0};
+const byte pic_star_yellow[24] PROGMEM ={   1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 0}; //0 star yellow
+const byte pic_angel[24]       PROGMEM ={   0, 2, 2, 2, 2,  2, 0, 0, 0, 0,  0, 0, 2, 2, 2, 2, 2, 2, 2, 2,  2, 2, 2, 0}; //1 Angale 
 const byte pic_tree[24]        PROGMEM ={   3, 3, 3, 3, 3,  3, 0, 0, 0, 0,  3, 3, 0, 0, 3, 3, 3, 3, 0, 0,  4, 0, 0, 3}; //2 Tree
 const byte pic_moon[24]        PROGMEM ={   0, 0, 7, 7, 0,  0, 0, 0, 0, 0,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 5}; //3 Moon
 const byte pic_pentagons[24]   PROGMEM ={   2, 2, 2, 2, 2,  3, 3, 3, 3, 3,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0}; //4 Pentagons
 const byte pic_bell[24]        PROGMEM ={   1, 1, 1, 1, 1,  0, 0, 0, 0, 0,  1, 1, 0, 0, 1, 0, 0, 1, 0, 0,  1, 0, 0, 0}; //5 Bell
-const byte pic_heart[24]       PROGMEM ={   0, 0, 5, 5, 0,  0, 0, 0, 0, 0,  0, 0, 5, 5, 5, 5, 5, 5, 5, 5,  5, 0, 0, 5}; //6 Heart
+//const byte pic_heart[24]       PROGMEM ={   0, 0, 5, 5, 0,  0, 0, 0, 0, 0,  0, 0, 5, 5, 5, 5, 5, 5, 5, 5,  5, 0, 0, 5}; //6 Heart
 const byte pic_center_star[24] PROGMEM ={   0, 0, 0, 0, 0,  2, 2, 2, 2, 2,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 7}; //7 center star
-const byte pic_cassiopeia[24]  PROGMEM ={   0, 0, 0, 0, 6,  0, 6, 0, 0, 6,  0, 0, 0, 0, 0, 0, 0, 6, 6, 0,  0, 0, 0, 6}; //8 cassiopeia
+const byte pic_cassiopeia[24]  PROGMEM ={   0, 0, 0, 0, 6,  0, 6, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 6, 6, 0,  0, 0, 0, 6}; //8 cassiopeia
 const byte pic_snow_man[24]    PROGMEM ={   0, 0, 7, 7, 0,  7, 0, 0, 0, 0,  0, 0, 0, 7, 7, 0, 0, 7, 7, 0,  7, 7, 7, 0}; //9 snow man
 const byte pic_krippe[24]      PROGMEM ={   0, 9, 0, 0, 9,  0, 0, 9, 9, 0,  0, 0, 0, 0, 9, 0, 0, 9, 0, 0,  1, 0, 7, 9}; //10 krippe
 const byte pic_ichtys[24]      PROGMEM ={   6, 6, 0, 6, 6,  6, 0, 6, 0, 6,  0, 0, 0, 0, 6, 6, 0, 7, 6, 6,  0, 0, 6, 0}; //11 ychtis
@@ -52,9 +57,10 @@ const byte pic_half_moon[24]   PROGMEM ={   1, 0, 0, 1, 1,  0, 0, 0, 0, 0,  0, 1
 //const byte pic_######[24]      PROGMEM ={   0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0}; //## #####
 
 
-const byte* const g_pic_table [] ={pic_star_yellow,pic_angel,pic_tree,pic_moon,pic_pentagons,   // 1-5
-                                   pic_bell,pic_heart,pic_center_star,pic_snow_man,pic_krippe, //6-10
-                                   pic_ichtys,pic_flake_pple,pic_flake_oran,pic_star_color,pic_half_moon}; // 11-15
+const byte* const g_pic_table [] ={pic_star_yellow,pic_angel,pic_tree,pic_moon,pic_pentagons,   // 0-4
+                                   pic_bell,/*pic_heart,*/pic_center_star,pic_cassiopeia,pic_snow_man, //5-9
+                                   pic_krippe,pic_ichtys,pic_flake_pple,pic_flake_oran,pic_star_color, // 10-14
+                                   pic_half_moon}; // 15-19
 
 #define PICTURE_POINT(pic,lamp) pgm_read_byte_near(g_pic_table[pic]+lamp*sizeof(byte))
 
@@ -79,7 +85,9 @@ float g_color_palette[][3]={
 PictureLamp g_picture_lamp[LAMP_COUNT];
 
 unsigned long g_picture_start_time=0;
-unsigned int g_picture_duration_time=5000;
+unsigned long g_picture_duration_time=5000;
+unsigned long g_transition_start_time=0;
+unsigned long g_transition_follow_up_duration=5000;
 
 byte g_pic_index=0; //
 
@@ -146,7 +154,8 @@ void loop()
 void enter_SHOW_MODE()
 {
     #ifdef TRACE_MODES
-      Serial.println(F("#SHOW_MODE"));
+      Serial.print(F("#SHOW_MODE: start "));
+      Serial.println(millis()/1000);
     #endif
     g_process_mode=SHOW_MODE;
     input_IgnoreUntilRelease();
@@ -161,6 +170,10 @@ void enter_SHOW_MODE()
 
     g_picture_start_time=millis();
     g_picture_duration_time=SHOW_DURATION_MINIMAL+random(SHOW_DURATION_VARIANCE);
+    #ifdef TRACE_TIMING
+      Serial.print(F("TRACE_TIMING:g_picture_duration_time="));
+      Serial.println(g_picture_duration_time/1000);
+    #endif
 }
 
 void process_SHOW_MODE()
@@ -206,7 +219,8 @@ void process_SHOW_MODE()
 void enter_TRANSITION_MODE()
 {
     #ifdef TRACE_MODES
-      Serial.println(F("#TRANSITION_MODE"));
+      Serial.print(F("#TRANSITION_MODE:start "));
+      Serial.println(millis()/1000);
     #endif
     g_process_mode=TRANSITION_MODE;
     input_IgnoreUntilRelease();
@@ -243,9 +257,17 @@ void process_TRANSITION_MODE()
     output_show();
 
     // Order next transitions
-    if(transitionsRunningCount<1) 
+    if(transitionsRunningCount<1 || millis()-g_transition_start_time>g_transition_follow_up_duration) 
     {
-       if (!triggerNextTransition()) enter_SHOW_MODE();
+      triggerNextTransition();
+      if ( getTransitionsRunningCount()==0 ) enter_SHOW_MODE();
+      #ifdef TRACE_LOGIC
+        Serial.print(F("TRACE_LOGIC::transitions running: "));
+        Serial.println(getTransitionsRunningCount());
+      #endif
+      g_transition_start_time=millis();
+      g_transition_follow_up_duration=TRANSITION_RYTHM_MINIMAL+random(TRANSITION_RYTHM_VARIANCE);
+
     }
     #ifdef TRACE_LOGIC 
     delay(500);
@@ -401,7 +423,7 @@ int getTransitionsRunningCount()
 {
   int theCount=0;
   for(int i=0;i<LAMP_COUNT;i++) {
-    if(!g_picture_lamp[i].is_in_transition()) theCount++;
+    if(g_picture_lamp[i].is_in_transition()) theCount++;
   }
   return theCount;
 }

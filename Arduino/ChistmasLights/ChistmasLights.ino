@@ -53,6 +53,7 @@ const byte pic_flake_pple[24]  PROGMEM ={   0, 0, 0, 0, 0,  8, 8, 8, 8, 8,  0, 8
 const byte pic_flake_oran[24]  PROGMEM ={   0, 0, 0, 0, 0,  9, 9, 9, 9, 9,  9, 0, 9, 0, 9, 0, 9, 0, 9, 0,  0, 0, 0, 1}; //13 flake_oran
 const byte pic_star_color[24]  PROGMEM ={   6, 6, 6, 6, 6,  5, 5, 5, 5, 5, 10, 1,10, 1,10, 1,10, 1,10, 1,  0, 0, 0, 0}; //14 star_color
 const byte pic_half_moon[24]   PROGMEM ={   1, 0, 0, 1, 1,  0, 0, 0, 0, 0,  0, 1, 1, 1, 1, 1, 1, 1, 0, 0,  1, 0, 0, 0}; //15 half_moon
+const byte pic_gingerbread[24] PROGMEM ={   8, 5, 5, 5, 5,  5, 5, 5, 5, 5,  7, 7, 5, 0, 5, 5, 5, 5, 0, 5,  5, 5, 5,10}; //16 pic_gingerbread
 
 //const byte pic_######[24]      PROGMEM ={   0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0}; //## #####
 
@@ -60,7 +61,7 @@ const byte pic_half_moon[24]   PROGMEM ={   1, 0, 0, 1, 1,  0, 0, 0, 0, 0,  0, 1
 const byte* const g_pic_table [] ={pic_star_yellow,pic_angel,pic_tree,pic_moon,pic_pentagons,   // 0-4
                                    pic_bell,/*pic_heart,*/pic_center_star,pic_cassiopeia,pic_snow_man, //5-9
                                    pic_krippe,pic_ichtys,pic_flake_pple,pic_flake_oran,pic_star_color, // 10-14
-                                   pic_half_moon}; // 15-19
+                                   pic_half_moon,pic_gingerbread}; // 15-19
 
 #define PICTURE_POINT(pic,lamp) pgm_read_byte_near(g_pic_table[pic]+lamp*sizeof(byte))
 
@@ -74,7 +75,7 @@ float g_color_palette[][3]={
           {0  ,0.8  ,0.8  },  //2 = cyan
           {0  ,0.5,0.08}, //3 = mid green
           {0.2,0.1,0 },  //4 = dark brown
-          {0.8,0.0,0  },  //5 = red
+          {1,0.0,0  },  //5 = red
           {0  ,0  ,0.8},  //6 = blue
           {1  ,1  ,1  },  //7 = white
           {0.8  ,0  ,0.8  },  //8 = purple

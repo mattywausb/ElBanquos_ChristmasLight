@@ -19,9 +19,9 @@
 #define TRANSITION_RYTHM_MINIMAL 3000
 #define TRANSITION_RYTHM_VARIANCE 5000
 #define TRANSITION_DURATION_MINIMAL 6000
-#define TRANSITION_DURATION_VARIANCE 2500
-#define SHOW_DURATION_MINIMAL 180000  
-#define SHOW_DURATION_VARIANCE 90000
+#define TRANSITION_DURATION_VARIANCE 4000
+#define SHOW_DURATION_MINIMAL 400000  
+#define SHOW_DURATION_VARIANCE 200000
 
 #else
 // debug timing setting
@@ -70,14 +70,14 @@ const byte* const g_pic_table [] ={pic_star_yellow,pic_angel,pic_tree,pic_moon,p
 
 float g_color_palette[][3]={
           {0  ,0  ,0  },  //0 = black
-          {1  ,0.8,0  },  //1 = yellow
-          {0  ,1  ,1  },  //2 = cyan
+          {1  ,0.7,0  },  //1 = yellow
+          {0  ,0.8  ,0.8  },  //2 = cyan
           {0  ,0.5,0.08}, //3 = mid green
           {0.2,0.1,0 },  //4 = dark brown
           {0.8,0.0,0  },  //5 = red
           {0  ,0  ,0.8},  //6 = blue
           {1  ,1  ,1  },  //7 = white
-          {1  ,0  ,1  },  //8 = purple
+          {0.8  ,0  ,0.8  },  //8 = purple
           {1  ,0.3,0  },  //9 = orange
           {0  ,1  ,0  }  // 10 =bright green
 };
@@ -119,11 +119,7 @@ void setup() {
   
   pinMode(LED_BUILTIN, OUTPUT);
   output_setup();
-  for (int i=0;i<LAMP_COUNT;i++) {
-    g_picture_lamp[i].setCurrentColor(0,0,0);
-    g_picture_lamp[i].updateOutput(i);
-  }
-  output_show();
+
   input_setup();
   
   for (int i=0;i<PICTURE_HISTORY_COUNT;i++) {
@@ -131,6 +127,9 @@ void setup() {
   };
   set_target_picture( g_pic_index);
   randomSeed(analogRead(0));
+
+  delay(700); // wait for chains to power up completetly
+
   enter_SHOW_MODE();
 }
 

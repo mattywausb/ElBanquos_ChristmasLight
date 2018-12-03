@@ -10,6 +10,7 @@
 
 
 #define FLOAT_CONVERSION 10000.0
+#define MAX_INTENSITY 210.0
 
 PictureLamp::PictureLamp()
 {
@@ -65,9 +66,9 @@ void PictureLamp::updateOutput(byte light_index)
  #endif
 
    output_setLightColor(light_index,
-                  static_cast<int>(180.0*interpolated_red),
-                  static_cast<int>(180.0*interpolated_green),
-                  static_cast<int>(180.0*interpolated_blue));
+                  static_cast<int>(MAX_INTENSITY*interpolated_red),
+                  static_cast<int>(MAX_INTENSITY*interpolated_green),
+                  static_cast<int>(MAX_INTENSITY*interpolated_blue));
 }
 
 void PictureLamp::setCurrentColor(float red, float green, float blue)

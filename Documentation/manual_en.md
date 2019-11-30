@@ -33,7 +33,7 @@ SELECT: Switch to Picture Test
 STEP: Switch to next circle
 
 ### Picture Test
-The Picture Test shows a Picture until it is stopped.
+The Picture Test shows a picture until it is stopped.
 
 SELECT: Switch to Fade Solo Test
 
@@ -42,7 +42,7 @@ STEP: Switch to next picture
 ### Fade Solo Test
 The Fade Solo Test fades one lamp fading green value from 0 to 255. Should be used while assembling the chain, to test added lamps.
 
-SELECT: Switcht to Fade Ensemble Test
+SELECT: Switch to Fade Ensemble Test
 
 STEP: Switch to next lamp in the physical chain
 

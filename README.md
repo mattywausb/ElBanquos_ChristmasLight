@@ -32,6 +32,7 @@ The following
 * Inkscape SVG with my light arrangement with 24 lamps 
 * Fritzing circuit documentation
 * Pictures of different assembly state phases to give you an idea how to build the chains
+* [manual] (Documentation/manual_en.md) 
 
 ## Hardwarelist
 * Arduino Uno board (or anything similar with 5 Digital Outs and 2 KByte SRAM)

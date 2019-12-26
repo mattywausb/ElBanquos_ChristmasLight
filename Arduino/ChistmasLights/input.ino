@@ -115,7 +115,7 @@ bool input_stepIsPressed()
   return input_enabled && ((button_tick_state & INPUT_BUTTON_B_BITS) == INPUT_BUTTON_B_IS_PRESSED_PATTERN); 
 }
 
-byte input_steptGotReleased()
+byte input_stepGotReleased()
 {
   return input_enabled && ((button_tick_state & INPUT_BUTTON_B_BITS) == INPUT_BUTTON_B_GOT_RELEASED_PATTERN); 
 }

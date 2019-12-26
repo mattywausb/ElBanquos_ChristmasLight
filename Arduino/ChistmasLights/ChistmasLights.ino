@@ -69,6 +69,8 @@ const byte* const g_pic_table [] ={pic_star_yellow,pic_angel,pic_tree,pic_moon,p
 #define iGREEN 1
 #define iBLUE 2
 
+#define SECONDS_PER_DAY 86400
+
 float g_color_palette[][3]={
           {0  ,0  ,0  },  //0 = black
           {1  ,0.7,0  },  //1 = yellow
@@ -78,10 +80,15 @@ float g_color_palette[][3]={
           {1,0.0,0  },  //5 = red
           {0  ,0  ,0.8},  //6 = blue
           {1  ,1  ,1  },  //7 = white
-          {0.8  ,0  ,0.8  },  //8 = purple
+          {0.8  ,0  ,0.8  },  //8 = pink
           {1  ,0.3,0  },  //9 = orange
-          {0  ,1  ,0  }  // 10 =bright green
+          {0  ,1  ,0  },  // 10 =bright green
+          {0.5  ,0  ,1  }  //11 = purple
 };
+
+//                                             1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23   24 
+const byte clock_hour_color[24]   PROGMEM ={0x90,0x90,0x90,0x90,0x90,0x19,0x19,0x19,0x19,0x19,0xA0,0x60,0x50,0x50,0x50,0x50,0x50,0x70,0x70,0x70,0x70,0x70,0x00,0x00};
+#define GET_HOUR_COLOR_BYTE(hour) pgm_read_byte_near(clock_hour_color+(hour-1)*sizeof(byte))
 
 PictureLamp g_picture_lamp[LAMP_COUNT];
 
@@ -89,6 +96,9 @@ unsigned long g_picture_start_time=0;
 unsigned long g_picture_duration_time=5000;
 unsigned long g_transition_start_time=0;
 unsigned long g_transition_follow_up_duration=5000;
+
+int g_clock_base_time=54000000;  // Time in seconds to add to systemclock to get realtime (15:00 as default)
+unsigned long g_clock_sync_time=0;  // Time to calibrate "zeropoint" of systemclock 
 
 byte g_pic_index=0; //
 
@@ -100,6 +110,10 @@ byte g_picture_history_next_entry_index=0;
 enum PROCESS_MODES {
   SHOW_MODE, 
   TRANSITION_MODE,
+  CLOCK_MODE,
+  CLOCK_SET_HOUR_MODE,
+  CLOCK_SET_MINUTE_MODE,
+  FIREWORKS_MODE,
   TEST_MODE_PLACEMENT,
   TEST_MODE_PICTURES,
   TEST_MODE_FADE_SOLO,
@@ -142,6 +156,9 @@ void loop()
    switch(g_process_mode) {
     case SHOW_MODE: process_SHOW_MODE();break;
     case TRANSITION_MODE:process_TRANSITION_MODE();break;
+    case CLOCK_MODE:process_CLOCK_MODE();break;
+    case CLOCK_SET_HOUR_MODE:process_CLOCK_SET_HOUR_MODE();break;
+    case CLOCK_SET_MINUTE_MODE:process_CLOCK_SET_MINUTE_MODE();break;
     case TEST_MODE_PLACEMENT:process_TEST_MODE_PLACEMENT();break;
     case TEST_MODE_PICTURES:process_TEST_MODE_PICTURES();break;
     case TEST_MODE_FADE_SOLO:process_TEST_MODE_FADE_SOLO();break;
@@ -441,6 +458,153 @@ int getTransitionsPendingCount()
 }
 
 
+/* ========= CLOCK_MODE ======== */
+
+void enter_CLOCK_MODE() 
+{
+    #ifdef TRACE_MODES
+      Serial.println(F("#CLOCK_MODE"));
+    #endif
+    g_process_mode=CLOCK_MODE;
+    input_IgnoreUntilRelease();
+    g_transition_start_time=millis()/1000;  // We use this variable to keep track, when second has changed
+    for(int i=0;i<LAMP_COUNT;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
+    output_show();
+}
+
+void process_CLOCK_MODE()
+{
+    unsigned long secondOfTheDay=0;
+    if(input_selectGotPressed()) {
+       enter_TEST_MODE_PLACEMENT();
+      return;
+    } // Select got pressed
+    
+    if(input_stepGotPressed()) {  
+      enter_CLOCK_SET_HOUR_MODE();
+      return;
+    } // Step got pressed
+    
+    secondOfTheDay=((millis()-g_clock_sync_time)/1000+g_clock_base_time)%SECONDS_PER_DAY; //86400=Seconds in a day
+    
+    if(secondOfTheDay!=g_transition_start_time) { // Trigger new Lamp Targets
+      g_transition_start_time=secondOfTheDay;
+      order_next_clock_picture(secondOfTheDay,950);
+    }
+    
+   // update all transitioning lights
+    for(int i=0;i<LAMP_COUNT;i++) 
+    {
+      if(g_picture_lamp[i].is_in_transition()) 
+      {
+        g_picture_lamp[i].updateOutput(i);
+      }
+    }
+    output_show();  
+}
+
+/* ========= CLOCK_SET_HOUR_MODE ======== */
+
+void enter_CLOCK_SET_HOUR_MODE() 
+{
+    #ifdef TRACE_MODES
+      Serial.println(F("#CLOCK_SET_HOUR_MODE"));
+    #endif
+    g_process_mode=CLOCK_SET_HOUR_MODE;
+    g_clock_base_time=((millis()-g_clock_sync_time)/1000+g_clock_base_time)%SECONDS_PER_DAY; //freeze current time 
+    g_clock_base_time=(g_clock_base_time/60)*60; //Remove seconds from time
+    input_IgnoreUntilRelease();
+
+     // TODO: Switch on central lamp
+
+}
+
+void process_CLOCK_SET_HOUR_MODE()
+{
+    boolean changed=false;
+     // TODO: Animate central lamp
+     
+     if(input_selectGotPressed()) {
+       g_clock_base_time-=3600;
+       if (g_clock_base_time<0)g_clock_base_time+=SECONDS_PER_DAY;
+       changed=true
+    } // Select got pressed
+    
+    if(input_stepGotReleased()) {  
+      if(input_getLastPressDuration()>2000)  
+         {enter_CLOCK_SET_MINUTE_MODE();  // Long press
+          return};
+      else {  // Short press
+        g_clock_base_time+=3600;
+        if (g_clock_base_time>=SECONDS_PER_DAY)g_clock_base_time-=SECONDS_PER_DAY;
+        changed=true;
+      }
+    } // Step got pressed
+    if (changed) order_next_clock_picture(g_clock_real_time_delta,950);  
+}
+
+
+/* ========= CLOCK_SET_MINUTE_MODE ======== */
+
+void enter_CLOCK_SET_MINUTE_MODE() 
+{
+    #ifdef TRACE_MODES
+      Serial.println(F("#CLOCK_SET_MINUTE_MODE"));
+    #endif
+    g_process_mode=CLOCK_SET_MINUTE_MODE;
+    input_IgnoreUntilRelease();
+     // TODO: Switch on central lamp
+}
+
+void process_CLOCK_SET_MINUTE_MODE()
+{
+    boolean changed=false;
+     // TODO: Animate central lamp
+     
+     if(input_selectGotPressed()) {
+       g_clock_real_time_delta+=60;
+       changed=true
+    } // Select got pressed
+    
+    if(input_stepGotReleased()) {  
+      if(input_getLastPressDuration()>2000)  
+         {g_clock_real_time_delta=millis()-g_clock_real_time_delta*1000;  //
+          enter_CLOCK_MODE();  // Release after Long press
+          return};
+      else {  // Short press
+        g_clock_real_time_delta+=60;
+        changed=true;
+      }
+    } // Step got pressed
+    if (changed) order_next_clock_picture(g_clock_real_time_delta,950);  
+}
+
+
+void order_next_clock_picture(unsigned long secondOfTheDay,int transitionTime)
+{
+  unsigned long currentHour=secondOfTheDay/3600;  
+  unsigned int currentMinute=(secondOfTheDay%60)/60;  
+  unsigned int currentSecond=secondOfTheDay%60;  
+
+  byte colorByte=GET_HOUR_COLOR_BYTE(currentHour);
+
+  byte color1=colorByte>>4;
+  byte color0=colorByte&0x0f;
+  short pattern=0x0ff0;
+  if(currentHour<11)  pattern=pattern>>(currentHour%5);
+  else if (currentHour>12 && currentHour<23) 
+      pattern=pattern>>((currentHour-3)%5);
+      else pattern=0x0fff;
+
+   for(int i=6;i<11;i++) {
+    if(pattern&0x0001) {
+      g_picture_lamp[i].setTargetColor(g_color_palette[color1][iRED],g_color_palette[color1][iGREEN],g_color_palette[color1][iBLUE]);
+    } else { 
+      g_picture_lamp[i].setTargetColor(g_color_palette[color0][iRED],g_color_palette[color0][iGREEN],g_color_palette[color0][iBLUE]);
+    }
+   g_picture_lamp[i].startTransition(transitionTime)
+   }
+}
 
 /* ========= TEST_MODE_PLACEMENT ======== */
 

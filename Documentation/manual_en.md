@@ -1,28 +1,57 @@
 # ElBanquos Christmas Lights - Manual
 
-## Installation
-
-
 ## Functions
 The system contains multiple programs, that can be accessed by using the two buttons:
 * Select Mode
 * Step
  
-Especially for assembly and installation there are multiple test programs to verify the electrical function and the corect arrangement of the lamps.
+Especially for assembly and installation there are multiple test programs to verify the electrical function and the correct arrangement of the lamps.
 
-### Show Mode 
-The show mode show the static picture for a random number of seconds. After the wait time is over, a random new picture is determined and the programm switches to transition mode.
+### Show Mode (Default Mode when switched on)
+The show mode shows the static picture for a random number of seconds. After the wait time is over, a random new picture is determined and the program switches to transition mode.
 
-SELECT: Start transition to next picture in list
+SELECT: Countdown Mode
 
-STEP: Switch immediately to next picture in the list
+STEP: Start transition to next picture in list
 
 ### Transition Mode
 The Transition Mode modifies the lamps slowly in random order to transition to the next picture. After it is done, the mode switches to Show Mode.
 
-SELECT:  Switch to Placement Test
+SELECT:  Countdown Mode
 
 STEP: Foreward transition to target picture an switch to show mode. 
+
+### Countdown Mode
+The Countdown Mode can be set to coutndown to Midnight
+
+SELECT: Switch to Fireworks (Will be done automatically when reaching 00:00:00)
+
+STEP: Switch to Set Hour
+
+### Set Hour Mode
+The Set Hour Mode is used to set the Hour of the countdown. (Indicated by blue blinking Middle light)
+
+SELECT: Switch to Set Minute
+
+STEP: 1 Hour Forward
+
+STEP+SELECT: 1 Hour Backwards
+
+### Set Minute Mode
+The Set Hour Mode is used to set the Hour of the countdown. (Indicated by blue blinking Middle light)
+
+SELECT: Start Clock (with 0 Seconds) and switch to Countdown Mode
+
+STEP: 1 Minute Forward
+
+STEP+SELECT: 1 Minute Backwards
+
+### Fireworks Mode
+The Fireworks Mode plays randomly chosen Firework Animations
+
+SELECT: Switch to placement Test
+
+STEP: Switch to countdown Mode
 
 ### Placement Test
 The placement test shows a rainbow color pattern on the different circles, starting with red on the upper lamp and forwarding clockwise.
@@ -53,8 +82,8 @@ SELECT: Switch to Scaling Test
 
 STEP: Switch to next lamp in physical chain
 
-### Scaling Test
-The Scaling test lights lamps in with fading white, starting with one lamp. Should be used to check, if assemble cables and power supply will provide enough current. When all lamps are running, you have reached the worst case consumption scenario.
+### Scaling Current Test
+The Scaling test lights lamps in with fading white, starting with one lamp. Should be used to check, if assemble cables and power supply will provide enough current. When all lamps are running, you have reached the worst case consumption scenario. Fading must still be smooth and steady-
 
 SELECT: Switch to Show Mode
 

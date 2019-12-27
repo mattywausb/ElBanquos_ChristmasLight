@@ -84,7 +84,7 @@ float g_color_palette[][3]={
           {0.8  ,0  ,0.8  },  //8 = pink
           {1  ,0.3,0  },  //9 = orange
           {0  ,1  ,0  },  // 10 =bright green
-          {0.5  ,0  ,1  }  //11 = purple
+          {0.3  ,0  ,1  }  //11 = purple
 };
 
 //                                             1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23   24 
@@ -496,7 +496,7 @@ void process_CLOCK_MODE()
     
     if(secondOfTheDay!=g_transition_start_time) { // Trigger new Lamp Targets
       g_transition_start_time=secondOfTheDay;
-      order_next_clock_picture(secondOfTheDay,950);
+      order_next_clock_picture(secondOfTheDay,550);
     }
     
    // update all transitioning lights
@@ -610,7 +610,7 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
           Serial.print(F(">order_next_clock_picture HOUR: "));
           Serial.print(currentHour);
    #endif
-   for(int i=6;i<11;i++) {
+   for(int i=5;i<10;i++) {
     #ifdef TRACE_CLOCK
       Serial.print(F("/"));
    #endif
@@ -664,11 +664,12 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
    #endif
    
    for (int i=0;i<10;i++) {  /* Iterate from */
-    lamp=i!=9?i+12:11;
+    lamp=i!=9?i+11:10;
     if(i<color1_border) colorIndex=color0;
       else if(i<color2_border) colorIndex=color1;
         else colorIndex=color2;
     g_picture_lamp[lamp].setTargetColor(g_color_palette[colorIndex][iRED],g_color_palette[colorIndex][iGREEN],g_color_palette[colorIndex][iBLUE]);
+    g_picture_lamp[lamp].startTransition(transitionTime);
     #ifdef TRACE_CLOCK
           Serial.print(F("/"));
           Serial.print(colorIndex);
@@ -699,11 +700,12 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
           Serial.print(F(" c1="));Serial.print(color1); Serial.println(F(" b2="));Serial.print(F(">order_next_clock_picture SECOND lmp: "));
    #endif
    for (int i=0;i<5;i++) {  /* Iterate from */
-    lamp=i<2?i+4:i-2;
+    lamp=i<2?i+3:i-2;
     if(i<color1_border) colorIndex=color0;
       else if(i<color2_border) colorIndex=color1;
         else colorIndex=color2;
     g_picture_lamp[lamp].setTargetColor(g_color_palette[colorIndex][iRED],g_color_palette[colorIndex][iGREEN],g_color_palette[colorIndex][iBLUE]);
+    g_picture_lamp[lamp].startTransition(transitionTime);
     #ifdef TRACE_CLOCK
           Serial.print(F("/"));
           Serial.print(colorIndex);

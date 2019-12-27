@@ -31,21 +31,21 @@ STEP: Switch to Set Hour
 ### Set Hour Mode
 The Set Hour Mode is used to set the Hour of the countdown. (Indicated by blue blinking Middle light)
 
-SELECT: 1 Hour Backwards
+SELECT: 1 Hour Backward
 
 STEP: 1 Hour Forward
 
-STEP Hold and release: Switch to Set Minute Mode
+STEP Hold 2 sec and release: Switch to Set Minute Mode
 
 
 ### Set Minute Mode
 The Set Hour Mode is used to set the Hour of the countdown. (Indicated by blue blinking Middle light)
 
-SELECT: 1 Minute Backwards
+SELECT: 1 Minute Backward
 
 STEP: 1 Minute Forward
 
-STEP Hold and release: Start Clock (with 0 Seconds) and switch to Countdown Mode
+STEP Hold 2 sec and release: Start Clock (with 0 Seconds) and switch to Countdown Mode
 
 
 ### Fireworks Mode

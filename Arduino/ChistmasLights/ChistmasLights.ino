@@ -91,6 +91,9 @@ float g_color_palette[][3]={
 const byte clock_hour_color[24]   PROGMEM ={0x90,0x90,0x90,0x90,0x90,0x19,0x19,0x19,0x19,0x19,0xA0,0x60,0x50,0x50,0x50,0x50,0x50,0x07,0x07,0x07,0x07,0x07,0x00,0x00};
 #define GET_HOUR_COLOR_BYTE(hour) pgm_read_byte_near(clock_hour_color+(hour-1)*sizeof(byte))
 
+const byte clock_minute_color[14]   PROGMEM ={0,0,6,6,9,2,10,10,1,5,7,7,0,0};
+#define GET_MINUTE_COLOR(segment) pgm_read_byte_near(clock_minute_color+segment*sizeof(byte))
+
 PictureLamp g_picture_lamp[LAMP_COUNT];
 
 unsigned long g_picture_start_time=0;
@@ -575,9 +578,11 @@ void process_CLOCK_SET_MODE()
 void order_next_clock_picture(long secondOfTheDay,int transitionTime)
 {
   int currentHour=secondOfTheDay/3600;  
-  int currentMinute=(secondOfTheDay%60)/60;  
+  int currentMinute=(secondOfTheDay/60)%60;  
   int currentSecond=secondOfTheDay%60;  
 
+
+  /* HOUR */
   byte colorByte=GET_HOUR_COLOR_BYTE(currentHour);
 
   byte color1=colorByte>>4;
@@ -585,7 +590,7 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
   unsigned short pattern=0x0fe0;
   if(currentHour<11 )  pattern>>=currentHour;
   else  if(currentHour<13 )  pattern=0x0fff;
-        else if( currentHour<18) pattern=currentHour-12;
+        else if( currentHour<18) pattern>>=currentHour-12;
              else if(currentHour<23) pattern>>=currentHour-18;
                   else pattern=0x0fff;
    #ifdef TRACE_CLOCK
@@ -615,7 +620,48 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
    #ifdef TRACE_CLOCK
       Serial.println(F(" "));
    #endif
-}
+
+   /* MINUTE */ /* Lamps 12-20,11 */ 
+   int segment=currentMinute/5;
+   color0=GET_MINUTE_COLOR(segment+2); /* newset color */
+   color1=GET_MINUTE_COLOR(segment+1); 
+   byte color2=GET_MINUTE_COLOR(segment);  /* oldest color */
+
+   #ifdef TRACE_CLOCK
+          Serial.print(F(">order_next_clock_picture MINUTE: "));
+          Serial.print(currentMinute);
+          Serial.print(F(" c0="));Serial.print(color0);
+          Serial.print(F(" c1="));Serial.print(color1);
+          Serial.print(F(" c2="));Serial.print(color2);
+   #endif
+   byte lamp=0;
+   byte colorIndex=0;
+   byte color1_border=currentMinute%5;
+   byte color2_border=5+currentMinute%5;
+   #ifdef TRACE_CLOCK
+          Serial.print(F(">order_next_clock_picture MINUTE: "));
+          Serial.print(currentMinute);
+          Serial.print(F(" c0="));Serial.print(color0); Serial.print(F(" b1="));Serial.print(color1_border);
+          Serial.print(F(" c1="));Serial.print(color1); Serial.print(F(" b2="));Serial.print(color2_border);
+          Serial.print(F(" c2="));Serial.println(color2);Serial.print(F(">order_next_clock_picture MINUTE lmp: "));
+   #endif
+   for (int i=0;i<10;i++) {  /* Iterate from */
+    lamp=i!=9?i+12:11;
+    if(i<color1_border) colorIndex=color0;
+      else if(i<color2_border) colorIndex=color1;
+        else colorIndex=color2;
+    g_picture_lamp[lamp].setTargetColor(g_color_palette[colorIndex][iRED],g_color_palette[colorIndex][iGREEN],g_color_palette[colorIndex][iBLUE]);
+    #ifdef TRACE_CLOCK
+          Serial.print(F("/"));
+          Serial.print(colorIndex);
+     #endif   
+   } // Iteration over lamps
+   #ifdef TRACE_CLOCK
+      Serial.println(F(" "));
+   #endif
+   
+   
+} //order_next_clock_picture
 
 
 /* ========= TEST_MODE_PLACEMENT ======== */

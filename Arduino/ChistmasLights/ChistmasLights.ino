@@ -91,8 +91,12 @@ float g_color_palette[][3]={
 const byte clock_hour_color[24]   PROGMEM ={0x90,0x90,0x90,0x90,0x90,0x19,0x19,0x19,0x19,0x19,0xA0,0x60,0x50,0x50,0x50,0x50,0x50,0x07,0x07,0x07,0x07,0x07,0x00,0x00};
 #define GET_HOUR_COLOR_BYTE(hour) pgm_read_byte_near(clock_hour_color+(hour-1)*sizeof(byte))
 
-const byte clock_minute_color[14]   PROGMEM ={0,0,6,6,9,2,10,10,1,5,7,7,0,0};
+const byte clock_minute_color[14]   PROGMEM ={11,11,6,6,9,2,10,10,1,5,7,7,11,11};
 #define GET_MINUTE_COLOR(segment) pgm_read_byte_near(clock_minute_color+segment*sizeof(byte))
+
+const byte clock_second_color[14]   PROGMEM ={0,6,9,11,5,2,10,6,8,1,5,7,0};
+#define GET_SECOND_COLOR(segment) pgm_read_byte_near(clock_second_color+segment*sizeof(byte))
+
 
 PictureLamp g_picture_lamp[LAMP_COUNT];
 
@@ -545,7 +549,7 @@ void process_CLOCK_SET_MODE()
     } // Select got pressed
     
     if(input_stepGotReleased()) {  
-      if(input_getLastPressDuration()>2000)   // Long press
+      if(input_getLastPressDuration()>1500)   // Long press
          {if (g_process_mode==CLOCK_SET_HOUR_MODE) enter_CLOCK_SET_MINUTE_MODE();  
           else {
             g_clock_sync_time=millis();  //Set our systemtime reference to now = relative zero
@@ -581,12 +585,20 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
   int currentMinute=(secondOfTheDay/60)%60;  
   int currentSecond=secondOfTheDay%60;  
 
+  byte color2=0;
+  byte lamp=0;
+  byte colorIndex=0;
+  byte color1_border=0;
+  byte color2_border=0;
+  int segment=0;
+ 
 
-  /* HOUR */
+  /* HOUR */  /* Lamps 6-10 */
   byte colorByte=GET_HOUR_COLOR_BYTE(currentHour);
 
   byte color1=colorByte>>4;
   byte color0=colorByte&0x0f;
+
   unsigned short pattern=0x0fe0;
   if(currentHour<11 )  pattern>>=currentHour;
   else  if(currentHour<13 )  pattern=0x0fff;
@@ -622,22 +634,27 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
    #endif
 
    /* MINUTE */ /* Lamps 12-20,11 */ 
-   int segment=currentMinute/5;
+   if(currentHour<23||currentMinute<59)  { /* Normal Minute */
+       segment=currentMinute/5;
+       color1_border=currentMinute%5;
+       color2_border=5+currentMinute%5;
+   } else {                               /* Countdown last Minute */
+      segment=currentSecond/5;
+      color1_border=currentSecond%5;
+      color2_border=5+currentSecond%5;
+   }
+   
    color0=GET_MINUTE_COLOR(segment+2); /* newset color */
    color1=GET_MINUTE_COLOR(segment+1); 
-   byte color2=GET_MINUTE_COLOR(segment);  /* oldest color */
+   color2=GET_MINUTE_COLOR(segment);  /* oldest color */
 
-   #ifdef TRACE_CLOCK
-          Serial.print(F(">order_next_clock_picture MINUTE: "));
-          Serial.print(currentMinute);
-          Serial.print(F(" c0="));Serial.print(color0);
-          Serial.print(F(" c1="));Serial.print(color1);
-          Serial.print(F(" c2="));Serial.print(color2);
-   #endif
-   byte lamp=0;
-   byte colorIndex=0;
-   byte color1_border=currentMinute%5;
-   byte color2_border=5+currentMinute%5;
+   if(currentHour==23&&currentMinute==59&&currentSecond>30) { /* Final countdown to Black instead of purple */
+    color0=color0==11?0:color0;
+    color1=color1==11?0:color1;
+    color2=color2==11?0:color2;
+   }
+   
+
    #ifdef TRACE_CLOCK
           Serial.print(F(">order_next_clock_picture MINUTE: "));
           Serial.print(currentMinute);
@@ -645,6 +662,7 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
           Serial.print(F(" c1="));Serial.print(color1); Serial.print(F(" b2="));Serial.print(color2_border);
           Serial.print(F(" c2="));Serial.println(color2);Serial.print(F(">order_next_clock_picture MINUTE lmp: "));
    #endif
+   
    for (int i=0;i<10;i++) {  /* Iterate from */
     lamp=i!=9?i+12:11;
     if(i<color1_border) colorIndex=color0;
@@ -659,6 +677,41 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
    #ifdef TRACE_CLOCK
       Serial.println(F(" "));
    #endif
+
+
+   /* SECOND */  /* Lamps 4-5,1-3 */
+
+   if(currentHour<23||currentMinute<59) { // Normal Operation
+       segment=currentSecond/5;
+       color0=GET_SECOND_COLOR(segment+1); /* newset color */
+       color1=GET_SECOND_COLOR(segment); 
+       color1_border=currentSecond%5;
+   } else {                         // Final Countdown
+       color0=0;
+       color1=0; 
+       color1_border=0;
+  }
+
+   #ifdef TRACE_CLOCK
+          Serial.print(F(">order_next_clock_picture SECOND: "));
+          Serial.print(currentSecond);
+          Serial.print(F(" c0="));Serial.print(color0); Serial.print(F(" b1="));Serial.print(color1_border);
+          Serial.print(F(" c1="));Serial.print(color1); Serial.println(F(" b2="));Serial.print(F(">order_next_clock_picture SECOND lmp: "));
+   #endif
+   for (int i=0;i<5;i++) {  /* Iterate from */
+    lamp=i<2?i+4:i-2;
+    if(i<color1_border) colorIndex=color0;
+      else if(i<color2_border) colorIndex=color1;
+        else colorIndex=color2;
+    g_picture_lamp[lamp].setTargetColor(g_color_palette[colorIndex][iRED],g_color_palette[colorIndex][iGREEN],g_color_palette[colorIndex][iBLUE]);
+    #ifdef TRACE_CLOCK
+          Serial.print(F("/"));
+          Serial.print(colorIndex);
+     #endif   
+   } // Iteration over lamps
+   #ifdef TRACE_CLOCK
+      Serial.println(F(" "));
+   #endif   
    
    
 } //order_next_clock_picture

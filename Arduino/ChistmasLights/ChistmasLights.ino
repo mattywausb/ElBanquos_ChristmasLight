@@ -6,10 +6,11 @@
 
 #ifdef TRACE_ON
 //#define TRACE_LOGIC
-#define TRACE_PICTURES
+//#define TRACE_PICTURES
 #define TRACE_MODES
-#define TRACE_TIMING
-#define TRACE_CLOCK
+//#define TRACE_TIMING
+//#define TRACE_CLOCK
+//#define TRACE_FIREWORK
 #endif 
 
 #define LAMP_COUNT 24
@@ -124,6 +125,19 @@ byte g_pic_index=0; //
 #define PICTURE_HISTORY_COUNT 4
 byte g_picture_history [PICTURE_HISTORY_COUNT];
 byte g_picture_history_next_entry_index=0;
+
+                                                                      // fade=0-F = 25-1000ms 65ms steps
+                                                                      // framelength=0-F = 25-1000ms 65ms steps  
+
+#define FIREWORK_TIME_SCALE 65
+#define FIREWORK_TIME_SCALE_START 25
+
+const byte fw_path_1[] PROGMEM ={9,0x71,18,0x71,2,0x72,3,0x72,11,0x73,12,0x83,4,0x83,5,0xa3,255,0x00};   // lamp and duration(4 bit fade, 4 bit framelenth)  for particle
+#define GET_FW_PATH_LAMP(frame) pgm_read_byte_near(fw_path_1+frame*2*sizeof(byte)) 
+#define GET_FW_PATH_SPEED_BYTE(frame) pgm_read_byte_near(fw_path_1+frame*2*sizeof(byte)+1) 
+
+byte g_firework_frame=0;
+
 
 /* Control */
 enum PROCESS_MODES {
@@ -502,7 +516,7 @@ void process_CLOCK_MODE()
 {
     long secondOfTheDay=0;
     if(input_selectGotPressed()) {
-       enter_TEST_MODE_PLACEMENT();
+       enter_FIREWORK_RUN() ;
       return;
     } // Select got pressed
     
@@ -512,6 +526,11 @@ void process_CLOCK_MODE()
     } // Step got pressed
     
     secondOfTheDay=((millis()-g_clock_sync_time)/1000+g_clock_base_time)%SECONDS_PER_DAY; //86400=Seconds in a day
+
+    if(secondOfTheDay<10) {
+      enter_FIREWORK_RUN();
+      return; 
+    }
     
     if(secondOfTheDay!=g_transition_start_time) { // Trigger new Lamp Targets
       g_transition_start_time=secondOfTheDay;
@@ -726,8 +745,8 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
        } else {
         if(currentHour>=18) {   // Slow Animation
            colorIndex=GET_SECOND_6_COLOR(currentSecond/10); 
-           g_picture_lamp[lamp].setTargetColor(g_color_palette[colorIndex][iRED],g_color_palette[colorIndex][iGREEN],g_color_palette[colorIndex][iBLUE]);
-           g_picture_lamp[lamp].startTransition(transitionTime);
+           g_picture_lamp[23].setTargetColor(g_color_palette[colorIndex][iRED],g_color_palette[colorIndex][iGREEN],g_color_palette[colorIndex][iBLUE]);
+           g_picture_lamp[23].startTransition(transitionTime);
            #ifdef TRACE_CLOCK
                  Serial.print(F(">order_next_clock_picture SECOND: >"));Serial.print(colorIndex);Serial.println(F("<"));
            #endif  
@@ -770,28 +789,69 @@ void enter_FIREWORK_RUN()
     #endif
     g_process_mode=FIREWORK_RUN;
     input_IgnoreUntilRelease();
-    g_pic_index=0;
-    for(int i=0;i<LAMP_COUNT;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
-    output_setLightColor(0,255,0,0);
-    output_setLightColor(1,255,255,0);
-    output_setLightColor(2,0,255,0);
-    output_setLightColor(3,0,255,255);
-    output_setLightColor(4,0,0,255);
+    for(int i=0;i<LAMP_COUNT;i++)  /* Initialize all lamps */
+    {
+         g_picture_lamp[i].setTargetColor(0,0,0);
+         g_picture_lamp[i].endTransition();
+         g_picture_lamp[i].updateOutput(i);
+       }
+
+    g_picture_start_time=millis();
+    g_picture_duration_time=0;
+    g_firework_frame=0;
     output_show();
 }
 
 void process_FIREWORK_RUN()
 {
-    
+
     if(input_selectGotPressed()) {
       enter_TEST_MODE_PICTURES();
       return;
     }
     
-    if(input_stepGotPressed()) {  // foreward one patter
-      }// switch
-      output_show();
-    
+    long secondOfTheDay=((millis()-g_clock_sync_time)/1000+g_clock_base_time)%SECONDS_PER_DAY;
+    if(secondOfTheDay>3600) {
+      //enter_SHOW_MODE();
+    }
+    byte nextLamp=0;
+    byte speedByte=0;
+    int nextFadeDuration=0;
+    if(millis()-g_picture_start_time > g_picture_duration_time || input_stepGotReleased()) {  // Picture needs update
+        g_picture_start_time=millis();
+        nextLamp=GET_FW_PATH_LAMP(g_firework_frame)-1;
+        if(nextLamp<254) {   // this is not the endmarker
+          speedByte=GET_FW_PATH_SPEED_BYTE(g_firework_frame);
+          nextFadeDuration=(speedByte>>4)*FIREWORK_TIME_SCALE+FIREWORK_TIME_SCALE_START;
+          g_picture_duration_time=(speedByte&0x000f)*FIREWORK_TIME_SCALE+FIREWORK_TIME_SCALE_START;
+          g_picture_lamp[nextLamp].setCurrentColor(1,1,1);
+          g_picture_lamp[nextLamp].setTargetColor(0,0,0);
+          g_picture_lamp[nextLamp].startTransition(nextFadeDuration);
+          if(input_stepGotReleased()&& input_getLastPressDuration()<1500) {
+            g_picture_duration_time=g_picture_duration_time*30;  /* Slow down x30 */
+            nextFadeDuration=nextFadeDuration*30;   /* Slow down x30 */
+          }
+          #ifdef TRACE_FIREWORK
+              Serial.print(F(">process_FIREWORK_RUN: frame= ")); Serial.print(g_firework_frame);
+              Serial.print(F(" lamp="));Serial.print(nextLamp); 
+              Serial.print(F(" fade="));Serial.print(nextFadeDuration);
+              Serial.print(F(" speed="));Serial.println(g_picture_duration_time); 
+          #endif    
+          g_firework_frame++;
+        } else {
+          g_firework_frame=0;
+          g_picture_duration_time=1000; // Wait 1000 ms to next element
+        }
+    }
+    // update all transitioning lights
+    for(int i=0;i<LAMP_COUNT;i++) 
+    {
+      if(g_picture_lamp[i].is_in_transition()) 
+      {
+        g_picture_lamp[i].updateOutput(i);
+      }
+    }
+    output_show();
 }
 
 /* ========= TEST_MODE_PLACEMENT ======== */

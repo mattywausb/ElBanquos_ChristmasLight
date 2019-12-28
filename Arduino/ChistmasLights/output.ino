@@ -8,13 +8,43 @@
 //#define TRACE_OUTPUT_HIGH
 #endif
 
+#define MOCKUP_LIGHTS
 
 #define CHAIN_PIN_1 7
 #define CHAIN_PIN_2 8
 #define CHAIN_PIN_3 9
-#define NUMCHAINS 3
+
+ // MOCKUP PIXEL STRIP definition
+ 
+#ifdef MOCKUP_LIGHTS   
+
+#define NUMCHAINS 1
 #define NUMPIXELS 8
 
+Adafruit_NeoPixel light_chain[1]={ Adafruit_NeoPixel(NUMPIXELS, CHAIN_PIN_1, NEO_GRB + NEO_KHZ800)};
+
+/* This map translates the picture light index in to the physical light index 
+   an must be adapted to the current physical setup
+ */
+#define xx 32
+byte light_index_map[24]={xx, 2, 3, 6, 7,  // 1-5
+                          xx,xx,xx, 0,xx,  // 6-10
+                           4, 5,  // 11-12
+                          xx,xx,  // 13-14
+                          xx,xx,  // 15-16
+                          xx, 1,  // 17-18
+                          xx,xx,  // 19-20
+                          xx,xx,xx,xx // 21-24
+                          };
+                          
+#endif
+
+// MAIN PIXEL STRIP definition
+
+#ifndef MOCKUP_LIGHTS  
+
+#define NUMCHAINS 3
+#define NUMPIXELS 8
 
 Adafruit_NeoPixel light_chain[3]={ Adafruit_NeoPixel(NUMPIXELS, CHAIN_PIN_1, NEO_RGB + NEO_KHZ400),
                                     Adafruit_NeoPixel(NUMPIXELS, CHAIN_PIN_2, NEO_RGB + NEO_KHZ400),
@@ -32,6 +62,8 @@ byte light_index_map[24]={ 9, 4,11,22,18,  // 1-5
                            5, 7,  // 19-20
                            0,12,23,10  // 21-24
                           };
+#endif
+
 
 void output_setup()
 {
@@ -47,6 +79,9 @@ void output_setLightColor(byte index,int red,int green, int blue)
   byte light_index=light_index_map[index];
   byte chain_index=light_index/NUMPIXELS;
   byte pixel_index=light_index%NUMPIXELS;
+  #ifdef MOCKUP_LIGHTS
+     if(chain_index<NUMCHAINS && pixel_index<NUMPIXELS)
+  #endif  
   light_chain[chain_index].setPixelColor(pixel_index, light_chain[chain_index].Color(red,green,blue));
 }
 
@@ -56,6 +91,9 @@ void output_setLightColorUnmapped(byte index,int red,int green, int blue)
   byte light_index=index;
   byte chain_index=light_index/NUMPIXELS;
   byte pixel_index=light_index%NUMPIXELS;
+  #ifdef MOCKUP_LIGHTS
+    if(chain_index<NUMCHAINS && pixel_index<NUMPIXELS)
+  #endif  
   light_chain[chain_index].setPixelColor(pixel_index, light_chain[chain_index].Color(red,green,blue));
 }
 

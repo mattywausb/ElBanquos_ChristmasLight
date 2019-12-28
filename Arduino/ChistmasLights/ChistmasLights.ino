@@ -35,6 +35,8 @@
 #endif
 
 
+#define CLOCK_SECOND_LIVE_INTERVAL 60000
+
 #define PICTURE_COUNT sizeof(g_pic_table)/sizeof(g_pic_table[0])
 
 //                                         01 02 03 04 05  06 07 08 09 10  11 12 13 14 15 16 17 18 19 20  21 22 23 24
@@ -84,18 +86,27 @@ float g_color_palette[][3]={
           {0.8  ,0  ,0.8  },  //8 = pink
           {1  ,0.3,0  },  //9 = orange
           {0  ,1  ,0  },  // 10 =bright green
-          {0.3  ,0  ,1  }  //11 = purple
+          {0.08  ,0  ,0.7  }  //11 = dark purple
 };
 
-//                                             1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23   24 
-const byte clock_hour_color[24]   PROGMEM ={0x90,0x90,0x90,0x90,0x90,0x19,0x19,0x19,0x19,0x19,0xA0,0x60,0x50,0x50,0x50,0x50,0x50,0x07,0x07,0x07,0x07,0x07,0x00,0x00};
-#define GET_HOUR_COLOR_BYTE(hour) pgm_read_byte_near(clock_hour_color+(hour-1)*sizeof(byte))
+//                                             0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23
+const byte clock_hour_color[24]   PROGMEM ={0x00,0x60,0x60,0x60,0x60,0x60,0x26,0x26,0x26,0x26,0x26,0xA0,0x10,0x95,0x95,0x95,0x95,0x95,0x05,0x05,0x05,0x05,0x05,0x00};
+#define GET_HOUR_COLOR_BYTE(hour) pgm_read_byte_near(clock_hour_color+hour*sizeof(byte))
 
-const byte clock_minute_color[14]   PROGMEM ={11,11,6,6,9,2,10,10,1,5,7,7,11,11};
+#define MINUTE_FUTURE_COLOR 1
+#define MINUTE_PAST_COLOR 6
+
+const byte clock_minute_color[14]   PROGMEM ={10,2,7,9,5,MINUTE_PAST_COLOR};   // defines color sequence of minute indication light
 #define GET_MINUTE_COLOR(segment) pgm_read_byte_near(clock_minute_color+segment*sizeof(byte))
 
-const byte clock_second_color[14]   PROGMEM ={0,6,9,11,5,2,10,6,8,1,5,7,0};
-#define GET_SECOND_COLOR(segment) pgm_read_byte_near(clock_second_color+segment*sizeof(byte))
+const byte clock_minute_border[]   PROGMEM ={0,1,7,13,18,23,28,33,38,43,48,54,60};   // defines smalles minute to use the segment
+#define GET_MINUTE_BORDER(segment) pgm_read_byte_near(clock_minute_border+segment*sizeof(byte))
+
+const byte clock_second_6_color[7]   PROGMEM ={11,2,10,7,9,5,1};   // defines color sequence of 6 phase second  indication (10 sec per phase)
+#define GET_SECOND_6_COLOR(segment) pgm_read_byte_near(clock_second_6_color+segment*sizeof(byte))
+
+const byte clock_second_12_color[13]   PROGMEM ={0,11,6,11,8,6,2,10,7,1,9,5,0};   // defines color sequence of 12 phase second  indication  (5 sec per phase)
+#define GET_SECOND_12_COLOR(segment) pgm_read_byte_near(clock_second_12_color+segment*sizeof(byte))
 
 
 PictureLamp g_picture_lamp[LAMP_COUNT];
@@ -475,7 +486,14 @@ void enter_CLOCK_MODE()
     g_process_mode=CLOCK_MODE;
     input_IgnoreUntilRelease();
     long secondOfTheDay=((millis()-g_clock_sync_time)/1000+g_clock_base_time)%SECONDS_PER_DAY;
+    for(int i=0;i<LAMP_COUNT;i++)  /* Initialize all lamps */
+    {
+         g_picture_lamp[i].setTargetColor(0,0,0);
+         g_picture_lamp[i].endTransition();
+         g_picture_lamp[i].updateOutput(i);
+       }
     order_next_clock_picture(secondOfTheDay,0);
+    output_show();
     g_transition_start_time=secondOfTheDay;  // We use this variable to keep track, when second has changed 
 }
 
@@ -588,8 +606,8 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
   byte color2=0;
   byte lamp=0;
   byte colorIndex=0;
-  byte color1_border=0;
-  byte color2_border=0;
+  short color1_border=0;
+  short color2_border=0;
   int segment=0;
  
 
@@ -633,25 +651,26 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
       Serial.println(F(" "));
    #endif
 
-   /* MINUTE */ /* Lamps 12-20,11 */ 
-   if(currentHour<23||currentMinute<59)  { /* Normal Minute */
-       segment=currentMinute/5;
-       color1_border=currentMinute%5;
-       color2_border=5+currentMinute%5;
+   /* MINUTE RING */ /* Lamps 12-20,11 */ 
+   if(currentMinute<59)  { /* Normal Minute */
+       for(segment=0; currentMinute>=GET_MINUTE_BORDER(segment+1);segment++);
+       #ifdef TRACE_CLOCK
+          Serial.print(F(">order_next_clock_picture MINUTE_BORDER: "));    Serial.println( GET_MINUTE_BORDER(segment));
+       #endif
+       color1_border=segment-1;
+       color2_border=segment;
+       color0=MINUTE_PAST_COLOR;
+       color2=MINUTE_FUTURE_COLOR;
+       color1=GET_MINUTE_COLOR(currentMinute-GET_MINUTE_BORDER(segment));
    } else {                               /* Countdown last Minute */
-      segment=currentSecond/5;
-      color1_border=currentSecond%5;
-      color2_border=5+currentSecond%5;
-   }
-   
-   color0=GET_MINUTE_COLOR(segment+2); /* newset color */
-   color1=GET_MINUTE_COLOR(segment+1); 
-   color2=GET_MINUTE_COLOR(segment);  /* oldest color */
-
-   if(currentHour==23&&currentMinute==59&&currentSecond>30) { /* Final countdown to Black instead of purple */
-    color0=color0==11?0:color0;
-    color1=color1==11?0:color1;
-    color2=color2==11?0:color2;
+      segment=currentSecond/10;
+      color1_border=currentSecond%10;
+      color2_border=100;
+      color0=GET_SECOND_6_COLOR(segment+1); /* newset color */
+      color1=GET_SECOND_6_COLOR(segment);  /* previous color */
+      if(currentHour==23&&currentMinute==59&&currentSecond>30) { /* Final countdown to Black instead of yellow */
+        color0=color0==1?0:color0;
+     }
    }
    
 
@@ -663,8 +682,17 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
           Serial.print(F(" c2="));Serial.println(color2);Serial.print(F(">order_next_clock_picture MINUTE lmp: "));
    #endif
    
-   for (int i=0;i<10;i++) {  /* Iterate from */
-    lamp=i!=9?i+11:10;
+   for (int i=0;i<11;i++) {  /* Iterate */
+    lamp= i!=9 ? i+11 : 10;
+    if(currentMinute<59) {  /* in minute mode insert lamp 20 as 6th*/
+      if(i>5) { lamp= i!=10 ? i+12 : 10;}
+       else { if(i==5) lamp=20; }
+    } else if(i>9) {       /* in second mode after 10 lamps switch of lamp 20 and bail out */
+        g_picture_lamp[20].setTargetColor(0,0,0);
+        g_picture_lamp[20].startTransition(transitionTime);
+        break; 
+    }
+        
     if(i<color1_border) colorIndex=color0;
       else if(i<color2_border) colorIndex=color1;
         else colorIndex=color2;
@@ -675,19 +703,20 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
           Serial.print(colorIndex);
      #endif   
    } // Iteration over lamps
+   
    #ifdef TRACE_CLOCK
       Serial.println(F(" "));
    #endif
 
 
-   /* SECOND */  /* Lamps 4-5,1-3 */
+   /* SECOND RING */  /* Lamps 4-5,1-3 */
 
-   if(currentHour<23||currentMinute<59) { // Normal Operation
+   if((currentHour>=23&&currentMinute<59)||millis()-g_clock_sync_time<CLOCK_SECOND_LIVE_INTERVAL) { // Fast Operation
        segment=currentSecond/5;
-       color0=GET_SECOND_COLOR(segment+1); /* newset color */
-       color1=GET_SECOND_COLOR(segment); 
+       color0=GET_SECOND_12_COLOR(segment+1); /* newset color */
+       color1=GET_SECOND_12_COLOR(segment); 
        color1_border=currentSecond%5;
-   } else {                         // Final Countdown
+   } else {                         // Black
        color0=0;
        color1=0; 
        color1_border=0;
@@ -697,7 +726,8 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
           Serial.print(F(">order_next_clock_picture SECOND: "));
           Serial.print(currentSecond);
           Serial.print(F(" c0="));Serial.print(color0); Serial.print(F(" b1="));Serial.print(color1_border);
-          Serial.print(F(" c1="));Serial.print(color1); Serial.println(F(" b2="));Serial.print(F(">order_next_clock_picture SECOND lmp: "));
+          Serial.print(F(" c1="));Serial.println(color1); 
+          Serial.print(F(">order_next_clock_picture SECOND lmp: "));
    #endif
    for (int i=0;i<5;i++) {  /* Iterate from */
     lamp=i<2?i+3:i-2;

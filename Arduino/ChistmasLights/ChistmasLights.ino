@@ -132,7 +132,7 @@ enum PROCESS_MODES {
   CLOCK_MODE,
   CLOCK_SET_HOUR_MODE,
   CLOCK_SET_MINUTE_MODE,
-  FIREWORKS_MODE,
+  FIREWORK_RUN,
   TEST_MODE_PLACEMENT,
   TEST_MODE_PICTURES,
   TEST_MODE_FADE_SOLO,
@@ -178,6 +178,7 @@ void loop()
     case CLOCK_MODE:process_CLOCK_MODE();break;
     case CLOCK_SET_HOUR_MODE:process_CLOCK_SET_MODE();break;
     case CLOCK_SET_MINUTE_MODE:process_CLOCK_SET_MODE();break;
+    case FIREWORK_RUN:process_FIREWORK_RUN();break;
     case TEST_MODE_PLACEMENT:process_TEST_MODE_PLACEMENT();break;
     case TEST_MODE_PICTURES:process_TEST_MODE_PICTURES();break;
     case TEST_MODE_FADE_SOLO:process_TEST_MODE_FADE_SOLO();break;
@@ -759,6 +760,39 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
    
 } //order_next_clock_picture
 
+
+/* ========= FIREWORK_RUN ======== */
+
+void enter_FIREWORK_RUN() 
+{
+    #ifdef TRACE_MODES
+      Serial.println(F("#FIREWORK_RUN"));
+    #endif
+    g_process_mode=FIREWORK_RUN;
+    input_IgnoreUntilRelease();
+    g_pic_index=0;
+    for(int i=0;i<LAMP_COUNT;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
+    output_setLightColor(0,255,0,0);
+    output_setLightColor(1,255,255,0);
+    output_setLightColor(2,0,255,0);
+    output_setLightColor(3,0,255,255);
+    output_setLightColor(4,0,0,255);
+    output_show();
+}
+
+void process_FIREWORK_RUN()
+{
+    
+    if(input_selectGotPressed()) {
+      enter_TEST_MODE_PICTURES();
+      return;
+    }
+    
+    if(input_stepGotPressed()) {  // foreward one patter
+      }// switch
+      output_show();
+    
+}
 
 /* ========= TEST_MODE_PLACEMENT ======== */
 

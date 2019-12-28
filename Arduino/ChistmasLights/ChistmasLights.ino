@@ -711,16 +711,28 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
 
    /* SECOND RING */  /* Lamps 4-5,1-3 */
 
-   if((currentHour>=23&&currentMinute<59)||millis()-g_clock_sync_time<CLOCK_SECOND_LIVE_INTERVAL) { // Fast Operation
-       segment=currentSecond/5;
-       color0=GET_SECOND_12_COLOR(segment+1); /* newset color */
-       color1=GET_SECOND_12_COLOR(segment); 
-       color1_border=currentSecond%5;
-   } else {                         // Black
-       color0=0;
-       color1=0; 
-       color1_border=0;
-  }
+   // Black as default
+   color0=0;
+   color1=0; 
+   color1_border=0;
+   
+   if(currentMinute<59) {
+       if(currentHour>=23||millis()-g_clock_sync_time<CLOCK_SECOND_LIVE_INTERVAL) { // Fast Animation
+           segment=currentSecond/5;
+           color0=GET_SECOND_12_COLOR(segment+1); /* newset color */
+           color1=GET_SECOND_12_COLOR(segment); 
+           color1_border=currentSecond%5;
+       } else {
+        if(currentHour>=18) {   // Slow Animation
+           colorIndex=GET_SECOND_6_COLOR(currentSecond/10); 
+           g_picture_lamp[lamp].setTargetColor(g_color_palette[colorIndex][iRED],g_color_palette[colorIndex][iGREEN],g_color_palette[colorIndex][iBLUE]);
+           g_picture_lamp[lamp].startTransition(transitionTime);
+           #ifdef TRACE_CLOCK
+                 Serial.print(F(">order_next_clock_picture SECOND: >"));Serial.print(colorIndex);Serial.println(F("<"));
+           #endif  
+        }
+       }
+   } // if seconds are on second ring  
 
    #ifdef TRACE_CLOCK
           Serial.print(F(">order_next_clock_picture SECOND: "));
@@ -732,8 +744,7 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
    for (int i=0;i<5;i++) {  /* Iterate from */
     lamp=i<2?i+3:i-2;
     if(i<color1_border) colorIndex=color0;
-      else if(i<color2_border) colorIndex=color1;
-        else colorIndex=color2;
+      else  colorIndex=color1;
     g_picture_lamp[lamp].setTargetColor(g_color_palette[colorIndex][iRED],g_color_palette[colorIndex][iGREEN],g_color_palette[colorIndex][iBLUE]);
     g_picture_lamp[lamp].startTransition(transitionTime);
     #ifdef TRACE_CLOCK

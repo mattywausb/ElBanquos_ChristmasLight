@@ -105,9 +105,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="1"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.35"
-     inkscape:cx="906.46471"
-     inkscape:cy="1513.1529"
+     inkscape:zoom="0.49497475"
+     inkscape:cx="853.00244"
+     inkscape:cy="1734.6393"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -115,9 +115,9 @@
      inkscape:bbox-nodes="false"
      inkscape:bbox-paths="true"
      inkscape:snap-bbox-midpoints="false"
-     inkscape:window-width="1858"
+     inkscape:window-width="1920"
      inkscape:window-height="1057"
-     inkscape:window-x="54"
+     inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
      inkscape:showpageshadow="false"
@@ -147,7 +147,7 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(0,503)"
-     style="display:inline">
+     style="display:none">
     <ellipse
        id="path3713"
        cx="99.999992"
@@ -1741,7 +1741,7 @@
      id="layer3"
      inkscape:label="physicalWire"
      transform="translate(0,503)"
-     style="display:inline"
+     style="display:none"
      sodipodi:insensitive="true">
     <path
        style="fill:none;stroke:#6a6a6a;stroke-width:6.49174547;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.50970878;marker-start:url(#DotS)"

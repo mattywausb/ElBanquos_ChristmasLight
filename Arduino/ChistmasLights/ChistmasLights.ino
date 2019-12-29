@@ -1,4 +1,5 @@
 
+#include "particle.h"
 #include "picturelamp.h"
 #include "mainSettings.h"
 
@@ -10,10 +11,14 @@
 #define TRACE_MODES
 //#define TRACE_TIMING
 //#define TRACE_CLOCK
-//#define TRACE_FIREWORK
+#define TRACE_FIREWORK
 #endif 
 
 #define LAMP_COUNT 24
+
+#define PARTICLE_COUNT 5
+#define FW_PATH_MAX_STEPS 10
+#define FW_PATH_BUFFER_LENGTH FW_PATH_MAX_STEPS*2+1
 
 
 #ifndef DEBUG_ON
@@ -126,17 +131,19 @@ byte g_pic_index=0; //
 byte g_picture_history [PICTURE_HISTORY_COUNT];
 byte g_picture_history_next_entry_index=0;
 
-                                                                      // fade=0-F = 25-1000ms 65ms steps
-                                                                      // framelength=0-F = 25-1000ms 65ms steps  
+/* Fireworks */
 
-#define FIREWORK_TIME_SCALE 65
-#define FIREWORK_TIME_SCALE_START 25
+                                                                      // fade=0-F = 10-535ms 35ms steps
+                                                                      // framelength=0-F = 10-535ms 35ms steps  
+                                                                      // Lamp 255 = Endmarker
+//                                1       2       3       4       6       6       7       8        9      10
+const byte fw_path_1[] PROGMEM ={ 9,0x51,18,0x51, 2,0x62, 3,0x73,11,0x73,12,0x62, 4,0x62, 5,0x62,15,0x62, 8,0xf2,255};   // lamp and duration(4 bit fade, 4 bit framelenth)  for particle
+const byte fw_path_2[] PROGMEM ={ 8,0x51,15,0x51, 5,0x62, 4,0x73,12,0x73,11,0x62, 3,0x62, 2,0x62,18,0x62, 9,0xf2,255};   // lamp and duration(4 bit fade, 4 bit framelenth)  for particle
+const byte* const g_fw_path_table [] = {fw_path_1,fw_path_2};
 
-const byte fw_path_1[] PROGMEM ={9,0x71,18,0x71,2,0x72,3,0x72,11,0x73,12,0x83,4,0x83,5,0xa3,255,0x00};   // lamp and duration(4 bit fade, 4 bit framelenth)  for particle
-#define GET_FW_PATH_LAMP(frame) pgm_read_byte_near(fw_path_1+frame*2*sizeof(byte)) 
-#define GET_FW_PATH_SPEED_BYTE(frame) pgm_read_byte_near(fw_path_1+frame*2*sizeof(byte)+1) 
-
-byte g_firework_frame=0;
+Particle g_firework_particle[PARTICLE_COUNT];
+byte g_fw_path_buffer[PARTICLE_COUNT][FW_PATH_BUFFER_LENGTH];
+byte g_next_free_particle=0;
 
 
 /* Control */
@@ -176,6 +183,9 @@ void setup() {
   set_target_picture( g_pic_index);
   randomSeed(analogRead(0));
 
+ for(int p=0;p<PARTICLE_COUNT;p++)
+        g_firework_particle[p].init(g_picture_lamp);
+
   delay(700); // wait for chains to power up completetly
 
   enter_SHOW_MODE();
@@ -205,8 +215,11 @@ void loop()
 void enter_SHOW_MODE()
 {
     #ifdef TRACE_MODES
-      Serial.print(F("#SHOW_MODE: start "));
-      Serial.println(millis()/1000);
+      Serial.print(F("#SHOW_MODE: "));
+      Serial.print(freeMemory());
+      Serial.print(F(" bytes free memory. "));
+      Serial.print(millis()/1000);
+      Serial.println(F(" seconds uptime"));
     #endif
     g_process_mode=SHOW_MODE;
     input_IgnoreUntilRelease();
@@ -785,8 +798,11 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
 void enter_FIREWORK_RUN() 
 {
     #ifdef TRACE_MODES
-      Serial.println(F("#FIREWORK_RUN"));
+      Serial.print(F("#FIREWORK_RUN: "));
+      Serial.print(freeMemory());
+      Serial.println(F(" bytes free memory"));
     #endif
+    delay(500);
     g_process_mode=FIREWORK_RUN;
     input_IgnoreUntilRelease();
     for(int i=0;i<LAMP_COUNT;i++)  /* Initialize all lamps */
@@ -798,8 +814,15 @@ void enter_FIREWORK_RUN()
 
     g_picture_start_time=millis();
     g_picture_duration_time=0;
-    g_firework_frame=0;
-    output_show();
+    g_next_free_particle=0;
+    memcpy_P(g_fw_path_buffer[0],g_fw_path_table[0],FW_PATH_BUFFER_LENGTH);
+    memcpy_P(g_fw_path_buffer[1],g_fw_path_table[1],FW_PATH_BUFFER_LENGTH);
+    //for(int i=0;i<FW_PATH_BUFFER_LENGTH;i++) g_fw_path_buffer[0][i]=pgm_read_byte_near(g_fw_path_table[0]+i*sizeof(byte));
+    g_fw_path_buffer[0][10]=255; //cut off path
+    g_fw_path_buffer[1][10]=255; //cut off path
+    g_fw_path_buffer[0][FW_PATH_BUFFER_LENGTH-1]=255; //guarantee final stop of pattern
+    for(int p=0;p<PARTICLE_COUNT;p++)
+        g_firework_particle[p].end();
 }
 
 void process_FIREWORK_RUN()
@@ -814,35 +837,20 @@ void process_FIREWORK_RUN()
     if(secondOfTheDay>3600) {
       //enter_SHOW_MODE();
     }
-    byte nextLamp=0;
-    byte speedByte=0;
-    int nextFadeDuration=0;
-    if(millis()-g_picture_start_time > g_picture_duration_time || input_stepGotReleased()) {  // Picture needs update
-        g_picture_start_time=millis();
-        nextLamp=GET_FW_PATH_LAMP(g_firework_frame)-1;
-        if(nextLamp<254) {   // this is not the endmarker
-          speedByte=GET_FW_PATH_SPEED_BYTE(g_firework_frame);
-          nextFadeDuration=(speedByte>>4)*FIREWORK_TIME_SCALE+FIREWORK_TIME_SCALE_START;
-          g_picture_duration_time=(speedByte&0x000f)*FIREWORK_TIME_SCALE+FIREWORK_TIME_SCALE_START;
-          g_picture_lamp[nextLamp].setCurrentColor(1,1,1);
-          g_picture_lamp[nextLamp].setTargetColor(0,0,0);
-          g_picture_lamp[nextLamp].startTransition(nextFadeDuration);
-          if(input_stepGotReleased()&& input_getLastPressDuration()<1500) {
-            g_picture_duration_time=g_picture_duration_time*30;  /* Slow down x30 */
-            nextFadeDuration=nextFadeDuration*30;   /* Slow down x30 */
-          }
-          #ifdef TRACE_FIREWORK
-              Serial.print(F(">process_FIREWORK_RUN: frame= ")); Serial.print(g_firework_frame);
-              Serial.print(F(" lamp="));Serial.print(nextLamp); 
-              Serial.print(F(" fade="));Serial.print(nextFadeDuration);
-              Serial.print(F(" speed="));Serial.println(g_picture_duration_time); 
-          #endif    
-          g_firework_frame++;
-        } else {
-          g_firework_frame=0;
-          g_picture_duration_time=1000; // Wait 1000 ms to next element
-        }
+    if(millis()-g_picture_start_time > g_picture_duration_time) {  // Particle initiation needed
+      float colorShiftGreen=(random(50)+50)/100.0;
+      float colorShiftBlue=colorShiftGreen*0.8;
+       g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[random(2)],3,0.8,0.8*colorShiftGreen,0.75*colorShiftBlue,255,0.7);
+       if(++g_next_free_particle>=PARTICLE_COUNT)g_next_free_particle=0;
+       g_picture_start_time=millis();
+       g_picture_duration_time=200+random(600);
     }
+
+     // Update all particles
+    for(int i=0;i<PARTICLE_COUNT;i++) {
+      if(g_firework_particle[i].inProgress()) g_firework_particle[i].process();
+    }
+ 
     // update all transitioning lights
     for(int i=0;i<LAMP_COUNT;i++) 
     {
@@ -1059,6 +1067,24 @@ void process_TEST_MODE_SCALING()
     output_show();
 }
 
+/* ******************** Memory Helper *************** */
+ 
+#ifdef __arm__
+// should use uinstd.h to define sbrk but Due causes a conflict
+extern "C" char* sbrk(int incr);
+#else  // __ARM__
+extern char *__brkval;
+#endif  // __arm__
 
+int freeMemory() {
+  char top;
+#ifdef __arm__
+  return &top - reinterpret_cast<char*>(sbrk(0));
+#elif defined(CORE_TEENSY) || (ARDUINO > 103 && ARDUINO != 151)
+  return &top - __brkval;
+#else  // __arm__
+  return __brkval ? &top - __brkval : &top - __malloc_heap_start;
+#endif  // __arm__
+}
 
 

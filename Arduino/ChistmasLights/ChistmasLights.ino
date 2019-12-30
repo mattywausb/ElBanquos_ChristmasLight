@@ -842,7 +842,7 @@ void process_FIREWORK_RUN()
       color.h=40; // mostly yello with little Orange
       color.s=random(60)/100.0; // Nearly white
       color.v=1;  // Brightest
-       g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[random(2)],3,color,255,0.7);
+       g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[0],random(2),3,color,255,0.7);
        if(++g_next_free_particle>=PARTICLE_COUNT)g_next_free_particle=0;
        g_picture_start_time=millis();
        g_picture_duration_time=200+random(600);

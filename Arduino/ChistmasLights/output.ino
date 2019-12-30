@@ -20,7 +20,7 @@
 
 #define NUMCHAINS 1
 #define NUMPIXELS 12
-#define PIXEL_BRIGHTNESS 210
+#define PIXEL_BRIGHTNESS 120 // only 1/2 of amps necessary
 
 Adafruit_NeoPixel light_chain[1]={ Adafruit_NeoPixel(NUMPIXELS, CHAIN_PIN_1, NEO_GRB + NEO_KHZ800)};
 

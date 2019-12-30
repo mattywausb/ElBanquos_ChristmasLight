@@ -25,7 +25,7 @@ class Particle
         void init(PictureLamp *pictureLamp);
 
         /* Setup the particle */
-        void start(byte *pathArray,int time_scale,t_color_hsv color_hsv, byte pathFadeStartIndex, float pathFadeRate);
+        void start(byte *pathArray,bool mirror,int time_scale,t_color_hsv color_hsv, byte pathFadeStartIndex, float pathFadeRate);
 
         /* calculate progress and update lamps */
         void process();
@@ -47,6 +47,7 @@ class Particle
         unsigned long m_previousStepMillis=0;
         int m_stepDuration=0;
         int m_time_scale=1;
+        bool m_mirror=false;
 
         /* internal color conversion function */
         t_color_rgb get_color_rgb();

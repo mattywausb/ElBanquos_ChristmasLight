@@ -11,6 +11,9 @@
 #define FIREWORK_FADE_TIME_SCALE 30
 #define FIREWORK_TIME_SCALE_START 10
 
+//                            0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
+const byte lamp_mirror_map[]={0, 4, 3, 2, 1, 5, 9, 8, 7, 6,11,10,19,18,17,16,15,14,13,12,20,22,21,23};
+
 Particle::Particle(void)
 {
 
@@ -23,7 +26,7 @@ void Particle::init(PictureLamp *pictureLamp)
 }
 
 
-void Particle::start(byte *pathArray,int time_scale,t_color_hsv color, byte globalFadeStart, float globalFadeRate) 
+void Particle::start(byte *pathArray,bool mirror,int time_scale,t_color_hsv color, byte globalFadeStart, float globalFadeRate) 
 {
   #ifdef TRACE_PARTICLE
       Serial.println(F("TRACE_PARTICLE> start "));
@@ -36,6 +39,7 @@ void Particle::start(byte *pathArray,int time_scale,t_color_hsv color, byte glob
   m_previousStepMillis=0;
   m_stepDuration=0;
   m_time_scale=time_scale;
+  m_mirror=mirror,
   process();
 }
 
@@ -55,6 +59,8 @@ void Particle::process()
      return;
   }
   m_previousStepMillis=millis();
+  
+  if(m_mirror) nextLamp=lamp_mirror_map[nextLamp];
  
   byte speedByte=m_pathArray[m_pathIndex+1];
   int pixelFadeDuration=(speedByte>>4);

@@ -8,7 +8,7 @@
 
 // Which pin on the Arduino is connected to the NeoPixels?
 // On a Trinket or Gemma we suggest changing this to 1
-#define PIN            7
+#define PIN            8
 // How many NeoPixels are attached to the Arduino?
 #define NUMPIXELS      12
 
@@ -27,7 +27,7 @@ void setup() {
   // End of trinket special code
 
   pixels.begin(); // This initializes the NeoPixel library.
-  pixels.setBrightness(200);
+  pixels.setBrightness(128);
 }
 
 void loop() {

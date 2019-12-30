@@ -18,16 +18,33 @@
  
 #ifdef MOCKUP_LIGHTS   
 
-#define NUMCHAINS 1
+#define NUMCHAINS 2
 #define NUMPIXELS 12
 #define PIXEL_BRIGHTNESS 120 // only 1/2 of amps necessary
 
-Adafruit_NeoPixel light_chain[1]={ Adafruit_NeoPixel(NUMPIXELS, CHAIN_PIN_1, NEO_GRB + NEO_KHZ800)};
+Adafruit_NeoPixel light_chain[2]={ Adafruit_NeoPixel(NUMPIXELS, CHAIN_PIN_1, NEO_GRB + NEO_KHZ800)
+                                  ,Adafruit_NeoPixel(NUMPIXELS, CHAIN_PIN_2, NEO_GRB + NEO_KHZ800)};
 
 /* This map translates the picture light index in to the physical light index 
    an must be adapted to the current physical setup
  */
 #define xx 32
+
+/* Ring and stripe */
+
+byte light_index_map[24]={12,15, 4, 7,18,  // 1-5
+                          19, 9,16,13, 2,  // 6-10
+                           5, 6,  // 11-12
+                           8,10,  // 13-14
+                          17,11,  // 15-16
+                           0,14,  // 17-18
+                           1, 3,  // 19-20
+                          xx,xx,xx,xx // 21-24
+                          };
+
+
+
+/* Ring only 
 byte light_index_map[24]={xx, 2, 3, 8, 9,  // 1-5
                           xx,xx,11, 0,xx,  // 6-10
                            5, 6,  // 11-12
@@ -37,6 +54,7 @@ byte light_index_map[24]={xx, 2, 3, 8, 9,  // 1-5
                           xx,xx,  // 19-20
                           xx, 4, 7,xx // 21-24
                           };
+*/                       
                           
 #endif
 

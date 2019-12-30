@@ -11,12 +11,12 @@
 #define TRACE_MODES
 //#define TRACE_TIMING
 //#define TRACE_CLOCK
-#define TRACE_FIREWORK
+#define TRACE_CLOCK_TIME
 #endif 
 
 #define LAMP_COUNT 24
 
-#define PARTICLE_COUNT 5
+#define PARTICLE_COUNT 8
 
 
 Particle g_firework_particle[PARTICLE_COUNT];
@@ -600,10 +600,18 @@ void process_CLOCK_SET_MODE()
          else g_clock_base_time+=60;
         if (g_clock_base_time>=SECONDS_PER_DAY)g_clock_base_time-=SECONDS_PER_DAY;
         changed=true;
+
       }
     } // Step got pressed
     
-    if (changed) order_next_clock_picture(g_clock_base_time,1);  
+    if (changed) { 
+      order_next_clock_picture(g_clock_base_time,1);
+      #ifdef TRACE_CLOCK_TIME
+          Serial.println(F(">TRACE_CLOCK_TIME Set Time:"));
+          clock_print_to_Serial_time(g_clock_base_time);
+          Serial.println();
+        #endif
+    };  
     
     // update all transitioning lights
     for(int i=0;i<LAMP_COUNT;i++) 
@@ -617,6 +625,17 @@ void process_CLOCK_SET_MODE()
 }
 
 /*  Clock Helper functions */
+
+void clock_print_to_Serial_time(long secondOfTheDay)
+{
+  int currentHour=secondOfTheDay/3600;  
+  int currentMinute=(secondOfTheDay/60)%60;  
+  int currentSecond=secondOfTheDay%60;  
+
+  Serial.print(currentHour);Serial.print(F(":"));
+  Serial.print(currentMinute);Serial.print(F(":"));
+  Serial.print(currentSecond);Serial.print(F(" "));
+}
 
 void order_next_clock_picture(long secondOfTheDay,int transitionTime)
 {

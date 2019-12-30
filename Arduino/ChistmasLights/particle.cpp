@@ -8,8 +8,8 @@
 #endif
 
 #define FIREWORK_STEP_TIME_SCALE 15
-#define FIREWORK_FADE_TIME_SCALE 30
-#define FIREWORK_TIME_SCALE_START 10
+#define FIREWORK_FADE_TIME_SCALE 15
+#define FIREWORK_TIME_SCALE_START 0
 
 //                            0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
 const byte lamp_mirror_map[]={0, 4, 3, 2, 1, 5, 9, 8, 7, 6,11,10,19,18,17,16,15,14,13,12,20,22,21,23};
@@ -26,7 +26,7 @@ void Particle::init(PictureLamp *pictureLamp)
 }
 
 
-void Particle::start(byte *pathArray,bool mirror,int time_scale,t_color_hsv color, byte globalFadeStart, float globalFadeRate) 
+void Particle::start(byte *pathArray,byte pathIndexMax,bool mirror,int time_scale,t_color_hsv color, byte globalFadeStart, float globalFadeRate) 
 {
   #ifdef TRACE_PARTICLE
       Serial.println(F("TRACE_PARTICLE> start "));
@@ -39,7 +39,8 @@ void Particle::start(byte *pathArray,bool mirror,int time_scale,t_color_hsv colo
   m_previousStepMillis=0;
   m_stepDuration=0;
   m_time_scale=time_scale;
-  m_mirror=mirror,
+  m_mirror=mirror;
+  m_pathIndexMax=pathIndexMax*2; // take doube byte stepping into account
   process();
 }
 
@@ -51,7 +52,7 @@ void Particle::process()
       Serial.print(F(" m_pathIndex:"));Serial.println(m_pathIndex);
   #endif
   byte nextLamp=m_pathArray[m_pathIndex]-1;
-  if(nextLamp>=254) { // End of path indicator found
+  if(nextLamp>=254 || m_pathIndex>=m_pathIndexMax) { // End of path indicator found
     m_pathIndex=255;
     #ifdef TRACE_PARTICLE
        Serial.println(F("TRACE_PARTICLE> done"));
@@ -64,7 +65,7 @@ void Particle::process()
  
   byte speedByte=m_pathArray[m_pathIndex+1];
   int pixelFadeDuration=(speedByte>>4);
-  pixelFadeDuration=pixelFadeDuration*FIREWORK_FADE_TIME_SCALE+FIREWORK_TIME_SCALE_START;
+  pixelFadeDuration=m_time_scale*pixelFadeDuration*FIREWORK_FADE_TIME_SCALE+FIREWORK_TIME_SCALE_START;
   m_stepDuration=speedByte&0x000f;
   m_stepDuration=m_time_scale*m_stepDuration*FIREWORK_STEP_TIME_SCALE+FIREWORK_TIME_SCALE_START;
 

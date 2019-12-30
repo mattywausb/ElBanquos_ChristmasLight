@@ -10,7 +10,7 @@
 //#define TRACE_PICTURES
 #define TRACE_MODES
 //#define TRACE_TIMING
-//#define TRACE_CLOCK
+#define TRACE_CLOCK
 #define TRACE_FIREWORK
 #endif 
 
@@ -688,7 +688,7 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
    if(currentMinute<59)  { /* Normal Minute */
        for(segment=0; currentMinute>=GET_MINUTE_BORDER(segment+1);segment++);
        #ifdef TRACE_CLOCK
-          Serial.print(F(">order_next_clock_picture MINUTE_BORDER: "));    Serial.println( GET_MINUTE_BORDER(segment));
+          Serial.print(F(">order_next_clock_picture MINUTE_BORDER: "));    Serial.print( GET_MINUTE_BORDER(segment)); Serial.print(F(" segment="));Serial.println(segment);
        #endif
        color1_border=segment-1;
        color2_border=segment;
@@ -715,12 +715,12 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
           Serial.print(F(" c2="));Serial.println(color2);Serial.print(F(">order_next_clock_picture MINUTE lmp: "));
    #endif
    
-   for (int i=0;i<11;i++) {  /* Iterate */
-    lamp= i!=9 ? i+11 : 10;
-    if(currentMinute<59) {  /* in minute mode insert lamp 20 as 6th*/
-      if(i>5) { lamp= i!=10 ? i+12 : 10;}
-       else { if(i==5) lamp=20; }
-    } else if(i>9) {       /* in second mode after 10 lamps switch of lamp 20 and bail out */
+   for (int i=0;i<11;i++) {  // Iterate over sequence of minute ring lamps */
+    lamp= i!=9 ? i+11 : 10; // maps to lamp index 11...19,10 
+    if(currentMinute<59) {  // in minute mode insert lamp 21 as 6th, equals to sequence 11..15,20,17...19,10
+      if(i>5) { lamp= i!=10 ? i+10 : 10;}
+       else { if(i==5) lamp=20; }     
+    } else if(i>9) {       // in second mode after 10 lamps switch of lamp 20 and bail out 
         g_picture_lamp[20].setTargetColor(0,0,0);
         g_picture_lamp[20].startTransition(transitionTime);
         break; 
@@ -829,7 +829,7 @@ void process_FIREWORK_RUN()
 {
 
     if(input_selectGotPressed()) {
-      enter_TEST_MODE_PICTURES();
+      enter_TEST_MODE_PLACEMENT();
       return;
     }
     

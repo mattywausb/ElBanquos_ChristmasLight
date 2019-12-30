@@ -10,7 +10,7 @@
 //#define TRACE_PICTURES
 #define TRACE_MODES
 //#define TRACE_TIMING
-#define TRACE_CLOCK
+//#define TRACE_CLOCK
 #define TRACE_FIREWORK
 #endif 
 
@@ -838,9 +838,11 @@ void process_FIREWORK_RUN()
       //enter_SHOW_MODE();
     }
     if(millis()-g_picture_start_time > g_picture_duration_time) {  // Particle initiation needed
-      float colorShiftGreen=(random(50)+50)/100.0;
-      float colorShiftBlue=colorShiftGreen*0.8;
-       g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[random(2)],3,0.8,0.8*colorShiftGreen,0.75*colorShiftBlue,255,0.7);
+      t_color_hsv color;
+      color.h=40; // mostly yello with little Orange
+      color.s=random(60)/100.0; // Nearly white
+      color.v=1;  // Brightest
+       g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[random(2)],3,color,255,0.7);
        if(++g_next_free_particle>=PARTICLE_COUNT)g_next_free_particle=0;
        g_picture_start_time=millis();
        g_picture_duration_time=200+random(600);

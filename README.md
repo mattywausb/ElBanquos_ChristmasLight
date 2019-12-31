@@ -11,6 +11,9 @@ People should see the picture in the window and next time they come by will see 
 
 Since there is not programmable christmas light chain in the stores, I have built my own.
 
+### And the fireworks ?
+While enjoing it the first christmas and watching I also on new years eve I had the idea of switching the concept of slow animation to fast firework like effects to celebrate the new year. So I added a countdown clock and some fireworks animations, that can be activated for that special day
+
 The following 
 ## Features
 * Easy maintainable programming of the light patterns
@@ -22,6 +25,9 @@ The following
   * Random transformation order and timing of the pixels
   * Asynchronous and overlapping transformation of the pixels
   * Random hold time for one picture
+* Fireworks for new years eve
+  * countdown clock 
+  * multiple simulations of fireworks
 * Testmodes to check 
   * correct pixel position
   * Pictures

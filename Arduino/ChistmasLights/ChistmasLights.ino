@@ -10,7 +10,7 @@
 //#define TRACE_PICTURES
 #define TRACE_MODES
 //#define TRACE_TIMING
-//#define TRACE_CLOCK
+#define TRACE_CLOCK
 #define TRACE_CLOCK_TIME
 #endif 
 
@@ -96,8 +96,9 @@ float g_color_palette[][3]={
           {0.08  ,0  ,0.7  }  //11 = dark purple
 };
 
+// packed palette Color 1 | color0
 //                                             0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23
-const byte clock_hour_color[24]   PROGMEM ={0x00,0x60,0x60,0x60,0x60,0x60,0x26,0x26,0x26,0x26,0x26,0xA0,0x10,0x95,0x95,0x95,0x95,0x95,0x05,0x05,0x05,0x05,0x05,0x00};
+const byte clock_hour_color[24]   PROGMEM ={0x00,0x60,0x60,0x60,0x60,0x26,0x26,0x26,0x26,0x26,0x22,0xA0,0x10,0x59,0x59,0x59,0x59,0x59,0x05,0x05,0x05,0x05,0x05,0x00};
 #define GET_HOUR_COLOR_BYTE(hour) pgm_read_byte_near(clock_hour_color+hour*sizeof(byte))
 
 #define MINUTE_FUTURE_COLOR 1
@@ -658,11 +659,13 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
   byte color0=colorByte&0x0f;
 
   unsigned short pattern=0x0fe0;
-  if(currentHour<11 )  pattern>>=currentHour;
-  else  if(currentHour<13 )  pattern=0x0fff;
-        else if( currentHour<18) pattern>>=currentHour-12;
-             else if(currentHour<23) pattern>>=currentHour-18;
-                  else pattern=0x0fff;
+  if(currentHour==0) pattern=0x0000;
+  else
+    if(currentHour<11 )  pattern>>=currentHour%5;
+    else  if(currentHour<13 )  pattern=0x0fff;
+          else if( currentHour<18) pattern>>=currentHour-13;
+               else if(currentHour<23) pattern>>=currentHour-18;
+                    else pattern=0x0fff;
    #ifdef TRACE_CLOCK
           Serial.print(F(">order_next_clock_picture secondOfTheDay: "));Serial.println(secondOfTheDay);
           Serial.print(F(">order_next_clock_picture HOUR: "));
@@ -670,22 +673,22 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
    #endif
    for(int i=5;i<10;i++) {
     #ifdef TRACE_CLOCK
-      Serial.print(F("/"));
-   #endif
-    if(pattern&0x0001) {
-         #ifdef TRACE_CLOCK
-          Serial.print(color1);
-         #endif
-      g_picture_lamp[i].setTargetColor(g_color_palette[color1][iRED],g_color_palette[color1][iGREEN],g_color_palette[color1][iBLUE]);
-    } else { 
-         #ifdef TRACE_CLOCK
-          Serial.print(color0);
-         #endif
-      g_picture_lamp[i].setTargetColor(g_color_palette[color0][iRED],g_color_palette[color0][iGREEN],g_color_palette[color0][iBLUE]);
-    }
-
-   g_picture_lamp[i].startTransition(transitionTime);
-   pattern>>=1;
+          Serial.print(F("/"));
+       #endif
+        if(pattern&0x0001) {
+             #ifdef TRACE_CLOCK
+              Serial.print(color1);
+             #endif
+          g_picture_lamp[i].setTargetColor(g_color_palette[color1][iRED],g_color_palette[color1][iGREEN],g_color_palette[color1][iBLUE]);
+        } else { 
+             #ifdef TRACE_CLOCK
+              Serial.print(color0);
+             #endif
+          g_picture_lamp[i].setTargetColor(g_color_palette[color0][iRED],g_color_palette[color0][iGREEN],g_color_palette[color0][iBLUE]);
+        }
+    
+       g_picture_lamp[i].startTransition(transitionTime);
+       pattern>>=1;
    }
    #ifdef TRACE_CLOCK
       Serial.println(F(" "));

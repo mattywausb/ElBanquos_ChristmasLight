@@ -40,7 +40,7 @@ void Particle::start(byte *pathArray,byte pathIndexMax,bool mirror,int time_scal
   m_stepDuration=0;
   m_time_scale=time_scale;
   m_mirror=mirror;
-  m_pathIndexMax=pathIndexMax*2; // take doube byte stepping into account
+  m_pathIndexMax=pathIndexMax*2; // take double byte stepping into account
   process();
 }
 

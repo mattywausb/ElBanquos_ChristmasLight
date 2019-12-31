@@ -3,8 +3,9 @@
 #ifdef TRACE_ON
 //#define TRACE_FIREWORK
 #define TRACE_FIREWORK_HIGH
-#define DISARM_1_HOUR_RESET
+
 #endif 
+#define DISARM_1_HOUR_RESET
 
 #define FW_SHOW_TYPE_COUNT 7
 
@@ -21,12 +22,14 @@ byte g_fw_path_buffer[FW_PATH_BANK_COUNT][FW_PATH_BUFFER_LENGTH];
 //                                1       2       3       4       6       6       7       8        9      10
 const byte fw_path_long_arc[] PROGMEM ={ 9,0x51,18,0x51, 2,0x62, 3,0x73,12,0x73,13,0x62, 14,0x62,255};   
 const byte fw_path_central_arc[] PROGMEM ={ 21,0x51,1,0x62, 24,0x62, 3,0x73,18,0x73,9,0x62,255}; 
-const byte fw_path_beam_3h[] PROGMEM ={ 4,0x22,13,0x22, 7,0x22,255};   
-const byte fw_path_beam_5h[] PROGMEM ={ 5,0x22,15,0x22, 8,0x22,255};   
-const byte fw_path_beam_7h[] PROGMEM ={ 1,0x22,17,0x22, 9,0x22,255};   
-const byte fw_path_beam_9h[] PROGMEM ={ 2,0x22,19,0x22, 10,0x22,255};  
-const byte fw_path_beam_0h[] PROGMEM ={ 3,0x22,11,0x22, 6,0x22,255};   
-const byte fw_path_circle[] PROGMEM ={ 22,0xd0,4,0xf0,2,0xc0,11,0xb0, 20,0xe0,24,0xd0,19,0xc0,12,0xb0,255};   
+
+const byte fw_path_beam_3h[] PROGMEM ={ 4,0xc2,13,0xa2, 7,0x62,255};   
+const byte fw_path_beam_5h[] PROGMEM ={ 5,0xc2,15,0xa2, 8,0x62,255};   
+const byte fw_path_beam_7h[] PROGMEM ={ 1,0xc2,17,0xa2, 9,0x62,255};   
+const byte fw_path_beam_9h[] PROGMEM ={ 2,0xc2,19,0xa2,10,0x62,255};  
+const byte fw_path_beam_0h[] PROGMEM ={ 3,0xc2,11,0xa2, 6,0x62,255};
+   
+const byte fw_path_circle[] PROGMEM ={ 22,0xc0,4,0xf0,2,0xc0,11,0xb0, 20,0xe0,24,0xd0,19,0xc0,12,0xb0,255};   
 const byte fw_path_straigth_accellerating[] PROGMEM ={ 9,0x53,18,0x42, 2,0x21, 3,0x11,11,0x11,6,0x11, 255};   
 const byte fw_path_straigth_decellerating[] PROGMEM ={ 9,0x32,18,0x32, 2,0x43, 3,0x43,11,0x54,6,0x54, 255};  
 const byte fw_path_peak_explode_1[] PROGMEM ={ 22,0xd0,12,0xcd, 20,0xa0, 3,0xb0, 255};  
@@ -66,7 +69,7 @@ void enter_FIREWORK_RUN()
     g_next_free_particle=0;
     for(int p=0;p<PARTICLE_COUNT;p++)
         g_firework_particle[p].end();
-    g_fw_show_type=FW_SHOW_TYPE_COUNT-1;
+    g_fw_show_type=3;  // start with sunflower
     fw_init_show();
 }
 
@@ -106,7 +109,7 @@ void process_FIREWORK_RUN()
       g_fw_show_shot=0;
       g_fw_show_shot_limit=1;
       g_picture_start_time=millis();
-      g_picture_duration_time=1000*random(10)+5000;
+      g_picture_duration_time=1000*random(6)+5000;
       #ifdef TRACE_FIREWORK
         Serial.print(F(">TRACE_FIREWORK: pausing for "));
         Serial.println(g_picture_duration_time);
@@ -190,13 +193,13 @@ void fw_init_show() {
            memcpy_P(g_fw_path_buffer[4],fw_path_beam_0h ,FW_PATH_BUFFER_LENGTH);
            break;
   case 5:          // Roman lights
-           g_fw_show_shot_limit=2*6; // one cycle needs 2 steps
+           g_fw_show_shot_limit=2*(6+random(4)); // one cycle needs 2 steps
            memcpy_P(g_fw_path_buffer[0],fw_path_straigth_decellerating ,FW_PATH_BUFFER_LENGTH);  
            memcpy_P(g_fw_path_buffer[1],fw_path_peak_explode_1 ,FW_PATH_BUFFER_LENGTH);  
            memcpy_P(g_fw_path_buffer[2],fw_path_peak_explode_2 ,FW_PATH_BUFFER_LENGTH);
            break;
   case 6:          // Glitterbomb
-           g_fw_show_shot_limit=3*7; // one cycle needs 7 shots
+           g_fw_show_shot_limit=5*7; // one cycle needs 7 shots
             
            memcpy_P(g_fw_path_buffer[0],fw_path_middle_up,FW_PATH_BUFFER_LENGTH);
            g_fw_path_buffer[0][6]=255; // Stop after 3rd element (middle led)
@@ -261,9 +264,9 @@ void show_2_next_particle()  // Launch Rockets
           color.h=random(360); 
           color.s=1; 
           color.v=1; 
-          g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[1],g_mirror,5,color);
+          g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[1],9-random(6),g_mirror,5,color,255,1);
           if(++g_next_free_particle>=PARTICLE_COUNT)g_next_free_particle=0;
-          g_picture_duration_time=3000+random(3000);    
+          g_picture_duration_time=3000+random(1500);    
       }
       g_fw_show_shot++;
 }
@@ -331,8 +334,8 @@ void show_6_next_particle()  // Glitterbomb
     #endif
     switch (phase) {
       case 0:  // Launch
-            for(byte bank=3;bank<5;bank++){  // Create glitter Pattern in bank 3-4
-              for(step=0;step<9;step++) {
+            for(byte bank=3;bank<FW_PATH_BANK_COUNT;bank++){  // Create glitter Pattern in bank 3-4
+              for(step=0;step<FW_PATH_MAX_STEPS;step++) {
                 g_fw_path_buffer[bank][step*2]=random(LAMP_COUNT)+1;
                 g_fw_path_buffer[bank][step*2+1]=0x01|((10+random(5))<<4);
               }

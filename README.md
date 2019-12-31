@@ -26,8 +26,9 @@ The following
   * Asynchronous and overlapping transformation of the pixels
   * Random hold time for one picture
 * Fireworks for new years eve
-  * countdown clock 
+  * countdown clock (mostly slow animated)
   * multiple simulations of fireworks
+  * modularized and extendable implementation (add new ideas in 30 minutes)
 * Testmodes to check 
   * correct pixel position
   * Pictures

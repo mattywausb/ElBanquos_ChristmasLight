@@ -12,9 +12,8 @@ People should see the picture in the window and next time they come by will see 
 Since there is not programmable christmas light chain in the stores, I have built my own.
 
 ### And the fireworks ?
-While enjoing it the first christmas and watching the lights also on new years eve I had the idea of switching the concept of slow animation to fast firework like effects to celebrate the new year. So I added a countdown clock and some fireworks animations, that can be activated for that special day.
+While also enjoing it on new years eve I had the idea of switching the concept of slow animation to fast firework like effects to celebrate the new year. So I added a countdown clock and some fireworks animations. This mode can be activated for that special day.
 
-The following 
 ## Features
 * Easy maintainable programming of the light patterns
   * Picture is described on a logical lamp arrangemant. Translation to physical arrangement on the window is done at runtime.

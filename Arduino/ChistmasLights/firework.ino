@@ -1,15 +1,18 @@
 #include "particle.h"
 
 #ifdef TRACE_ON
-#define TRACE_FIREWORK
+//#define TRACE_FIREWORK
+#define TRACE_FIREWORK_HIGH
 #define DISARM_1_HOUR_RESET
 #endif 
 
+#define FW_SHOW_TYPE_COUNT 7
 
 
 #define FW_PATH_MAX_STEPS 10
 #define FW_PATH_BUFFER_LENGTH FW_PATH_MAX_STEPS*2+1
-/* Fireworks */
+#define FW_PATH_BANK_COUNT 5
+byte g_fw_path_buffer[FW_PATH_BANK_COUNT][FW_PATH_BUFFER_LENGTH];
 
                                                                       // fade=0-F = 10-535ms 35ms steps
                                                                       // framelength=0-F = 10-535ms 35ms steps  
@@ -28,16 +31,9 @@ const byte fw_path_straigth_accellerating[] PROGMEM ={ 9,0x53,18,0x42, 2,0x21, 3
 const byte fw_path_straigth_decellerating[] PROGMEM ={ 9,0x32,18,0x32, 2,0x43, 3,0x43,11,0x54,6,0x54, 255};  
 const byte fw_path_peak_explode_1[] PROGMEM ={ 22,0xd0,12,0xcd, 20,0xa0, 3,0xb0, 255};  
 const byte fw_path_peak_explode_2[] PROGMEM ={ 22,0xa0,23,0xdd, 20,0xb0, 13,0xc0, 255};  
-const byte fw_path_middle_up[] PROGMEM ={ 21,0x32,1,0x21, 24,0x43, 6,0x43, 255};  
+const byte fw_path_middle_up[] PROGMEM ={ 21,0x32,1,0x22, 24,0x43, 6,0x43, 255};  
 
 
-
- #define FW_SHOW_TYPE_COUNT 7
-
-
-
-
-byte g_fw_path_buffer[PARTICLE_COUNT][FW_PATH_BUFFER_LENGTH];
 byte g_next_free_particle=0;
 byte g_fw_show_type=0;
 int g_fw_show_shot=0; 
@@ -133,6 +129,7 @@ void process_FIREWORK_RUN()
               Serial.print(F(">TRACE_FIREWORK: unhandled show type "));
               Serial.println(g_fw_show_type);
             #endif 
+            break;
       }
     }
     
@@ -209,17 +206,33 @@ void fw_init_show() {
             g_fw_path_buffer[1][step*2+1]=0xf0;
            }
            g_fw_path_buffer[1][4*2+1]=0xff; // set long step time from inner to outer ring so we can insert the middle
-           g_fw_path_buffer[1][10]=255;
+           g_fw_path_buffer[1][20]=255;
 
            for(step=0;step<10;step++) { //Put all 10 "minute ring" leds into the pattern
             g_fw_path_buffer[2][step*2]=step+11;
             g_fw_path_buffer[2][step*2+1]=0xf0;
            }
-           g_fw_path_buffer[2][10]=255;
+           g_fw_path_buffer[2][20]=255;
 
            break;
   }  
 }       
+
+void fw_trace_paths_to_serial()
+{
+  for(int bank=0;bank<FW_PATH_BANK_COUNT;bank++) {
+              Serial.print(F("Path Bank "));
+              Serial.print(bank);
+              Serial.print(F(" : "));
+      for(byte step=0;step<FW_PATH_MAX_STEPS;step++) {
+              Serial.print(g_fw_path_buffer[bank][step*2]);
+              Serial.print(F(","));
+              Serial.print(g_fw_path_buffer[bank][step*2+1],HEX);
+              Serial.print(F(" / "));
+      }
+      Serial.println();
+  }
+}
 
 void show_1_next_particle()  // Sparkle from left and right bottom
 {
@@ -239,9 +252,9 @@ void show_2_next_particle()  // Launch Rockets
       if(g_fw_show_shot%2==0) { //Launch
           color.h=25; // Orange
           color.s=0.8; 
-          color.v=0.2; 
+          color.v=0.4; 
           g_mirror=random(2);
-          g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[0],g_mirror,3,color);
+          g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[0],g_mirror,5,color);
           if(++g_next_free_particle>=PARTICLE_COUNT)g_next_free_particle=0;
           g_picture_duration_time=1000+random(200);
       } else {          // Explode
@@ -312,54 +325,45 @@ void show_6_next_particle()  // Glitterbomb
     t_color_hsv color;
     byte step;
     byte phase=g_fw_show_shot%7;
-    #ifdef TRACE_FIREWORK
-        Serial.print(F(">TRACE_FIREWORK: show_6_next_particle: phase "));
+    #ifdef TRACE_FIREWORK_HIGH
+        Serial.print(F(">TRACE_FIREWORK_HIGH: show_6_next_particle: phase "));
         Serial.println(phase);
     #endif
     switch (phase) {
       case 0:  // Launch
             for(byte bank=3;bank<5;bank++){  // Create glitter Pattern in bank 3-4
-            #ifdef TRACE_FIREWORK
-              Serial.print(F(">TRACE_FIREWORK: show_6_next_particle: Bank: "));
-            #endif
               for(step=0;step<9;step++) {
                 g_fw_path_buffer[bank][step*2]=random(LAMP_COUNT)+1;
                 g_fw_path_buffer[bank][step*2+1]=0x01|((10+random(5))<<4);
-                #ifdef TRACE_FIREWORK
-                  Serial.print(g_fw_path_buffer[bank][step*2]);
-                  Serial.print(F("-"));
-                  Serial.print(g_fw_path_buffer[bank][step*2+1],HEX);
-                  Serial.print(F("/"));
-                #endif
               }
               g_fw_path_buffer[bank][step*2]=255;
-           }
-            #ifdef TRACE_FIREWORK
-              Serial.println();
+            }
+            #ifdef TRACE_FIREWORK_HIGH
+                 fw_trace_paths_to_serial();
             #endif
             color.h=15; // nearly red
             color.s=1;
             color.v=0.3;  // Brightness
-            g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[0],false,1,color);
+            g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[0],false,2,color);
             if(++g_next_free_particle>=PARTICLE_COUNT)g_next_free_particle=0;
-            g_picture_duration_time=700;
+            g_picture_duration_time=1300;
             break;
       case 1:  // Explode inner/outer ring
             g_fw_main_color=random(360); 
             color.h=g_fw_main_color;
             color.s=1;
             color.v=1;
-            g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[1],false,10,color);
+            g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[1],false,8,color);
             if(++g_next_free_particle>=PARTICLE_COUNT)g_next_free_particle=0;
-            g_picture_duration_time=200;
+            g_picture_duration_time=1000;
             break;          
       case 2:  // Explode middle ring
             color.h=g_fw_main_color;
             color.s=1;
             color.v=1;
-            g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[2],false,4,color);
+            g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[2],false,8,color);
             if(++g_next_free_particle>=PARTICLE_COUNT)g_next_free_particle=0;
-            g_picture_duration_time=300;
+            g_picture_duration_time=1000;
             break;
       case 3:
       case 4:
@@ -368,7 +372,7 @@ void show_6_next_particle()  // Glitterbomb
             color.h=30; // gold
             color.s=1-random(50)/100.0;  // Slight saturation differences
             color.v=0.8;  // Brightness
-            g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[3+(phase%2)],phase%4,6,color);
+            g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[3+(phase%2)],phase%4,4,color);
             if(++g_next_free_particle>=PARTICLE_COUNT)g_next_free_particle=0;
             if(phase<6) g_picture_duration_time=150;
             else g_picture_duration_time=2000+random(1500);

@@ -26,7 +26,7 @@ class Particle
 
         /* Setup the particle */
         void start(byte *pathArray,byte m_pathIndexMax,bool mirror,int time_scale,t_color_hsv color_hsv, byte pathFadeStartIndex, float pathFadeRate);
-        void start(byte *pathArray,bool mirror,int time_scale,t_color_hsv color_hsv) {start(pathArray,255,mirror,time_scale,color_hsv,255,0.7);};
+        void start(byte *pathArray,bool mirror,int time_scale,t_color_hsv color_hsv) {start(pathArray,255,mirror,time_scale,color_hsv,255,1);};
 
         /* calculate progress and update lamps */
         void process();

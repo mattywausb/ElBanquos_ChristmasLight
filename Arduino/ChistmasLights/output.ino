@@ -8,7 +8,7 @@
 //#define TRACE_OUTPUT_HIGH
 #endif
 
-#define MOCKUP_LIGHTS
+//#define MOCKUP_LIGHTS
 
 #define CHAIN_PIN_1 7
 #define CHAIN_PIN_2 8
@@ -64,8 +64,7 @@ byte light_index_map[24]={xx, 2, 3, 8, 9,  // 1-5
 
 #define NUMCHAINS 3
 #define NUMPIXELS 8
-#define PIXEL_BRIGHTNESS 210
-
+#define PIXEL_BRIGHTNESS 255
 Adafruit_NeoPixel light_chain[3]={ Adafruit_NeoPixel(NUMPIXELS, CHAIN_PIN_1, NEO_RGB + NEO_KHZ400),
                                     Adafruit_NeoPixel(NUMPIXELS, CHAIN_PIN_2, NEO_RGB + NEO_KHZ400),
                                     Adafruit_NeoPixel(NUMPIXELS, CHAIN_PIN_3, NEO_RGB + NEO_KHZ400)};

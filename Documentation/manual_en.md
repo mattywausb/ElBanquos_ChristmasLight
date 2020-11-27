@@ -28,7 +28,8 @@ Press MODE->  Countdown Mode
 Press STEP-> Foreward transition to target picture an switch to show mode. 
 
 ### Countdown Mode
-The Countdown Mode can be set to coutndown to Midnight
+The Countdown Mode will display time of an internal clock and switch to fireworks automatically at 00:00. 
+To undersatnd the time display, see description below.
 
 Status LED: OFF
 
@@ -116,3 +117,18 @@ Status LED: OFF
 Press MODE-> Switch to Show Mode
 
 Press STEP-> Add next lamp in physical chain.
+
+# How the countdown time is displayed
+The time display is designed to appear very static and add more movement, the nearer the time is to 00:00 resulting in a 1 Minute Countdown at 23:59.
+It uses color and positions to symbolize the time as follows:
+
+* Outer star points = Hours
+* Led Circle = Minute 0-58, Seconds of Minute 59
+* inner 5 lec circle = seconds (only for hour 23)
+* center light = seconds (for hour 18 to 22)
+
+In general colors transistion from blue/ green over white to orange/red, so red is always the last color before a change to a next element.
+The minute ring displays unused minute lamps in yellow and used minute lamps in blue, changing the color of the current lamp accordingly to the upper schema.
+
+
+

@@ -43,6 +43,15 @@ int g_fw_show_shot=0;
 int g_fw_show_shot_limit=0; 
 float  g_fw_main_color;
 boolean g_mirror=false;
+byte g_prev_fw_show_type=0;
+
+// used create an uneven probabilty pattern. Lon interval = high probability
+const byte show_probabilty_hitrange[] PROGMEM = {20,  // Sparkle left right
+                                                 40,  // Single random rockets
+                                                 50,  // sunflower
+                                                 65,  // Joker
+                                                 85,  // roman lights
+                                                 100};  // Glitter bomb
 
 
 /* ========= FIREWORK_RUN ======== */
@@ -100,7 +109,16 @@ void process_FIREWORK_RUN()
     } 
     
     if(g_fw_show_type==0 && ( millis()-g_picture_start_time )> g_picture_duration_time) {       //start next show
-      g_fw_show_type=random(FW_SHOW_TYPE_COUNT);
+      byte probabiliy_hitrange[FW_SHOW_TYPE_COUNT];
+      byte dice100;
+      memcpy_P(probabiliy_hitrange,show_probabilty_hitrange,FW_SHOW_TYPE_COUNT);
+      g_fw_show_type=0;
+      while(g_fw_show_type==g_prev_fw_show_type || g_fw_show_type==0) {
+        dice100=random(100);
+        for(g_fw_show_type=1; dice100>probabiliy_hitrange[g_fw_show_type-1];g_fw_show_type++);     
+      }
+      g_prev_fw_show_type=g_fw_show_type;
+          
       #ifdef TRACE_FIREWORK
         Serial.println(F(">TRACE_FIREWORK: start show "));
       #endif

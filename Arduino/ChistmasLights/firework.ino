@@ -199,7 +199,7 @@ void fw_init_show() {
            memcpy_P(g_fw_path_buffer[1],fw_path_circle,FW_PATH_BUFFER_LENGTH);  // This is the colorfull circle
            break;
     case 3:          // Sunflower
-           g_fw_show_shot_limit=3300;   // about 60 seconds with 15 ms per shot
+           g_fw_show_shot_limit=3000;   // about 60 seconds with 15 ms per shot
            memcpy_P(g_fw_path_buffer[0],fw_path_beam_3h ,FW_PATH_BUFFER_LENGTH);
            memcpy_P(g_fw_path_buffer[1],fw_path_beam_5h ,FW_PATH_BUFFER_LENGTH);   
            memcpy_P(g_fw_path_buffer[2],fw_path_beam_7h ,FW_PATH_BUFFER_LENGTH);  
@@ -318,9 +318,9 @@ void show_4_next_particle()  // Joker
       color.h=30+random(15); // mostly Orange to yello
       color.s=0.9-random(20)/100.0; // more colorful
       color.v=1;  // Brightness
-      g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[random(5)],random(2),5,color);
+      g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[random(5)],random(2),2,color);
       if(++g_next_free_particle>=PARTICLE_COUNT)g_next_free_particle=0;
-      g_picture_duration_time=300+random(400);
+      g_picture_duration_time=350+random(400); // time to next new particle
       g_fw_show_shot++;
 }
 

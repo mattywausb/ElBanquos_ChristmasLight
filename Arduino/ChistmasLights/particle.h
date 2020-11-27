@@ -16,6 +16,19 @@ typedef struct {
     float v;       // a fraction between 0 and 1
 } t_color_hsv;
 
+/* Particle class 
+ * A particle initiates lamps on a defined path with a given color, that fades in a defined rate
+ * Relative movement speed and fade rate are defined by the path and can be shiftet with parameters for every particle instance
+ * The following parameters are set, to start a particle:
+ * pathArray: Array, describing the path to follow (lamp sequence, time it should be lit, fade time for the lamp)
+ * pathIndexMax: length of the path for this particle (to shorten the path individually)
+ * mirror: boolea to mirror the path at the vertikal axis (allows more variation)
+ * time_scale: Factor to modify time for fade and path progress (1 = 15ms
+ * color_hsv: Initial color of the particle 
+ * pathFadeStartIndex: Index on the path to start fading (255=never)
+ * pathFadeRate: Factor to multiply the brightness for the next lamp in path
+ */
+
 class Particle
 {
   public:

@@ -76,9 +76,11 @@ void enter_FIREWORK_RUN()
 void process_FIREWORK_RUN()
 {
 
-    if(input_selectGotPressed()) {
-      enter_TEST_MODE_PLACEMENT();
-      return;
+    if(input_selectGotReleased()) {  
+      if(input_getLastPressDuration()>1500)   // Long press
+         enter_TEST_MODE_PLACEMENT();
+      else 
+         enter_SHOW_MODE();
     }
     
     long secondOfTheDay=((millis()-g_clock_sync_time)/1000+g_clock_base_time)%SECONDS_PER_DAY; // Todo switch to 1 hour after ENtering mode
@@ -101,10 +103,12 @@ void process_FIREWORK_RUN()
       #ifdef TRACE_FIREWORK
         Serial.println(F(">TRACE_FIREWORK: start show "));
       #endif
+      digitalWrite(LED_BUILTIN, false);
       fw_init_show();
     }
     
     if(g_fw_show_shot>=g_fw_show_shot_limit) {   // end current show with  short pause
+      digitalWrite(LED_BUILTIN, true);
       g_fw_show_type=0;
       g_fw_show_shot=0;
       g_fw_show_shot_limit=1;

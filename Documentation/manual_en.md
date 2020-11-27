@@ -63,11 +63,13 @@ STEP Hold 2 sec and release: Start Clock (with 0 Seconds) and switch to Countdow
 ### Fireworks Mode
 The Fireworks Mode plays randomly chosen Firework Animations
 
-Status LED: OFF
+Status LED: ON in show pause, OFF during show
 
 Press MODE-> Switch to placement Test
 
-Press STEP-> Switch to countdown Mode
+Press STEP-> Switch to Show Mode
+
+STEP Hold 2 sec and release: Switch to Placement Test
 
 ### Placement Test
 The placement test shows a rainbow color pattern on the different circles, starting with red on the upper lamp and forwarding clockwise.

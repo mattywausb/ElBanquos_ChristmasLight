@@ -123,8 +123,8 @@ The time display is designed to appear very static and add more movement, the ne
 It uses color and positions to symbolize the time as follows:
 
 * Outer star points = Hours
-* Led Circle = Minute 0-58, Seconds of Minute 59
-* inner 5 lec circle = seconds (only for hour 23)
+* middle led Circle = Minute 0-58, Seconds of Minute 59
+* inner 5 led circle = seconds (only for hour 23)
 * center light = seconds (for hour 18 to 22)
 
 In general colors transistion from blue/ green over white to orange/red, so red is always the last color before a change to a next element.

@@ -501,6 +501,7 @@ void enter_CLOCK_MODE()
       Serial.println(F("#CLOCK_MODE"));
     #endif
     g_process_mode=CLOCK_MODE;
+    digitalWrite(LED_BUILTIN, false);
     input_IgnoreUntilRelease();
     long secondOfTheDay=((millis()-g_clock_sync_time)/1000+g_clock_base_time)%SECONDS_PER_DAY;
     for(int i=0;i<LAMP_COUNT;i++)  /* Initialize all lamps */
@@ -579,8 +580,10 @@ void enter_CLOCK_SET_MINUTE_MODE()
 void process_CLOCK_SET_MODE()
 {
     boolean changed=false;
-     // TODO: Animate central lamp
-     
+     // Blink Builtin LED
+     if(g_process_mode==CLOCK_SET_HOUR_MODE)    digitalWrite(LED_BUILTIN, millis()%500<250);
+     else digitalWrite(LED_BUILTIN, millis()%250<125);
+    
      if(input_selectGotPressed()) {
        if(g_process_mode==CLOCK_SET_HOUR_MODE) g_clock_base_time-=3600;
        else g_clock_base_time-=60;
@@ -623,6 +626,8 @@ void process_CLOCK_SET_MODE()
       }
     }
     output_show();
+
+ 
 }
 
 /*  Clock Helper functions */
@@ -813,6 +818,7 @@ void enter_TEST_MODE_PLACEMENT()
     #endif
     g_process_mode=TEST_MODE_PLACEMENT;
     input_IgnoreUntilRelease();
+    digitalWrite(LED_BUILTIN, false);
     g_pic_index=0;
     for(int i=0;i<LAMP_COUNT;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
     output_setLightColor(0,255,0,0);
@@ -881,6 +887,7 @@ void enter_TEST_MODE_PICTURES()
     #endif
     g_process_mode=TEST_MODE_PICTURES;
     input_IgnoreUntilRelease();
+    digitalWrite(LED_BUILTIN, false);
     g_pic_index=0;
     set_picture( g_pic_index);
     output_show();
@@ -912,6 +919,7 @@ void enter_TEST_MODE_FADE_SOLO()
     #endif
     g_process_mode=TEST_MODE_FADE_SOLO;
     input_IgnoreUntilRelease();
+    digitalWrite(LED_BUILTIN, false);
     g_pic_index=0;
     for(int i=0;i<LAMP_COUNT;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
     output_show();
@@ -946,6 +954,7 @@ void enter_TEST_MODE_FADE_IN_ENSEMBLE()
     #endif
     g_process_mode=TEST_MODE_FADE_IN_ENSEMBLE;
     input_IgnoreUntilRelease();
+    digitalWrite(LED_BUILTIN, false);
     g_pic_index=0;
     for(int i=0;i<LAMP_COUNT;i++)  output_setLightColorUnmapped(i,0,128,128);  // shut down all lights
     output_show();
@@ -981,6 +990,7 @@ void enter_TEST_MODE_SCALING()
     #endif
     g_process_mode=TEST_MODE_SCALING;
     input_IgnoreUntilRelease();
+    digitalWrite(LED_BUILTIN, false);
     g_pic_index=0;
     for(int i=0;i<LAMP_COUNT;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
     output_show();

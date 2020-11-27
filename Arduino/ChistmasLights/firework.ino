@@ -56,6 +56,7 @@ void enter_FIREWORK_RUN()
     #endif
     delay(500);
     g_process_mode=FIREWORK_RUN;
+    digitalWrite(LED_BUILTIN, false);
     input_IgnoreUntilRelease();
     for(int i=0;i<LAMP_COUNT;i++)  /* Initialize all lamps */
     {

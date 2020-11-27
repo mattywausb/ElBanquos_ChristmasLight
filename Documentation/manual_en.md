@@ -39,7 +39,7 @@ Press STEP-> Switch to Set Hour
 ### Set Hour Mode
 The Set Hour Mode is used to set the Hour of the countdown. (Indicated by blue blinking Middle light)
 
-Status LED: OFF
+Status LED: Blinking (2 per Second)
 
 Press MODE-> 1 Hour Backward
 
@@ -51,7 +51,7 @@ STEP Hold 2 sec and release: Switch to Set Minute Mode
 ### Set Minute Mode
 The Set Hour Mode is used to set the Hour of the countdown. (Indicated by blue blinking Middle light)
 
-Status LED: OFF
+Status LED: Blinking (4 per Second)
 
 Press MODE-> 1 Minute Backward
 

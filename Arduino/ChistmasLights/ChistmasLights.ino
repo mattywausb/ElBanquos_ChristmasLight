@@ -96,9 +96,9 @@ float g_color_palette[][3]={
           {0.1  ,0  ,0.75  }  //11 = dark purple
 };
 
-// packed palette Color 1 | color0
+// packed palette Color 1 (Color of used element) | color 0 (Color of unused element)
 //                                             0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23
-const byte clock_hour_color[24]   PROGMEM ={0x00,0x60,0x60,0x60,0x60,0x26,0x26,0x26,0x26,0x26,0x22,0xA0,0x10,0x59,0x59,0x59,0x59,0x59,0x05,0x05,0x05,0x05,0x05,0x00};
+const byte clock_hour_color[24]   PROGMEM ={0x80,0x60,0x60,0x60,0x60,0x26,0x26,0x26,0x26,0x26,0x22,0xA0,0x10,0x59,0x59,0x59,0x59,0x59,0x05,0x05,0x05,0x05,0x05,0x00};
 #define GET_HOUR_COLOR_BYTE(hour) pgm_read_byte_near(clock_hour_color+hour*sizeof(byte))
 
 #define MINUTE_FUTURE_COLOR 1
@@ -663,8 +663,8 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
   byte color1=colorByte>>4;
   byte color0=colorByte&0x0f;
 
-  unsigned short pattern=0x0fe0;
-  if(currentHour==0) pattern=0x0000;
+  unsigned short pattern=0x0fe0;  // defines the color to take from the set: color 1 or color 0. Bit 0=Lamp 6   Bit 5=Lamp 10
+  if(currentHour==0) pattern=0x000c;
   else
     if(currentHour<11 )  pattern>>=currentHour%5;
     else  if(currentHour<13 )  pattern=0x0fff;

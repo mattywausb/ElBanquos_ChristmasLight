@@ -128,7 +128,21 @@ It uses color and positions to symbolize the time as follows:
 * center light = seconds (for hour 18 to 22)
 
 In general colors transistion from blue/ green over white to orange/red, so red is always the last color before a change to a next element.
-The minute ring displays unused minute lamps in yellow and used minute lamps in blue, changing the color of the current lamp accordingly to the upper schema.
+The minute ring displays "unused" minute lamps in yellow and used minute lamps in blue, changing the color of the current lamp accordingly to the upper schema.
+
+The 5 hour lamps will light as follows (going backwards)
+* 23:00 - all off
+* 20:00 - 3 red 2 off
+* 18:00 - all red
+* 15:00 - 3 orange 2 red
+* 13:00 - all orange
+* 12:00	- all yellow
+* 11:00 - all green
+* 10:00 - all cyan
+* 8:00 -  2 blue 3 cyan
+* 5:00 - all blue
+* 1:00 - 1 blue
+* 0:00 - 2 pink lamps on the bottom (but normally here is the fireworks to see)
 
 
 

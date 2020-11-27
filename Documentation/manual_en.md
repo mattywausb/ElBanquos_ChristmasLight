@@ -62,15 +62,14 @@ STEP Hold 2 sec and release: Start Clock (with 0 Seconds) and switch to Countdow
 
 
 ### Fireworks Mode
-The Fireworks Mode plays randomly chosen Firework Animations
+The Fireworks Mode plays randomly chosen firework animations
 
-Status LED: ON in show pause, OFF during show
+Status LED: ON in show pause, OFF during running pattern
+Press MODE-> Switch to Show Mode
 
-Press MODE-> Switch to placement Test
+Press STEP-> Change to next fireworks pattern
 
-Press STEP-> Switch to Show Mode
-
-STEP Hold 2 sec and release: Switch to Placement Test
+MODE Hold 2 sec and release: Switch to Placement Test
 
 ### Placement Test
 The placement test shows a rainbow color pattern on the different circles, starting with red on the upper lamp and forwarding clockwise.
@@ -130,6 +129,7 @@ It uses color and positions to symbolize the time as follows:
 In general colors transistion from blue/ green over white to orange/red, so red is always the last color before a change to a next element.
 The minute ring displays "unused" minute lamps in yellow and used minute lamps in blue, changing the color of the current lamp accordingly to the upper schema.
 
+
 The 5 hour lamps will light as follows (going backwards)
 * 23:00 - all off
 * 20:00 - 3 red 2 off
@@ -144,5 +144,10 @@ The 5 hour lamps will light as follows (going backwards)
 * 1:00 - 1 blue
 * 0:00 - 2 pink lamps on the bottom (but normally here is the fireworks to see)
 
+The minute lamps have some easy to recognize  positions/color as follows:
+00 - all yellow
+15 - 3rd right white
+30 - bottom middle white
+45 - 3rd left white
 
 

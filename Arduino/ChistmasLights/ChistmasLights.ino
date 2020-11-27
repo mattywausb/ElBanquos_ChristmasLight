@@ -93,7 +93,7 @@ float g_color_palette[][3]={
           {0.8  ,0  ,0.8  },  //8 = pink
           {1  ,0.3,0  },  //9 = orange
           {0  ,1  ,0  },  // 10 =bright green
-          {0.08  ,0  ,0.7  }  //11 = dark purple
+          {0.1  ,0  ,0.75  }  //11 = dark purple
 };
 
 // packed palette Color 1 | color0

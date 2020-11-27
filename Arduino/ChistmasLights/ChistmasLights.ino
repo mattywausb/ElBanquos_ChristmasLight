@@ -124,7 +124,7 @@ unsigned long g_picture_duration_time=5000;
 unsigned long g_transition_start_time=0;
 unsigned long g_transition_follow_up_duration=5000;
 
-long g_clock_base_time=54000;  // Time in seconds to add to systemclock to get realtime (15:00 as default)
+long g_clock_base_time=(18l*60l+57l)*60l;  // Time in seconds to add to systemclock to get realtime (18:58 as default)
 unsigned long g_clock_sync_time=0;  // Time to calibrate "zeropoint" of systemclock 
 
 byte g_pic_index=0; //
@@ -780,7 +780,10 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
            #endif  
         }
        }
-   } // if seconds are on second ring  
+   } else  {   // seconds are on the minute ring
+         g_picture_lamp[23].setTargetColor(0,0,0);   // Switch off the center
+         g_picture_lamp[23].startTransition(transitionTime);
+   }
 
    #ifdef TRACE_CLOCK
           Serial.print(F(">order_next_clock_picture SECOND: "));
@@ -789,7 +792,7 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
           Serial.print(F(" c1="));Serial.println(color1); 
           Serial.print(F(">order_next_clock_picture SECOND lmp: "));
    #endif
-   for (int i=0;i<5;i++) {  /* Iterate from */
+   for (int i=0;i<5;i++) {  /* Iterate over seconds ring */
     lamp=i<2?i+3:i-2;
     if(i<color1_border) colorIndex=color0;
       else  colorIndex=color1;

@@ -217,17 +217,26 @@ void enter_SHOW_MODE()
       Serial.print(millis()/1000);
       Serial.println(F(" seconds uptime"));
     #endif
+
+    
+    if(g_process_mode!=TRANSITION_MODE) {  // When not coming from Transition, init a random picture
+            g_pic_index=random(PICTURE_COUNT);
+            set_picture( g_pic_index);
+            output_show();
+    } else { 
+            // immediate end of transition (Picture will fully displayed)
+            for(int i=0;i<LAMP_COUNT;i++) 
+                  {
+                     g_picture_lamp[i].endTransition();
+                     g_picture_lamp[i].updateOutput(i);
+                   }
+            output_show();
+    }
+
+
     g_process_mode=SHOW_MODE;
     input_IgnoreUntilRelease();
     digitalWrite(LED_BUILTIN, false);
-    
-    for(int i=0;i<LAMP_COUNT;i++) 
-      {
-         g_picture_lamp[i].endTransition();
-         g_picture_lamp[i].updateOutput(i);
-       }
-    output_show();
-
     g_picture_start_time=millis();
     g_picture_duration_time=SHOW_DURATION_MINIMAL+random(SHOW_DURATION_VARIANCE);
     #ifdef TRACE_TIMING
@@ -513,13 +522,12 @@ void enter_CLOCK_MODE()
     long secondOfTheDay=((millis()-g_clock_sync_time)/1000+g_clock_base_time)%SECONDS_PER_DAY;
     for(int i=0;i<LAMP_COUNT;i++)  /* Initialize all lamps */
     {
-         g_picture_lamp[i].setTargetColor(0,0,0);
-         g_picture_lamp[i].endTransition();
+         g_picture_lamp[i].setCurrentColor(0,0,0);
          g_picture_lamp[i].updateOutput(i);
        }
-    order_next_clock_picture(secondOfTheDay,0);
+    order_next_clock_picture(secondOfTheDay,1);
     output_show();
-    g_transition_start_time=secondOfTheDay;  // We use this variable to keep track, when second has changed 
+    g_transition_start_time=secondOfTheDay;  // We use this variable to keep track, when second has changed , when entering the mode we pretend to be 1 second behind and trigger immediate change
 }
 
 void process_CLOCK_MODE()
@@ -537,7 +545,7 @@ void process_CLOCK_MODE()
     
     secondOfTheDay=((millis()-g_clock_sync_time)/1000+g_clock_base_time)%SECONDS_PER_DAY; //86400=Seconds in a day
 
-    if(secondOfTheDay<10) {
+    if(secondOfTheDay<10) { // to be sure e dont miss it, we start firework on any of the first 10 seconds of the day (normally at 0)
       enter_FIREWORK_RUN();
       return; 
     }
@@ -831,6 +839,7 @@ void enter_TEST_MODE_PLACEMENT()
     digitalWrite(LED_BUILTIN, false);
     g_pic_index=0;
     for(int i=0;i<LAMP_COUNT;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
+    output_show();
     output_setLightColor(0,255,0,0);
     output_setLightColor(1,255,255,0);
     output_setLightColor(2,0,255,0);

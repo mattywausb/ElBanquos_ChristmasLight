@@ -79,7 +79,7 @@ void enter_FIREWORK_RUN()
     g_next_free_particle=0;
     for(int p=0;p<PARTICLE_COUNT;p++)
         g_firework_particle[p].end();
-    g_fw_show_type=3;  // start with sunflower
+    g_fw_show_type=1;  // start with sparkles
     fw_init_show();
 }
 
@@ -91,6 +91,7 @@ void process_FIREWORK_RUN()
          enter_TEST_MODE_PLACEMENT();
       else 
          enter_SHOW_MODE();
+      return;
     }
     
     long secondOfTheDay=((millis()-g_clock_sync_time)/1000+g_clock_base_time)%SECONDS_PER_DAY; // Todo switch to 1 hour after ENtering mode

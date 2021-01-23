@@ -5,7 +5,9 @@
 #define TRACE_FIREWORK_HIGH
 
 #endif 
-#define DISARM_1_HOUR_RESET
+
+#define FW_MAX_RUNTIME 3600000     // 1 Hours 
+//#define FW_MAX_RUNTIME 60000     // 1 Minute
 
 #define FW_SHOW_TYPE_COUNT 7
 
@@ -75,6 +77,7 @@ void enter_FIREWORK_RUN()
        }
 
     g_picture_start_time=millis();
+    g_transition_follow_up_duration=millis();  // we use this global to track the overall runtime
     g_picture_duration_time=0;
     g_next_free_particle=0;
     for(int p=0;p<PARTICLE_COUNT;p++)
@@ -94,13 +97,6 @@ void process_FIREWORK_RUN()
       return;
     }
     
-    long secondOfTheDay=((millis()-g_clock_sync_time)/1000+g_clock_base_time)%SECONDS_PER_DAY; // Todo switch to 1 hour after ENtering mode
-    if(secondOfTheDay>3600) {
-      #ifndef DISARM_1_HOUR_RESET
-          enter_SHOW_MODE();
-      #endif
-    }
-
     if(input_stepGotPressed()) {       //toggle to  next show
       if(++g_fw_show_type>=FW_SHOW_TYPE_COUNT)g_fw_show_type=1;
       #ifdef TRACE_FIREWORK
@@ -112,6 +108,12 @@ void process_FIREWORK_RUN()
     if(g_fw_show_type==0 && ( millis()-g_picture_start_time )> g_picture_duration_time) {       //start next show
       byte probabiliy_hitrange[FW_SHOW_TYPE_COUNT];
       byte dice100;
+
+      if(millis()-g_transition_follow_up_duration>FW_MAX_RUNTIME) {  // Leave mode after max runtime
+          enter_SHOW_MODE();
+          return;
+      }
+      
       memcpy_P(probabiliy_hitrange,show_probabilty_hitrange,FW_SHOW_TYPE_COUNT);
       g_fw_show_type=0;
       while(g_fw_show_type==g_prev_fw_show_type || g_fw_show_type==0) {
@@ -134,6 +136,7 @@ void process_FIREWORK_RUN()
       g_fw_show_shot_limit=1;
       g_picture_start_time=millis();
       g_picture_duration_time=1000*random(6)+5000;
+     
       #ifdef TRACE_FIREWORK
         Serial.print(F(">TRACE_FIREWORK: pausing for "));
         Serial.println(g_picture_duration_time);

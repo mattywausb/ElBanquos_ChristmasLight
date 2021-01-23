@@ -47,7 +47,6 @@ Particle g_firework_particle[PARTICLE_COUNT];
 #define PICTURE_COUNT sizeof(g_pic_table)/sizeof(g_pic_table[0])
 
 //                                         01 02 03 04 05  06 07 08 09 10  11 12 13 14 15 16 17 18 19 20  21 22 23 24
-const byte pic_fdarwr_rd [24]  PROGMEM ={   5, 9,12,12, 9,  7, 0, 8, 8, 0,  1, 1, 0, 0, 5, 0, 0, 5, 0, 0,  8, 0, 0, 9}; //17 fade arrow red
 
 const byte pic_star_yellow[24] PROGMEM ={   1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 0}; //0 star yellow
 const byte pic_angel[24]       PROGMEM ={   0, 2, 2, 2, 2,  2, 0, 0, 0, 0,  0, 0, 2, 2, 2, 2, 2, 2, 2, 2,  2, 2, 2, 0}; //1 Angle 
@@ -65,7 +64,8 @@ const byte pic_flake_pple[24]  PROGMEM ={   0, 0, 0, 0, 0,  8, 8, 8, 8, 8,  0, 8
 const byte pic_flake_oran[24]  PROGMEM ={   0, 0, 0, 0, 0,  9, 9, 9, 9, 9,  9, 0, 9, 0, 9, 0, 9, 0, 9, 0,  0, 0, 0, 1}; //13 flake_oran
 const byte pic_star_color[24]  PROGMEM ={   6, 6, 6, 6, 6,  5, 5, 5, 5, 5, 10, 1,10, 1,10, 1,10, 1,10, 1,  0, 0, 0, 0}; //14 star_color
 const byte pic_half_moon[24]   PROGMEM ={   1, 0, 0, 1, 1,  0, 0, 0, 0, 0,  0, 1, 1, 1, 1, 1, 1, 1, 0, 0,  1, 0, 0, 0}; //15 half_moon
-const byte pic_gingerbread[24] PROGMEM ={   8, 9, 9, 9, 9,  9, 9, 9, 9, 9,  7, 7, 9, 0, 9, 0, 0, 9, 0, 9,  0, 9, 9,10}; //16 pic_gingerbread
+const byte pic_gingerbread[24] PROGMEM ={   8,13,13,13,13, 13,13,13,13,13,  7, 7,13, 0,13, 0, 0,13, 0,13,  0,13,13,10}; //16 pic_gingerbread
+const byte pic_fdarwr_rd [24]  PROGMEM ={   5, 9,12,12, 9,  7, 0, 8, 8, 0,  1, 1, 0, 0, 5, 0, 0, 5, 0, 0,  8, 0, 0, 9}; //17 fade arrow red
 
 
 const byte pic_3_wise[24]      PROGMEM ={  11, 0, 0, 0, 0,  7, 0, 0, 0, 0,  0, 0, 9, 9, 0, 0, 0, 0, 3, 3,  0, 0, 0,11}; //18 pic_3_wise
@@ -100,7 +100,8 @@ float g_color_palette[][3]={
           {1  ,0.3,0  },  //9 = orange
           {0  ,1  ,0  },  // 10 =bright green
           {0.1  ,0  ,0.75  },  //11 = dark purple
-          {1, 0.55,0}   // 12 = gold
+          {1, 0.55,0},   // 12 = gold
+          {0.5,0.0,0.07}  // 13 = low pastell red
 };
 
 // packed palette Color 1 (Color of used element) | color 0 (Color of unused element)

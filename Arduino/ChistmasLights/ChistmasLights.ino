@@ -47,13 +47,14 @@ Particle g_firework_particle[PARTICLE_COUNT];
 #define PICTURE_COUNT sizeof(g_pic_table)/sizeof(g_pic_table[0])
 
 //                                         01 02 03 04 05  06 07 08 09 10  11 12 13 14 15 16 17 18 19 20  21 22 23 24
+
 const byte pic_star_yellow[24] PROGMEM ={   1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 0}; //0 star yellow
 const byte pic_angel[24]       PROGMEM ={   0, 2, 2, 2, 2,  2, 0, 0, 0, 0,  0, 0, 2, 2, 2, 2, 2, 2, 2, 2,  2, 2, 2, 0}; //1 Angle 
-const byte pic_tree[24]        PROGMEM ={   3, 3, 3, 3, 3,  3, 0, 0, 0, 0,  3, 3, 0, 0, 3, 3, 3, 3, 0, 0,  4, 0, 0, 3}; //2 Tree
+const byte pic_tree[24]        PROGMEM ={   3, 3, 3, 3, 3,  3, 0, 0, 0, 0,  3, 3, 0, 0, 3, 0, 0, 3, 0, 0,  4, 0, 0, 3}; //2 Tree
 const byte pic_moon[24]        PROGMEM ={   0, 0, 7, 7, 0,  0, 0, 0, 0, 0,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 5}; //3 Moon
 const byte pic_pentagons[24]   PROGMEM ={   2, 2, 2, 2, 2,  3, 3, 3, 3, 3,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0}; //4 Pentagons
-const byte pic_bell[24]        PROGMEM ={   1, 1, 1, 1, 1,  0, 0, 0, 0, 0,  1, 1, 0, 0, 1, 0, 0, 1, 0, 0,  1, 0, 0, 0}; //5 Bell
-//const byte pic_heart[24]       PROGMEM ={   0, 0, 5, 5, 0,  0, 0, 0, 0, 0,  0, 0, 5, 5, 5, 5, 5, 5, 5, 5,  5, 0, 0, 5}; //6 Heart
+const byte pic_bell[24]        PROGMEM ={   0,12,12,12,12,  0, 0, 0, 0, 0,  0, 0,0, 0,12,12,12, 1, 0,0,  7, 0, 0, 0}; //5 Bell
+//const byte pic_heart[24]     PROGMEM ={   0, 0, 5, 5, 0,  0, 0, 0, 0, 0,  0, 0, 5, 5, 5, 5, 5, 5, 5, 5,  5, 0, 0, 5}; //6 Heart
 const byte pic_center_star[24] PROGMEM ={   0, 0, 0, 0, 0,  2, 2, 2, 2, 2,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 7}; //7 center star
 const byte pic_cassiopeia[24]  PROGMEM ={   0, 0, 0, 0, 6,  0, 6, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 6, 6, 0,  0, 0, 0, 6}; //8 cassiopeia
 const byte pic_snow_man[24]    PROGMEM ={   0, 0, 7, 7, 0,  7, 0, 0, 0, 0,  0, 0, 0, 7, 7, 0, 0, 7, 7, 0,  7, 7, 7, 0}; //9 snow man
@@ -63,15 +64,20 @@ const byte pic_flake_pple[24]  PROGMEM ={   0, 0, 0, 0, 0,  8, 8, 8, 8, 8,  0, 8
 const byte pic_flake_oran[24]  PROGMEM ={   0, 0, 0, 0, 0,  9, 9, 9, 9, 9,  9, 0, 9, 0, 9, 0, 9, 0, 9, 0,  0, 0, 0, 1}; //13 flake_oran
 const byte pic_star_color[24]  PROGMEM ={   6, 6, 6, 6, 6,  5, 5, 5, 5, 5, 10, 1,10, 1,10, 1,10, 1,10, 1,  0, 0, 0, 0}; //14 star_color
 const byte pic_half_moon[24]   PROGMEM ={   1, 0, 0, 1, 1,  0, 0, 0, 0, 0,  0, 1, 1, 1, 1, 1, 1, 1, 0, 0,  1, 0, 0, 0}; //15 half_moon
-const byte pic_gingerbread[24] PROGMEM ={   8, 5, 5, 5, 5,  5, 5, 5, 5, 5,  7, 7, 5, 0, 5, 5, 5, 5, 0, 5,  5, 5, 5,10}; //16 pic_gingerbread
+const byte pic_gingerbread[24] PROGMEM ={   8,13,13,13,13, 13,13,13,13,13,  7, 7,13, 0,13, 0, 0,13, 0,13,  0,13,13,10}; //16 pic_gingerbread
+const byte pic_fdarwr_rd [24]  PROGMEM ={   5, 9,12,12, 9,  7, 0, 8, 8, 0,  1, 1, 0, 0, 5, 0, 0, 5, 0, 0,  8, 0, 0, 9}; //17 fade arrow red
+
+
+const byte pic_3_wise[24]      PROGMEM ={  11, 0, 0, 0, 0,  7, 0, 0, 0, 0,  0, 0, 9, 9, 0, 0, 0, 0, 3, 3,  0, 0, 0,11}; //18 pic_3_wise
+
 
 //const byte pic_######[24]      PROGMEM ={   0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0}; //## #####
 
 
-const byte* const g_pic_table [] ={pic_star_yellow,pic_angel,pic_tree,pic_moon,pic_pentagons,   // 0-4
-                                   pic_bell,/*pic_heart,*/pic_center_star,pic_cassiopeia,pic_snow_man, //5-9
-                                   pic_krippe,pic_ichtys,pic_flake_pple,pic_flake_oran,pic_star_color, // 10-14
-                                   pic_half_moon,pic_gingerbread}; // 15-19
+const byte* const g_pic_table [] ={pic_star_yellow, pic_angel,      pic_tree,         pic_moon,       pic_pentagons,   // 0-4
+                                   pic_bell,        /*pic_heart,*/  pic_center_star,  pic_cassiopeia, pic_snow_man, //5-8
+                                   pic_krippe,      pic_ichtys,     pic_flake_pple,   pic_flake_oran, pic_star_color, // 9-13
+                                   pic_half_moon,   pic_gingerbread,pic_fdarwr_rd,     pic_3_wise}; // 14-19
 
 #define PICTURE_POINT(pic,lamp) pgm_read_byte_near(g_pic_table[pic]+lamp*sizeof(byte))
 
@@ -83,7 +89,7 @@ const byte* const g_pic_table [] ={pic_star_yellow,pic_angel,pic_tree,pic_moon,p
 
 float g_color_palette[][3]={
           {0  ,0  ,0  },  //0 = black
-          {1  ,0.7,0  },  //1 = yellow
+          {1  ,0.65,0  },  //1 = yellow
           {0  ,0.8  ,0.8  },  //2 = cyan
           {0  ,0.5,0.08}, //3 = mid green
           {0.2,0.1,0 },  //4 = dark brown
@@ -93,7 +99,9 @@ float g_color_palette[][3]={
           {0.8  ,0  ,0.8  },  //8 = pink
           {1  ,0.3,0  },  //9 = orange
           {0  ,1  ,0  },  // 10 =bright green
-          {0.1  ,0  ,0.75  }  //11 = dark purple
+          {0.1  ,0  ,0.75  },  //11 = dark purple
+          {1, 0.55,0},   // 12 = gold
+          {0.5,0.0,0.07}  // 13 = low pastell red
 };
 
 // packed palette Color 1 (Color of used element) | color 0 (Color of unused element)
@@ -210,17 +218,26 @@ void enter_SHOW_MODE()
       Serial.print(millis()/1000);
       Serial.println(F(" seconds uptime"));
     #endif
+
+    
+    if(g_process_mode!=TRANSITION_MODE) {  // When not coming from Transition, init a random picture
+            g_pic_index=random(PICTURE_COUNT);
+            set_picture( g_pic_index);
+            output_show();
+    } else { 
+            // immediate end of transition (Picture will fully displayed)
+            for(int i=0;i<LAMP_COUNT;i++) 
+                  {
+                     g_picture_lamp[i].endTransition();
+                     g_picture_lamp[i].updateOutput(i);
+                   }
+            output_show();
+    }
+
+
     g_process_mode=SHOW_MODE;
     input_IgnoreUntilRelease();
     digitalWrite(LED_BUILTIN, false);
-    
-    for(int i=0;i<LAMP_COUNT;i++) 
-      {
-         g_picture_lamp[i].endTransition();
-         g_picture_lamp[i].updateOutput(i);
-       }
-    output_show();
-
     g_picture_start_time=millis();
     g_picture_duration_time=SHOW_DURATION_MINIMAL+random(SHOW_DURATION_VARIANCE);
     #ifdef TRACE_TIMING
@@ -506,13 +523,12 @@ void enter_CLOCK_MODE()
     long secondOfTheDay=((millis()-g_clock_sync_time)/1000+g_clock_base_time)%SECONDS_PER_DAY;
     for(int i=0;i<LAMP_COUNT;i++)  /* Initialize all lamps */
     {
-         g_picture_lamp[i].setTargetColor(0,0,0);
-         g_picture_lamp[i].endTransition();
+         g_picture_lamp[i].setCurrentColor(0,0,0);
          g_picture_lamp[i].updateOutput(i);
        }
-    order_next_clock_picture(secondOfTheDay,0);
+    order_next_clock_picture(secondOfTheDay,1);
     output_show();
-    g_transition_start_time=secondOfTheDay;  // We use this variable to keep track, when second has changed 
+    g_transition_start_time=secondOfTheDay;  // We use this variable to keep track, when second has changed , when entering the mode we pretend to be 1 second behind and trigger immediate change
 }
 
 void process_CLOCK_MODE()
@@ -530,7 +546,7 @@ void process_CLOCK_MODE()
     
     secondOfTheDay=((millis()-g_clock_sync_time)/1000+g_clock_base_time)%SECONDS_PER_DAY; //86400=Seconds in a day
 
-    if(secondOfTheDay<10) {
+    if(secondOfTheDay<10) { // to be sure e dont miss it, we start firework on any of the first 10 seconds of the day (normally at 0)
       enter_FIREWORK_RUN();
       return; 
     }
@@ -824,6 +840,7 @@ void enter_TEST_MODE_PLACEMENT()
     digitalWrite(LED_BUILTIN, false);
     g_pic_index=0;
     for(int i=0;i<LAMP_COUNT;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
+    output_show();
     output_setLightColor(0,255,0,0);
     output_setLightColor(1,255,255,0);
     output_setLightColor(2,0,255,0);

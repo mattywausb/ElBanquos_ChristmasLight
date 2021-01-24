@@ -90,7 +90,7 @@ void process_FIREWORK_RUN()
 {
 
     if(input_selectGotReleased()) {  
-      if(input_getLastPressDuration()>1500)   // Long press
+      if(input_getLastPressDuration()>LONG_PRESS_DURATION)   // Long press
          enter_TEST_MODE_PLACEMENT();
       else 
          enter_SHOW_MODE();

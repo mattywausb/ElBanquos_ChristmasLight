@@ -60,7 +60,7 @@ void process_CLOCK_MODE()
     
     secondOfTheDay=((millis()-g_clock_sync_time)/1000+g_clock_base_time)%SECONDS_PER_DAY; //86400=Seconds in a day
 
-    if(secondOfTheDay<10) { // to be sure e dont miss it, we start firework on any of the first 10 seconds of the day (normally at 0)
+    if(secondOfTheDay>0 and secondOfTheDay<10) { // Use the last second for dimming the last light to be sure e dont miss it, we start firework on any of the first 10 seconds of the day (normally at 0)
       enter_FIREWORK_RUN();
       return; 
     }
@@ -194,7 +194,7 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
   byte color0=colorByte&0x0f;
 
   unsigned short pattern=0x0fe0;  // defines the color to take from the set: color 1 or color 0. Bit 0=Lamp 6   Bit 5=Lamp 10
-  if(currentHour==0) pattern=0x000c;
+  if(currentHour==0) pattern=0x0000; // no hour lamp at midnight
   else
     if(currentHour<11 )  pattern>>=currentHour%5;
     else  if(currentHour<13 )  pattern=0x0fff;
@@ -240,6 +240,11 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
        color0=MINUTE_PAST_COLOR;
        color2=MINUTE_FUTURE_COLOR;
        color1=GET_MINUTE_COLOR(currentMinute-GET_MINUTE_BORDER(segment));
+       if(currentHour==0) { /* Recover from black to blue in first hour of the day */
+        color0=color0==1?0:color0;
+        color1=color1==1?0:color1;
+        color2=color2==1?0:color2;
+       }
    } else {                               /* Countdown last Minute */
       segment=currentSecond/10;
       color1_border=currentSecond%10;
@@ -248,7 +253,7 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
       color1=GET_SECOND_6_COLOR(segment);  /* previous color */
       if(currentHour==23&&currentMinute==59&&currentSecond>30) { /* Final countdown to Black instead of yellow */
         color0=color0==1?0:color0;
-     }
+      }
    }
    
 
@@ -287,7 +292,7 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
    #endif
 
 
-   /* SECOND RING */  /* Lamps 4-5,1-3 */
+   /* SECONDS RING */  /* Lamps 4-5,1-3 */
 
    // Black as default
    color0=0;

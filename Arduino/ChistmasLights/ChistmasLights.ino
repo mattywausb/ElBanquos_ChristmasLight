@@ -6,7 +6,7 @@
 //#define DEBUG_ON
 
 #ifdef TRACE_ON
-//#define TRACE_LOGIC
+#define TRACE_LOGIC
 //#define TRACE_PICTURES
 #define TRACE_MODES
 //#define TRACE_TIMING
@@ -41,6 +41,7 @@ Particle g_firework_particle[PARTICLE_COUNT];
 #define SHOW_DURATION_VARIANCE 1500
 #endif
 
+#define LONG_PRESS_DURATION 1500
 
 #define CLOCK_SECOND_LIVE_INTERVAL 60000
 
@@ -48,36 +49,51 @@ Particle g_firework_particle[PARTICLE_COUNT];
 
 //                                         01 02 03 04 05  06 07 08 09 10  11 12 13 14 15 16 17 18 19 20  21 22 23 24
 
-const byte pic_star_yellow[24] PROGMEM ={   1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 0}; //0 star yellow
-const byte pic_angel[24]       PROGMEM ={   0, 2, 2, 2, 2,  2, 0, 0, 0, 0,  0, 0, 2, 2, 2, 2, 2, 2, 2, 2,  2, 2, 2, 0}; //1 Angle 
-const byte pic_tree[24]        PROGMEM ={   3, 3, 3, 3, 3,  3, 0, 0, 0, 0,  3, 3, 0, 0, 3, 0, 0, 3, 0, 0,  4, 0, 0, 3}; //2 Tree
-const byte pic_moon[24]        PROGMEM ={   0, 0, 7, 7, 0,  0, 0, 0, 0, 0,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 5}; //3 Moon
-const byte pic_pentagons[24]   PROGMEM ={   2, 2, 2, 2, 2,  3, 3, 3, 3, 3,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0}; //4 Pentagons
-const byte pic_bell[24]        PROGMEM ={   0,12,12,12,12,  0, 0, 0, 0, 0,  0, 0,0, 0,12,12,12, 1, 0,0,  7, 0, 0, 0}; //5 Bell
-//const byte pic_heart[24]     PROGMEM ={   0, 0, 5, 5, 0,  0, 0, 0, 0, 0,  0, 0, 5, 5, 5, 5, 5, 5, 5, 5,  5, 0, 0, 5}; //6 Heart
-const byte pic_center_star[24] PROGMEM ={   0, 0, 0, 0, 0,  2, 2, 2, 2, 2,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 7}; //7 center star
-const byte pic_cassiopeia[24]  PROGMEM ={   0, 0, 0, 0, 6,  0, 6, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 6, 6, 0,  0, 0, 0, 6}; //8 cassiopeia
-const byte pic_snow_man[24]    PROGMEM ={   0, 0, 7, 7, 0,  7, 0, 0, 0, 0,  0, 0, 0, 7, 7, 0, 0, 7, 7, 0,  7, 7, 7, 0}; //9 snow man
-const byte pic_krippe[24]      PROGMEM ={   0, 9, 0, 0, 9,  0, 0, 9, 9, 0,  0, 0, 0, 0, 9, 0, 0, 9, 0, 0,  1, 0, 7, 9}; //10 krippe
-const byte pic_ichtys[24]      PROGMEM ={   6, 6, 0, 6, 6,  6, 0, 6, 0, 6,  0, 0, 0, 0, 6, 6, 0, 7, 6, 6,  0, 0, 6, 0}; //11 ychtis
-const byte pic_flake_pple[24]  PROGMEM ={   0, 0, 0, 0, 0,  8, 8, 8, 8, 8,  0, 8, 0, 8, 0, 8, 0, 8, 0, 8,  0, 0, 0, 6}; //12 flake_pple
-const byte pic_flake_oran[24]  PROGMEM ={   0, 0, 0, 0, 0,  9, 9, 9, 9, 9,  9, 0, 9, 0, 9, 0, 9, 0, 9, 0,  0, 0, 0, 1}; //13 flake_oran
-const byte pic_star_color[24]  PROGMEM ={   6, 6, 6, 6, 6,  5, 5, 5, 5, 5, 10, 1,10, 1,10, 1,10, 1,10, 1,  0, 0, 0, 0}; //14 star_color
-const byte pic_half_moon[24]   PROGMEM ={   1, 0, 0, 1, 1,  0, 0, 0, 0, 0,  0, 1, 1, 1, 1, 1, 1, 1, 0, 0,  1, 0, 0, 0}; //15 half_moon
-const byte pic_gingerbread[24] PROGMEM ={   8,13,13,13,13, 13,13,13,13,13,  7, 7,13, 0,13, 0, 0,13, 0,13,  0,13,13,10}; //16 pic_gingerbread
-const byte pic_fdarwr_rd [24]  PROGMEM ={   5, 9,12,12, 9,  7, 0, 8, 8, 0,  1, 1, 0, 0, 5, 0, 0, 5, 0, 0,  8, 0, 0, 9}; //17 fade arrow red
+const byte pic_cassiopeia[24]  PROGMEM ={   0, 0, 0, 0, 6,  0, 6, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 6, 6, 0,  0, 0, 0, 6}; // cassiopeia
+const byte pic_star_uni[24]    PROGMEM ={   1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 0}; // star yellow
+const byte pic_star_color[24]  PROGMEM ={   6, 6, 6, 6, 6,  5, 5, 5, 5, 5, 10, 1,10, 1,10, 1,10, 1,10, 1,  0, 0, 0, 0}; // star_color
+const byte pic_pentagons[24]   PROGMEM ={   2, 2, 2, 2, 2,  3, 3, 3, 3, 3,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0}; // Pentagons
+const byte pic_center_star[24] PROGMEM ={   0, 0, 0, 0, 0,  2, 2, 2, 2, 2,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 7}; // center star
+const byte pic_gingerbread[24] PROGMEM ={   8,13,13,13,13, 13,13,13,13,13,  7, 7,13, 0,13, 0, 0,13, 0,13,  0,13,13,10}; // pic_gingerbread
+const byte pic_angel[24]       PROGMEM ={   0, 2, 2, 2, 2,  2, 0, 0, 0, 0,  0, 0, 2, 2, 2, 2, 2, 2, 2, 2,  2, 2, 2, 0}; // Angle 
+const byte pic_snow_man[24]    PROGMEM ={   0, 0, 7, 7, 0,  7, 0, 0, 0, 0,  0, 0, 0, 7, 7, 0, 0, 7, 7, 0,  7, 7, 7, 0}; // snow man
+const byte pic_moon[24]        PROGMEM ={   0, 0, 7, 7, 0,  0, 0, 0, 0, 0,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 5}; // Moon
+const byte pic_flake_pple[24]  PROGMEM ={   0, 0, 0, 0, 0,  8, 8, 8, 8, 8,  0, 8, 0, 8, 0, 8, 0, 8, 0, 8,  0, 0, 0, 6}; // flake_pple
+const byte pic_flake_oran[24]  PROGMEM ={   0, 0, 0, 0, 0,  9, 9, 9, 9, 9,  9, 0, 9, 0, 9, 0, 9, 0, 9, 0,  0, 0, 0, 1}; // flake_oran
+const byte pic_bell[24]        PROGMEM ={   0,12,12,12,12,  0, 0, 0, 0, 0,  0, 0, 0, 0,12,12,12,12, 0, 0,  7, 0, 0, 0}; // Bell
+const byte pic_tree[24]        PROGMEM ={   3, 3, 3, 3, 3,  3, 0, 0, 0, 0,  3, 3, 0, 0, 3, 0, 0, 3, 0, 0,  4, 0, 0, 3}; // Tree
+const byte pic_fdarwr_rd [24]  PROGMEM ={   5, 9,12,12, 9,  7, 0, 8, 8, 0,  1, 1, 0, 0, 5, 0, 0, 5, 0, 0,  8, 0, 0, 9}; // fade arrow red
+//const byte pic_heart[24]     PROGMEM ={   0, 0, 5, 5, 0,  0, 0, 0, 0, 0,  0, 0, 5, 5, 5, 5, 5, 5, 5, 5,  5, 0, 0, 5}; // Heart
+const byte pic_ichtys[24]      PROGMEM ={   6, 6, 0, 6, 6,  6, 0, 6, 0, 6,  0, 0, 0, 0, 6, 6, 0, 7, 6, 6,  0, 0, 6, 0}; // ychtis
+const byte pic_3_wise[24]      PROGMEM ={  11, 0, 0, 0, 0,  7, 0, 0, 0, 0,  0, 0, 9, 9, 0, 0, 0, 0, 3, 3,  0, 0, 0,11}; // pic_3_wise
+const byte pic_krippe[24]      PROGMEM ={   0, 9, 0, 0, 9,  0, 0, 9, 9, 0,  0, 0, 0, 0, 9, 0, 0, 9, 0, 0,  1, 0, 7, 9}; // krippe
+const byte pic_half_moon[24]   PROGMEM ={   1, 0, 0, 1, 1,  0, 0, 0, 0, 0,  0, 1, 1, 1, 1, 1, 1, 1, 0, 0,  1, 0, 0, 0}; // half_moon
 
 
-const byte pic_3_wise[24]      PROGMEM ={  11, 0, 0, 0, 0,  7, 0, 0, 0, 0,  0, 0, 9, 9, 0, 0, 0, 0, 3, 3,  0, 0, 0,11}; //18 pic_3_wise
 
 
 //const byte pic_######[24]      PROGMEM ={   0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0}; //## #####
 
-
-const byte* const g_pic_table [] ={pic_star_yellow, pic_angel,      pic_tree,         pic_moon,       pic_pentagons,   // 0-4
-                                   pic_bell,        /*pic_heart,*/  pic_center_star,  pic_cassiopeia, pic_snow_man, //5-8
-                                   pic_krippe,      pic_ichtys,     pic_flake_pple,   pic_flake_oran, pic_star_color, // 9-13
-                                   pic_half_moon,   pic_gingerbread,pic_fdarwr_rd,     pic_3_wise}; // 14-19
+                                                     // on: off rate (to test transition algorythm)
+const byte* const g_pic_table [] ={pic_cassiopeia,  
+                                   pic_star_uni,     // 16:1
+                                   pic_star_color,   // 0:0
+                                   pic_pentagons,    // 0:10
+                                   pic_center_star,  // 1:5
+                                   pic_gingerbread,  // 13:0
+                                   pic_angel,        // 4:8
+                                   pic_snow_man,     // 0:6
+                                   pic_moon,         // 7:4
+                                   pic_flake_pple,   // 6:7
+                                   pic_flake_oran,   // 5:5
+                                   pic_bell,         // 7:9
+                                   pic_tree,         // 5:2
+                                   pic_fdarwr_rd,    // 2:0
+                                   pic_ichtys,       // 5:5
+                                   pic_3_wise,       // 3:9
+                                   pic_krippe,       // 8:6
+                                   pic_half_moon     // 7:4                            
+                                   }; 
 
 #define PICTURE_POINT(pic,lamp) pgm_read_byte_near(g_pic_table[pic]+lamp*sizeof(byte))
 
@@ -295,7 +311,6 @@ void enter_TRANSITION_MODE()
     input_IgnoreUntilRelease();
     
     set_target_picture(g_pic_index);
-    triggerNextTransition();
     digitalWrite(LED_BUILTIN, true);
 }
 
@@ -339,7 +354,7 @@ void process_TRANSITION_MODE()
 
     }
     #ifdef TRACE_LOGIC 
-    delay(500);
+    //delay(500);
     #endif
 }
 
@@ -386,6 +401,8 @@ bool triggerNextTransition()
 {
   #ifdef TRACE_LOGIC
     Serial.println(F("TRACE_LOGIC::triggerNextTransition "));
+    Serial.print(millis()/1000);
+    Serial.println(F(" seconds uptime"));
   #endif
   int on_count=0;
   int off_count=0;
@@ -419,25 +436,24 @@ bool triggerNextTransition()
   #endif
   if(g_picture_lamp[trigger_lamp].getTransitionType()==TT_BLEND) return true;  // for a blend, one lamp is enough
 
-  int additional_on_lamps=min(3,off_count>0?on_count/off_count:on_count);  // determine ratio between on and off, use all on when there is no off, but never more then 3
-  int additional_off_lamps=min(3,on_count>0?off_count/on_count:off_count);
-
-  if(g_picture_lamp[trigger_lamp].getTransitionType()==TT_ON) additional_on_lamps--;  // Remove already triggered lamp from count
-  else additional_off_lamps--;
-
-  #ifdef TRACE_LOGIC
-    Serial.print(F("TRACE_LOGIC::additional_on_lamps="));Serial.print(additional_on_lamps);
-    Serial.print(F(" additional_off_lamps="));Serial.println(additional_off_lamps);
-  #endif
-  
-  for(int i=0;i<additional_on_lamps;i++)
-  {
-    g_picture_lamp[getRandomLampOfTransitionType(TT_ON)].startTransition(duration);  
-  }
-
-  for(int i=0;i<additional_off_lamps;i++)
-  {
-    g_picture_lamp[getRandomLampOfTransitionType(TT_OFF)].startTransition(duration);   
+  if(g_picture_lamp[trigger_lamp].getTransitionType()==TT_ON && off_count>0 ) {// There is a partner to switch off available
+    if(random(on_count)<=off_count) {
+      trigger_lamp=getRandomLampOfTransitionType(TT_OFF);
+      g_picture_lamp[trigger_lamp].startTransition(duration);
+      #ifdef TRACE_LOGIC
+          Serial.print(F("TRACE_LOGIC::triggered additional off lamp ")); Serial.println(trigger_lamp);
+      #endif  
+    }
+  } else {  // it is not an on transitioning lamp
+    if(g_picture_lamp[trigger_lamp].getTransitionType()==TT_OFF && on_count>0 ) {// There is a partner to switch on available
+      if(random(off_count)<=on_count) {
+        trigger_lamp=getRandomLampOfTransitionType(TT_ON);
+        g_picture_lamp[trigger_lamp].startTransition(duration);
+        #ifdef TRACE_LOGIC
+            Serial.print(F("TRACE_LOGIC::triggered additional on lamp ")); Serial.println(trigger_lamp);
+        #endif  
+      }
+    }
   }
   return true;
 }
@@ -608,7 +624,7 @@ void process_CLOCK_SET_MODE()
     } // Select got pressed
     
     if(input_stepGotReleased()) {  
-      if(input_getLastPressDuration()>1500)   // Long press
+      if(input_getLastPressDuration()>LONG_PRESS_DURATION)   // Long press
          {if (g_process_mode==CLOCK_SET_HOUR_MODE) enter_CLOCK_SET_MINUTE_MODE();  
           else {
             g_clock_sync_time=millis();  //Set our systemtime reference to now = relative zero
@@ -915,13 +931,18 @@ void enter_TEST_MODE_PICTURES()
 
 void process_TEST_MODE_PICTURES()
 {
-    
-    if(input_selectGotPressed()) {
-      enter_TEST_MODE_FADE_SOLO();
-      return;
+     if(input_selectGotReleased()) {  
+      if(input_getLastPressDuration()<=LONG_PRESS_DURATION) {   // Long press
+                    enter_TEST_MODE_FADE_SOLO();
+                   return;
+      }
+      if(g_pic_index>=PICTURE_COUNT) g_pic_index=PICTURE_COUNT; // backward one pattern
+      --g_pic_index;
+      set_picture( g_pic_index);
+      output_show(); 
     }
     
-    if(input_stepGotPressed()) {  // foreward one patter
+    if(input_stepGotPressed()) {  // foreward one pattern
       if(++g_pic_index>=PICTURE_COUNT) g_pic_index=0;
           set_picture( g_pic_index);
           output_show(); 

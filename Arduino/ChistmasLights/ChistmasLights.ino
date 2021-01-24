@@ -6,8 +6,9 @@
 //#define DEBUG_ON
 
 #ifdef TRACE_ON
-#define TRACE_LOGIC
+//#define TRACE_LOGIC
 //#define TRACE_PICTURES
+#define TRACE_RND_COL_GEN
 #define TRACE_MODES
 //#define TRACE_TIMING
 #define TRACE_CLOCK
@@ -47,28 +48,33 @@ Particle g_firework_particle[PARTICLE_COUNT];
 
 #define PICTURE_COUNT sizeof(g_pic_table)/sizeof(g_pic_table[0])
 
+#define RANDOM_COLOR_INDEX_START 30
+
+
+// Picture description
+// number beginning at 30 define varaible palette. Defineing the group of same color in first digit and the color set to use in second
+
 //                                         01 02 03 04 05  06 07 08 09 10  11 12 13 14 15 16 17 18 19 20  21 22 23 24
 
 const byte pic_cassiopeia[24]  PROGMEM ={   0, 0, 0, 0, 6,  0, 6, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 6, 6, 0,  0, 0, 0, 6}; // cassiopeia
 const byte pic_star_uni[24]    PROGMEM ={   1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 0}; // star yellow
-const byte pic_star_color[24]  PROGMEM ={   6, 6, 6, 6, 6,  5, 5, 5, 5, 5, 10, 1,10, 1,10, 1,10, 1,10, 1,  0, 0, 0, 0}; // star_color
-const byte pic_pentagons[24]   PROGMEM ={   2, 2, 2, 2, 2,  3, 3, 3, 3, 3,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0}; // Pentagons
-const byte pic_center_star[24] PROGMEM ={   0, 0, 0, 0, 0,  2, 2, 2, 2, 2,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 7}; // center star
-const byte pic_gingerbread[24] PROGMEM ={   8,13,13,13,13, 13,13,13,13,13,  7, 7,13, 0,13, 0, 0,13, 0,13,  0,13,13,10}; // pic_gingerbread
+const byte pic_star_color[24]  PROGMEM ={  34,34,34,34,34, 44,44,44,44,44, 54,64,54,64,54,64,54,64,54,64,  0, 0, 0, 0}; // star_color
+const byte pic_pentagons[24]   PROGMEM ={  31,31,31,31,31, 43,43,43,43,43,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0}; // Pentagons
+const byte pic_center_star[24] PROGMEM ={   0, 0, 0, 0, 0, 30,30,30,30,30,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 7}; // center star
+const byte pic_gingerbread[24] PROGMEM ={  32,13,13,13,13, 13,13,13,13,13,  7, 7,13, 0,13, 0, 0,13, 0,13,  0,13,13,42}; // pic_gingerbread
 const byte pic_angel[24]       PROGMEM ={   0, 2, 2, 2, 2,  2, 0, 0, 0, 0,  0, 0, 2, 2, 2, 2, 2, 2, 2, 2,  2, 2, 2, 0}; // Angle 
 const byte pic_snow_man[24]    PROGMEM ={   0, 0, 7, 7, 0,  7, 0, 0, 0, 0,  0, 0, 0, 7, 7, 0, 0, 7, 7, 0,  7, 7, 7, 0}; // snow man
-const byte pic_moon[24]        PROGMEM ={   0, 0, 7, 7, 0,  0, 0, 0, 0, 0,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 5}; // Moon
-const byte pic_flake_pple[24]  PROGMEM ={   0, 0, 0, 0, 0,  8, 8, 8, 8, 8,  0, 8, 0, 8, 0, 8, 0, 8, 0, 8,  0, 0, 0, 6}; // flake_pple
-const byte pic_flake_oran[24]  PROGMEM ={   0, 0, 0, 0, 0,  9, 9, 9, 9, 9,  9, 0, 9, 0, 9, 0, 9, 0, 9, 0,  0, 0, 0, 1}; // flake_oran
+const byte pic_moon[24]        PROGMEM ={   0, 0, 7, 7, 0,  0, 0, 0, 0, 0, 12,12,12,12,12,12,12,12,12,12,  0, 0, 0, 5}; // Moon
+const byte pic_flake_1[24]     PROGMEM ={   0, 0, 0, 0, 0, 30,30,30,30,30,  0,30, 0,30, 0,30, 0,30, 0,30,  0, 0, 0,40}; // flake_1
+const byte pic_flake_2[24]     PROGMEM ={   0, 0, 0, 0, 0, 30,30,30,30,30, 30, 0,30, 0,30, 0,30, 0,30, 0,  0, 0, 0,40}; // flake_2
 const byte pic_bell[24]        PROGMEM ={   0,12,12,12,12,  0, 0, 0, 0, 0,  0, 0, 0, 0,12,12,12,12, 0, 0,  7, 0, 0, 0}; // Bell
 const byte pic_tree[24]        PROGMEM ={   3, 3, 3, 3, 3,  3, 0, 0, 0, 0,  3, 3, 0, 0, 3, 0, 0, 3, 0, 0,  4, 0, 0, 3}; // Tree
-const byte pic_fdarwr_rd [24]  PROGMEM ={   5, 9,12,12, 9,  7, 0, 8, 8, 0,  1, 1, 0, 0, 5, 0, 0, 5, 0, 0,  8, 0, 0, 9}; // fade arrow red
-//const byte pic_heart[24]     PROGMEM ={   0, 0, 5, 5, 0,  0, 0, 0, 0, 0,  0, 0, 5, 5, 5, 5, 5, 5, 5, 5,  5, 0, 0, 5}; // Heart
 const byte pic_ichtys[24]      PROGMEM ={   6, 6, 0, 6, 6,  6, 0, 6, 0, 6,  0, 0, 0, 0, 6, 6, 0, 7, 6, 6,  0, 0, 6, 0}; // ychtis
 const byte pic_3_wise[24]      PROGMEM ={  11, 0, 0, 0, 0,  7, 0, 0, 0, 0,  0, 0, 9, 9, 0, 0, 0, 0, 3, 3,  0, 0, 0,11}; // pic_3_wise
 const byte pic_krippe[24]      PROGMEM ={   0, 9, 0, 0, 9,  0, 0, 9, 9, 0,  0, 0, 0, 0, 9, 0, 0, 9, 0, 0,  1, 0, 7, 9}; // krippe
 const byte pic_half_moon[24]   PROGMEM ={   1, 0, 0, 1, 1,  0, 0, 0, 0, 0,  0, 1, 1, 1, 1, 1, 1, 1, 0, 0,  1, 0, 0, 0}; // half_moon
 
+//const byte pic_heart[24]     PROGMEM ={   0, 0, 5, 5, 0,  0, 0, 0, 0, 0,  0, 0, 5, 5, 5, 5, 5, 5, 5, 5,  5, 0, 0, 5}; // Heart
 
 
 
@@ -84,12 +90,11 @@ const byte* const g_pic_table [] ={pic_cassiopeia,
                                    pic_angel,        // 4:8
                                    pic_snow_man,     // 0:6
                                    pic_moon,         // 7:4
-                                   pic_flake_pple,   // 6:7
-                                   pic_flake_oran,   // 5:5
+                                   pic_flake_1,      // 6:7
+                                   pic_flake_2,      // 5:5
                                    pic_bell,         // 7:9
                                    pic_tree,         // 5:2
-                                   pic_fdarwr_rd,    // 2:0
-                                   pic_ichtys,       // 5:5
+                                   pic_ichtys,       // 5:4
                                    pic_3_wise,       // 3:9
                                    pic_krippe,       // 8:6
                                    pic_half_moon     // 7:4                            
@@ -101,45 +106,36 @@ const byte* const g_pic_table [] ={pic_cassiopeia,
 #define iGREEN 1
 #define iBLUE 2
 
-#define SECONDS_PER_DAY 86400
+
 
 float g_color_palette[][3]={
-          {0  ,0  ,0  },  //0 = black
-          {1  ,0.65,0  },  //1 = yellow
-          {0  ,0.8  ,0.8  },  //2 = cyan
-          {0  ,0.5,0.08}, //3 = mid green
-          {0.2,0.1,0 },  //4 = dark brown
-          {1,0.0,0  },  //5 = red
-          {0  ,0  ,0.8},  //6 = blue
-          {1  ,1  ,1  },  //7 = white
-          {0.8  ,0  ,0.8  },  //8 = pink
-          {1  ,0.3,0  },  //9 = orange
-          {0  ,1  ,0  },  // 10 =bright green
-          {0.1  ,0  ,0.75  },  //11 = dark purple
-          {1, 0.55,0},   // 12 = gold
-          {0.5,0.0,0.07}  // 13 = low pastell red
+          {0  ,0  ,0  },    // 0 = black
+          {1  ,0.65,0  },   // 1 = yellow
+          {0  ,0.8  ,0.8  },// 2 = cyan
+          {0  ,0.5,0.08},   // 3 = mid green
+          {0.2,0.1,0 },     // 4 = dark brown
+          {1,0.0,0  },      // 5 = red
+          {0  ,0  ,0.8},    // 6 = blue
+          {1  ,1  ,1  },    // 7 = white
+          {0.8  ,0  ,0.8  },// 8 = pink
+          {1  ,0.3,0  },    // 9 = orange
+          {0  ,1  ,0  },    // 10 (A)= bright green
+          {0.1  ,0  ,0.75 },// 11 (B)= dark purple
+          {1, 0.55,0},      // 12 (C)= gold
+          {0.5,0.0,0.07},   // 13 (D)= low pastell red
 };
+//                       GFEDCBA9, 87654321 
+byte g_color_set[] =  { B00000011,B10110011,  // 0 = all saturated full colors
+                        B00001000,B01000010,  // 1 = Gold, White, Cyan
+                        B00000011,B10100011,  // 2 = all saturated full colors except red
+                        B00000010,B10110100,  // 3 = Green, pink, blue,red,mid green
+                        B00000010,B00110001,  // 4 = Green,, blue,red,yellow
+                                       };
+#define COLOR_SET_COUNT sizeof(g_color_set)/sizeof(g_color_set[0])/2;
 
-// packed palette Color 1 (Color of used element) | color 0 (Color of unused element)
-//                                             0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19   20   21   22   23
-const byte clock_hour_color[24]   PROGMEM ={0x80,0x60,0x60,0x60,0x60,0x26,0x26,0x26,0x26,0x26,0x22,0xA0,0x10,0x59,0x59,0x59,0x59,0x59,0x05,0x05,0x05,0x05,0x05,0x00};
-#define GET_HOUR_COLOR_BYTE(hour) pgm_read_byte_near(clock_hour_color+hour*sizeof(byte))
 
-#define MINUTE_FUTURE_COLOR 1
-#define MINUTE_PAST_COLOR 6
-
-const byte clock_minute_color[14]   PROGMEM ={10,2,7,9,5,MINUTE_PAST_COLOR};   // defines color sequence of minute indication light
-#define GET_MINUTE_COLOR(segment) pgm_read_byte_near(clock_minute_color+segment*sizeof(byte))
-
-const byte clock_minute_border[]   PROGMEM ={0,1,7,13,18,23,28,33,38,43,48,54,60};   // defines smalles minute to use the segment
-#define GET_MINUTE_BORDER(segment) pgm_read_byte_near(clock_minute_border+segment*sizeof(byte))
-
-const byte clock_second_6_color[7]   PROGMEM ={11,2,10,7,9,5,1};   // defines color sequence of 6 phase second  indication (10 sec per phase)
-#define GET_SECOND_6_COLOR(segment) pgm_read_byte_near(clock_second_6_color+segment*sizeof(byte))
-
-const byte clock_second_12_color[13]   PROGMEM ={0,11,6,11,8,6,2,10,7,1,9,5,0};   // defines color sequence of 12 phase second  indication  (5 sec per phase)
-#define GET_SECOND_12_COLOR(segment) pgm_read_byte_near(clock_second_12_color+segment*sizeof(byte))
-
+byte g_random_color_map[4]={0,0,0,0};    // this is used to map from group to randomly chosen color
+#define RANDOM_COLOR_MAP_COUNT sizeof(g_random_color_map)/sizeof(g_random_color_map[0])
 
 PictureLamp g_picture_lamp[LAMP_COUNT];
 
@@ -148,15 +144,12 @@ unsigned long g_picture_duration_time=5000;
 unsigned long g_transition_start_time=0;
 unsigned long g_transition_follow_up_duration=5000;
 
-long g_clock_base_time=(18l*60l+57l)*60l;  // Time in seconds to add to systemclock to get realtime (18:58 as default)
-unsigned long g_clock_sync_time=0;  // Time to calibrate "zeropoint" of systemclock 
 
 byte g_pic_index=0; //
 
 #define PICTURE_HISTORY_COUNT 4
 byte g_picture_history [PICTURE_HISTORY_COUNT];
 byte g_picture_history_next_entry_index=0;
-
 
 
 /* Control */
@@ -201,6 +194,10 @@ void setup() {
 
   delay(700); // wait for chains to power up completetly
 
+  #ifdef TRACE_RND_COL_GEN
+    enter_TEST_MODE_PICTURES();
+    return;
+  #endif
   enter_SHOW_MODE();
 }
 
@@ -362,6 +359,73 @@ void process_TRANSITION_MODE()
 
 /* ----- internal picture presentation helpers --------- */
 
+/* check for random colors, make a unique wish and provide it in random_color_map
+ */
+
+void populate_random_color_map(int picture_index){
+  byte color_list[16];
+  byte color_list_length=0;
+  
+  for(int i=0;i<RANDOM_COLOR_MAP_COUNT;i++) g_random_color_map[i]=0;  // Reset color map
+  
+  for (int lmp=0;lmp<LAMP_COUNT;lmp++) {
+     byte p_index=PICTURE_POINT(picture_index,lmp);
+     if(p_index>=RANDOM_COLOR_INDEX_START) {  // Lamp has random color declaration
+        int map_slot=(p_index-RANDOM_COLOR_INDEX_START)/10;
+        
+        if(g_random_color_map[map_slot]==0) {  // only choose a color for a mapslot, if not already done
+          byte color_set_index=p_index%10;
+          #ifdef TRACE_RND_COL_GEN
+            Serial.print(F("#TRACE_RND_COL_GEN: Choosing for "));
+            Serial.print(map_slot);
+            Serial.print(F(" from color set "));
+            Serial.println(color_set_index);
+          #endif  
+          // Convert bitmap of color set into list of palette indexes
+          color_list_length=0;
+          for(int byteindex=0;byteindex<2;byteindex++) {
+            byte color_set_bitmap=g_color_set[color_set_index*2+byteindex];
+            for (int bitindex=0;bitindex<8;bitindex++) {
+              if(bitRead(color_set_bitmap,bitindex)) {  
+                color_list[color_list_length]=bitindex+((1-byteindex)*8)+1;
+                  #ifdef TRACE_RND_COL_GEN
+                    Serial.println(color_list[color_list_length]);
+                  #endif  
+                color_list_length++;
+                }
+             } // Loop over bits
+          } // Loop over bytes
+
+          // Chose random element of the list and check if color already used, if not traverse until you find one
+          byte choice=random(color_list_length);
+          for(int check=0;check<color_list_length ;check++) { // only try until traversing full list
+              int m=0;
+              for(;m<RANDOM_COLOR_MAP_COUNT;m++) {
+                if(g_random_color_map[m]==color_list[choice]) break; 
+              }
+              if(m>=RANDOM_COLOR_MAP_COUNT) {  // This color is not used yet
+                g_random_color_map[m]=color_list[choice];
+                break; // leave the check loop
+              }
+              if(++choice >= color_list_length) choice=0;
+          } // end check loop
+          if(g_random_color_map[map_slot]==0) g_random_color_map[map_slot]=color_list[choice]; // if decision could not be made use first idea
+          #ifdef TRACE_RND_COL_GEN
+            Serial.print(F("#TRACE_RND_COL_GEN: Final choice is "));
+            Serial.println(g_random_color_map[map_slot]);
+          #endif 
+        } // end map slot is empty
+        
+     } // end this is a random color entry
+  } // loop over all lamps in the picture
+}
+
+byte get_mapped_color_number(byte pic_color_entry) {
+  if(pic_color_entry<RANDOM_COLOR_INDEX_START) return pic_color_entry;
+  byte map_slot=(pic_color_entry-RANDOM_COLOR_INDEX_START)/10;
+  return g_random_color_map[map_slot];
+}
+
 /* set_picture
  *  Orders all lamp objects to go to the defined picuture
  */
@@ -371,9 +435,10 @@ void set_picture(int picture_index)
   Serial.print(F("TRACE_PICTURES::set_picture"));
   Serial.println(picture_index);
 #endif
+  populate_random_color_map(picture_index);
   for (int i=0;i<LAMP_COUNT;i++) {
-     byte p_index=PICTURE_POINT(picture_index,i);
-     g_picture_lamp[i].setCurrentColor(g_color_palette[p_index][iRED],g_color_palette[p_index][iGREEN],g_color_palette[p_index][iBLUE]);
+     byte c_index=get_mapped_color_number(PICTURE_POINT(picture_index,i));
+     g_picture_lamp[i].setCurrentColor(g_color_palette[c_index][iRED],g_color_palette[c_index][iGREEN],g_color_palette[c_index][iBLUE]);
      g_picture_lamp[i].updateOutput(i);
   }
 }
@@ -387,9 +452,10 @@ void set_target_picture(int picture_index)
   Serial.print(F("TRACE_PICTURES::set_target_picture "));
   Serial.println(picture_index);
 #endif
+  populate_random_color_map(picture_index);
   for (int i=0;i<LAMP_COUNT;i++) {
-     byte p_index=PICTURE_POINT(picture_index,i);
-     g_picture_lamp[i].setTargetColor(g_color_palette[p_index][iRED],g_color_palette[p_index][iGREEN],g_color_palette[p_index][iBLUE]);
+     byte  c_index=get_mapped_color_number(PICTURE_POINT(picture_index,i));
+     g_picture_lamp[i].setTargetColor(g_color_palette[c_index][iRED],g_color_palette[c_index][iGREEN],g_color_palette[c_index][iBLUE]);
   }
 }
 
@@ -526,322 +592,6 @@ int getTransitionsPendingCount()
 }
 
 
-/* ========= CLOCK_MODE ======== */
-
-void enter_CLOCK_MODE() 
-{
-    #ifdef TRACE_MODES
-      Serial.println(F("#CLOCK_MODE"));
-    #endif
-    g_process_mode=CLOCK_MODE;
-    digitalWrite(LED_BUILTIN, false);
-    input_IgnoreUntilRelease();
-    long secondOfTheDay=((millis()-g_clock_sync_time)/1000+g_clock_base_time)%SECONDS_PER_DAY;
-    for(int i=0;i<LAMP_COUNT;i++)  /* Initialize all lamps */
-    {
-         g_picture_lamp[i].setCurrentColor(0,0,0);
-         g_picture_lamp[i].updateOutput(i);
-       }
-    order_next_clock_picture(secondOfTheDay,1);
-    output_show();
-    g_transition_start_time=secondOfTheDay;  // We use this variable to keep track, when second has changed , when entering the mode we pretend to be 1 second behind and trigger immediate change
-}
-
-void process_CLOCK_MODE()
-{
-    long secondOfTheDay=0;
-    if(input_selectGotPressed()) {
-       enter_FIREWORK_RUN() ;
-      return;
-    } // Select got pressed
-    
-    if(input_stepGotPressed()) {  
-      enter_CLOCK_SET_HOUR_MODE();
-      return;
-    } // Step got pressed
-    
-    secondOfTheDay=((millis()-g_clock_sync_time)/1000+g_clock_base_time)%SECONDS_PER_DAY; //86400=Seconds in a day
-
-    if(secondOfTheDay<10) { // to be sure e dont miss it, we start firework on any of the first 10 seconds of the day (normally at 0)
-      enter_FIREWORK_RUN();
-      return; 
-    }
-    
-    if(secondOfTheDay!=g_transition_start_time) { // Trigger new Lamp Targets
-      g_transition_start_time=secondOfTheDay;
-      order_next_clock_picture(secondOfTheDay,550);
-    }
-    
-   // update all transitioning lights
-    for(int i=0;i<LAMP_COUNT;i++) 
-    {
-      if(g_picture_lamp[i].is_in_transition()) 
-      {
-        g_picture_lamp[i].updateOutput(i);
-      }
-    }
-    output_show();  
-}
-
-/* ========= CLOCK_SET_HOUR_MODE ======== */
-
-void enter_CLOCK_SET_HOUR_MODE() 
-{
-    #ifdef TRACE_MODES
-      Serial.println(F("#CLOCK_SET_HOUR_MODE"));
-    #endif
-    g_process_mode=CLOCK_SET_HOUR_MODE;
-    g_clock_base_time=((millis()-g_clock_sync_time)/1000+g_clock_base_time)%SECONDS_PER_DAY; //freeze current time 
-    g_clock_base_time=(g_clock_base_time/60)*60; //Remove seconds from time
-    input_IgnoreUntilRelease();
-
-     // TODO: Switch on central lamp
-
-}
-
-void enter_CLOCK_SET_MINUTE_MODE() 
-{
-    #ifdef TRACE_MODES
-      Serial.println(F("#CLOCK_SET_MINUTE_MODE"));
-    #endif
-    g_process_mode=CLOCK_SET_MINUTE_MODE;
-    input_IgnoreUntilRelease();
-     // TODO: Switch on central lamp
-}
-
-void process_CLOCK_SET_MODE()
-{
-    boolean changed=false;
-     // Blink Builtin LED
-     if(g_process_mode==CLOCK_SET_HOUR_MODE)    digitalWrite(LED_BUILTIN, millis()%500<250);
-     else digitalWrite(LED_BUILTIN, millis()%250<125);
-    
-     if(input_selectGotPressed()) {
-       if(g_process_mode==CLOCK_SET_HOUR_MODE) g_clock_base_time-=3600;
-       else g_clock_base_time-=60;
-       if (g_clock_base_time<0)g_clock_base_time+=SECONDS_PER_DAY;
-       changed=true;
-    } // Select got pressed
-    
-    if(input_stepGotReleased()) {  
-      if(input_getLastPressDuration()>LONG_PRESS_DURATION)   // Long press
-         {if (g_process_mode==CLOCK_SET_HOUR_MODE) enter_CLOCK_SET_MINUTE_MODE();  
-          else {
-            g_clock_sync_time=millis();  //Set our systemtime reference to now = relative zero
-            enter_CLOCK_MODE();
-          }
-          return;}
-      else {  // Short press
-        if(g_process_mode==CLOCK_SET_HOUR_MODE) g_clock_base_time+=3600;
-         else g_clock_base_time+=60;
-        if (g_clock_base_time>=SECONDS_PER_DAY)g_clock_base_time-=SECONDS_PER_DAY;
-        changed=true;
-
-      }
-    } // Step got pressed
-    
-    if (changed) { 
-      order_next_clock_picture(g_clock_base_time,1);
-      #ifdef TRACE_CLOCK_TIME
-          Serial.println(F(">TRACE_CLOCK_TIME Set Time:"));
-          clock_print_to_Serial_time(g_clock_base_time);
-          Serial.println();
-        #endif
-    };  
-    
-    // update all transitioning lights
-    for(int i=0;i<LAMP_COUNT;i++) 
-    {
-      if(g_picture_lamp[i].is_in_transition()) 
-      {
-        g_picture_lamp[i].updateOutput(i);
-      }
-    }
-    output_show();
-
- 
-}
-
-/*  Clock Helper functions */
-
-void clock_print_to_Serial_time(long secondOfTheDay)
-{
-  int currentHour=secondOfTheDay/3600;  
-  int currentMinute=(secondOfTheDay/60)%60;  
-  int currentSecond=secondOfTheDay%60;  
-
-  Serial.print(currentHour);Serial.print(F(":"));
-  Serial.print(currentMinute);Serial.print(F(":"));
-  Serial.print(currentSecond);Serial.print(F(" "));
-}
-
-void order_next_clock_picture(long secondOfTheDay,int transitionTime)
-{
-  int currentHour=secondOfTheDay/3600;  
-  int currentMinute=(secondOfTheDay/60)%60;  
-  int currentSecond=secondOfTheDay%60;  
-
-  byte color2=0;
-  byte lamp=0;
-  byte colorIndex=0;
-  short color1_border=0;
-  short color2_border=0;
-  int segment=0;
- 
-
-  /* HOUR */  /* Lamps 6-10 */
-  byte colorByte=GET_HOUR_COLOR_BYTE(currentHour);
-
-  byte color1=colorByte>>4;
-  byte color0=colorByte&0x0f;
-
-  unsigned short pattern=0x0fe0;  // defines the color to take from the set: color 1 or color 0. Bit 0=Lamp 6   Bit 5=Lamp 10
-  if(currentHour==0) pattern=0x000c;
-  else
-    if(currentHour<11 )  pattern>>=currentHour%5;
-    else  if(currentHour<13 )  pattern=0x0fff;
-          else if( currentHour<18) pattern>>=currentHour-13;
-               else if(currentHour<23) pattern>>=currentHour-18;
-                    else pattern=0x0fff;
-   #ifdef TRACE_CLOCK
-          Serial.print(F(">order_next_clock_picture secondOfTheDay: "));Serial.println(secondOfTheDay);
-          Serial.print(F(">order_next_clock_picture HOUR: "));
-          Serial.print(currentHour);
-   #endif
-   for(int i=5;i<10;i++) {
-    #ifdef TRACE_CLOCK
-          Serial.print(F("/"));
-       #endif
-        if(pattern&0x0001) {
-             #ifdef TRACE_CLOCK
-              Serial.print(color1);
-             #endif
-          g_picture_lamp[i].setTargetColor(g_color_palette[color1][iRED],g_color_palette[color1][iGREEN],g_color_palette[color1][iBLUE]);
-        } else { 
-             #ifdef TRACE_CLOCK
-              Serial.print(color0);
-             #endif
-          g_picture_lamp[i].setTargetColor(g_color_palette[color0][iRED],g_color_palette[color0][iGREEN],g_color_palette[color0][iBLUE]);
-        }
-    
-       g_picture_lamp[i].startTransition(transitionTime);
-       pattern>>=1;
-   }
-   #ifdef TRACE_CLOCK
-      Serial.println(F(" "));
-   #endif
-
-   /* MINUTE RING */ /* Lamps 12-20,11 */ 
-   if(currentMinute<59)  { /* Normal Minute */
-       for(segment=0; currentMinute>=GET_MINUTE_BORDER(segment+1);segment++);
-       #ifdef TRACE_CLOCK
-          Serial.print(F(">order_next_clock_picture MINUTE_BORDER: "));    Serial.print( GET_MINUTE_BORDER(segment)); Serial.print(F(" segment="));Serial.println(segment);
-       #endif
-       color1_border=segment-1;
-       color2_border=segment;
-       color0=MINUTE_PAST_COLOR;
-       color2=MINUTE_FUTURE_COLOR;
-       color1=GET_MINUTE_COLOR(currentMinute-GET_MINUTE_BORDER(segment));
-   } else {                               /* Countdown last Minute */
-      segment=currentSecond/10;
-      color1_border=currentSecond%10;
-      color2_border=100;
-      color0=GET_SECOND_6_COLOR(segment+1); /* newset color */
-      color1=GET_SECOND_6_COLOR(segment);  /* previous color */
-      if(currentHour==23&&currentMinute==59&&currentSecond>30) { /* Final countdown to Black instead of yellow */
-        color0=color0==1?0:color0;
-     }
-   }
-   
-
-   #ifdef TRACE_CLOCK
-          Serial.print(F(">order_next_clock_picture MINUTE: "));
-          Serial.print(currentMinute);
-          Serial.print(F(" c0="));Serial.print(color0); Serial.print(F(" b1="));Serial.print(color1_border);
-          Serial.print(F(" c1="));Serial.print(color1); Serial.print(F(" b2="));Serial.print(color2_border);
-          Serial.print(F(" c2="));Serial.println(color2);Serial.print(F(">order_next_clock_picture MINUTE lmp: "));
-   #endif
-   
-   for (int i=0;i<11;i++) {  // Iterate over sequence of minute ring lamps */
-    lamp= i!=9 ? i+11 : 10; // maps to lamp index 11...19,10 
-    if(currentMinute<59) {  // in minute mode insert lamp 21 as 6th, equals to sequence 11..15,20,17...19,10
-      if(i>5) { lamp= i!=10 ? i+10 : 10;}
-       else { if(i==5) lamp=20; }     
-    } else if(i>9) {       // in second mode after 10 lamps switch of lamp 20 and bail out 
-        g_picture_lamp[20].setTargetColor(0,0,0);
-        g_picture_lamp[20].startTransition(transitionTime);
-        break; 
-    }
-        
-    if(i<color1_border) colorIndex=color0;
-      else if(i<color2_border) colorIndex=color1;
-        else colorIndex=color2;
-    g_picture_lamp[lamp].setTargetColor(g_color_palette[colorIndex][iRED],g_color_palette[colorIndex][iGREEN],g_color_palette[colorIndex][iBLUE]);
-    g_picture_lamp[lamp].startTransition(transitionTime);
-    #ifdef TRACE_CLOCK
-          Serial.print(F("/"));
-          Serial.print(colorIndex);
-     #endif   
-   } // Iteration over lamps
-   
-   #ifdef TRACE_CLOCK
-      Serial.println(F(" "));
-   #endif
-
-
-   /* SECOND RING */  /* Lamps 4-5,1-3 */
-
-   // Black as default
-   color0=0;
-   color1=0; 
-   color1_border=0;
-   
-   if(currentMinute<59) {
-       if(currentHour>=23||millis()-g_clock_sync_time<CLOCK_SECOND_LIVE_INTERVAL) { // Fast Animation
-           segment=currentSecond/5;
-           color0=GET_SECOND_12_COLOR(segment+1); /* newset color */
-           color1=GET_SECOND_12_COLOR(segment); 
-           color1_border=currentSecond%5;
-       } else {
-        if(currentHour>=18) {   // Slow Animation
-           colorIndex=GET_SECOND_6_COLOR(currentSecond/10); 
-           g_picture_lamp[23].setTargetColor(g_color_palette[colorIndex][iRED],g_color_palette[colorIndex][iGREEN],g_color_palette[colorIndex][iBLUE]);
-           g_picture_lamp[23].startTransition(transitionTime);
-           #ifdef TRACE_CLOCK
-                 Serial.print(F(">order_next_clock_picture SECOND: >"));Serial.print(colorIndex);Serial.println(F("<"));
-           #endif  
-        }
-       }
-   } else  {   // seconds are on the minute ring
-         g_picture_lamp[23].setTargetColor(0,0,0);   // Switch off the center
-         g_picture_lamp[23].startTransition(transitionTime);
-   }
-
-   #ifdef TRACE_CLOCK
-          Serial.print(F(">order_next_clock_picture SECOND: "));
-          Serial.print(currentSecond);
-          Serial.print(F(" c0="));Serial.print(color0); Serial.print(F(" b1="));Serial.print(color1_border);
-          Serial.print(F(" c1="));Serial.println(color1); 
-          Serial.print(F(">order_next_clock_picture SECOND lmp: "));
-   #endif
-   for (int i=0;i<5;i++) {  /* Iterate over seconds ring */
-    lamp=i<2?i+3:i-2;
-    if(i<color1_border) colorIndex=color0;
-      else  colorIndex=color1;
-    g_picture_lamp[lamp].setTargetColor(g_color_palette[colorIndex][iRED],g_color_palette[colorIndex][iGREEN],g_color_palette[colorIndex][iBLUE]);
-    g_picture_lamp[lamp].startTransition(transitionTime);
-    #ifdef TRACE_CLOCK
-          Serial.print(F("/"));
-          Serial.print(colorIndex);
-     #endif   
-   } // Iteration over lamps
-   #ifdef TRACE_CLOCK
-      Serial.println(F(" "));
-   #endif   
-   
-   
-} //order_next_clock_picture
-
 
 
 /* ========= TEST_MODE_PLACEMENT ======== */
@@ -932,11 +682,11 @@ void enter_TEST_MODE_PICTURES()
 void process_TEST_MODE_PICTURES()
 {
      if(input_selectGotReleased()) {  
-      if(input_getLastPressDuration()<=LONG_PRESS_DURATION) {   // Long press
+      if(input_getLastPressDuration()>LONG_PRESS_DURATION) {   // Long press
                     enter_TEST_MODE_FADE_SOLO();
                    return;
       }
-      if(g_pic_index>=PICTURE_COUNT) g_pic_index=PICTURE_COUNT; // backward one pattern
+      if(g_pic_index==0 || g_pic_index>=PICTURE_COUNT) g_pic_index=PICTURE_COUNT; // backward one pattern
       --g_pic_index;
       set_picture( g_pic_index);
       output_show(); 

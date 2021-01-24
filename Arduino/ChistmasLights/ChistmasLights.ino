@@ -58,24 +58,23 @@ Particle g_firework_particle[PARTICLE_COUNT];
 
 const byte pic_cassiopeia[24]  PROGMEM ={   0, 0, 0, 0, 6,  0, 6, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 6, 6, 0,  0, 0, 0, 6}; // cassiopeia
 const byte pic_star_uni[24]    PROGMEM ={   1, 1, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 0}; // star yellow
-const byte pic_star_color[24]  PROGMEM ={  30,30,30,30,30, 40,40,40,40,40, 50,60,50,60,50,60,50,60,50,60,  0, 0, 0, 0}; // star_color
-const byte pic_pentagons[24]   PROGMEM ={   2, 2, 2, 2, 2,  3, 3, 3, 3, 3,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0}; // Pentagons
-const byte pic_center_star[24] PROGMEM ={   0, 0, 0, 0, 0,  2, 2, 2, 2, 2,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 7}; // center star
-const byte pic_gingerbread[24] PROGMEM ={   8,13,13,13,13, 13,13,13,13,13,  7, 7,13, 0,13, 0, 0,13, 0,13,  0,13,13,10}; // pic_gingerbread
+const byte pic_star_color[24]  PROGMEM ={  34,34,34,34,34, 44,44,44,44,44, 54,64,54,64,54,64,54,64,54,64,  0, 0, 0, 0}; // star_color
+const byte pic_pentagons[24]   PROGMEM ={  31,31,31,31,31, 43,43,43,43,43,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0}; // Pentagons
+const byte pic_center_star[24] PROGMEM ={   0, 0, 0, 0, 0, 30,30,30,30,30,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 7}; // center star
+const byte pic_gingerbread[24] PROGMEM ={  32,13,13,13,13, 13,13,13,13,13,  7, 7,13, 0,13, 0, 0,13, 0,13,  0,13,13,42}; // pic_gingerbread
 const byte pic_angel[24]       PROGMEM ={   0, 2, 2, 2, 2,  2, 0, 0, 0, 0,  0, 0, 2, 2, 2, 2, 2, 2, 2, 2,  2, 2, 2, 0}; // Angle 
 const byte pic_snow_man[24]    PROGMEM ={   0, 0, 7, 7, 0,  7, 0, 0, 0, 0,  0, 0, 0, 7, 7, 0, 0, 7, 7, 0,  7, 7, 7, 0}; // snow man
-const byte pic_moon[24]        PROGMEM ={   0, 0, 7, 7, 0,  0, 0, 0, 0, 0,  1, 1, 1, 1, 1, 1, 1, 1, 1, 1,  0, 0, 0, 5}; // Moon
-const byte pic_flake_pple[24]  PROGMEM ={   0, 0, 0, 0, 0,  8, 8, 8, 8, 8,  0, 8, 0, 8, 0, 8, 0, 8, 0, 8,  0, 0, 0, 6}; // flake_pple
-const byte pic_flake_oran[24]  PROGMEM ={   0, 0, 0, 0, 0,  9, 9, 9, 9, 9,  9, 0, 9, 0, 9, 0, 9, 0, 9, 0,  0, 0, 0, 1}; // flake_oran
+const byte pic_moon[24]        PROGMEM ={   0, 0, 7, 7, 0,  0, 0, 0, 0, 0, 12,12,12,12,12,12,12,12,12,12,  0, 0, 0, 5}; // Moon
+const byte pic_flake_1[24]     PROGMEM ={   0, 0, 0, 0, 0, 30,30,30,30,30,  0,30, 0,30, 0,30, 0,30, 0,30,  0, 0, 0,40}; // flake_1
+const byte pic_flake_2[24]     PROGMEM ={   0, 0, 0, 0, 0, 30,30,30,30,30, 30, 0,30, 0,30, 0,30, 0,30, 0,  0, 0, 0,40}; // flake_2
 const byte pic_bell[24]        PROGMEM ={   0,12,12,12,12,  0, 0, 0, 0, 0,  0, 0, 0, 0,12,12,12,12, 0, 0,  7, 0, 0, 0}; // Bell
 const byte pic_tree[24]        PROGMEM ={   3, 3, 3, 3, 3,  3, 0, 0, 0, 0,  3, 3, 0, 0, 3, 0, 0, 3, 0, 0,  4, 0, 0, 3}; // Tree
-const byte pic_fdarwr_rd [24]  PROGMEM ={   5, 9,12,12, 9,  7, 0, 8, 8, 0,  1, 1, 0, 0, 5, 0, 0, 5, 0, 0,  8, 0, 0, 9}; // fade arrow red
-//const byte pic_heart[24]     PROGMEM ={   0, 0, 5, 5, 0,  0, 0, 0, 0, 0,  0, 0, 5, 5, 5, 5, 5, 5, 5, 5,  5, 0, 0, 5}; // Heart
 const byte pic_ichtys[24]      PROGMEM ={   6, 6, 0, 6, 6,  6, 0, 6, 0, 6,  0, 0, 0, 0, 6, 6, 0, 7, 6, 6,  0, 0, 6, 0}; // ychtis
 const byte pic_3_wise[24]      PROGMEM ={  11, 0, 0, 0, 0,  7, 0, 0, 0, 0,  0, 0, 9, 9, 0, 0, 0, 0, 3, 3,  0, 0, 0,11}; // pic_3_wise
 const byte pic_krippe[24]      PROGMEM ={   0, 9, 0, 0, 9,  0, 0, 9, 9, 0,  0, 0, 0, 0, 9, 0, 0, 9, 0, 0,  1, 0, 7, 9}; // krippe
 const byte pic_half_moon[24]   PROGMEM ={   1, 0, 0, 1, 1,  0, 0, 0, 0, 0,  0, 1, 1, 1, 1, 1, 1, 1, 0, 0,  1, 0, 0, 0}; // half_moon
 
+//const byte pic_heart[24]     PROGMEM ={   0, 0, 5, 5, 0,  0, 0, 0, 0, 0,  0, 0, 5, 5, 5, 5, 5, 5, 5, 5,  5, 0, 0, 5}; // Heart
 
 
 
@@ -91,12 +90,11 @@ const byte* const g_pic_table [] ={pic_cassiopeia,
                                    pic_angel,        // 4:8
                                    pic_snow_man,     // 0:6
                                    pic_moon,         // 7:4
-                                   pic_flake_pple,   // 6:7
-                                   pic_flake_oran,   // 5:5
+                                   pic_flake_1,      // 6:7
+                                   pic_flake_2,      // 5:5
                                    pic_bell,         // 7:9
                                    pic_tree,         // 5:2
-                                   pic_fdarwr_rd,    // 2:0
-                                   pic_ichtys,       // 5:5
+                                   pic_ichtys,       // 5:4
                                    pic_3_wise,       // 3:9
                                    pic_krippe,       // 8:6
                                    pic_half_moon     // 7:4                            
@@ -124,12 +122,14 @@ float g_color_palette[][3]={
           {0  ,1  ,0  },    // 10 (A)= bright green
           {0.1  ,0  ,0.75 },// 11 (B)= dark purple
           {1, 0.55,0},      // 12 (C)= gold
-          {0.5,0.0,0.07}    // 13 (D)= low pastell red
+          {0.5,0.0,0.07},   // 13 (D)= low pastell red
 };
 //                       GFEDCBA9, 87654321 
 byte g_color_set[] =  { B00000011,B10110011,  // 0 = all saturated full colors
                         B00001000,B01000010,  // 1 = Gold, White, Cyan
-                        B00000011,B10100011   // 2 = all saturated full colors except red
+                        B00000011,B10100011,  // 2 = all saturated full colors except red
+                        B00000010,B10110100,  // 3 = Green, pink, blue,red,mid green
+                        B00000010,B00110001,  // 4 = Green,, blue,red,yellow
                                        };
 #define COLOR_SET_COUNT sizeof(g_color_set)/sizeof(g_color_set[0])/2;
 

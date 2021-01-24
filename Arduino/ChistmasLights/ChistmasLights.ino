@@ -6,7 +6,7 @@
 //#define DEBUG_ON
 
 #ifdef TRACE_ON
-//#define TRACE_LOGIC
+#define TRACE_LOGIC
 //#define TRACE_PICTURES
 #define TRACE_MODES
 //#define TRACE_TIMING
@@ -311,7 +311,6 @@ void enter_TRANSITION_MODE()
     input_IgnoreUntilRelease();
     
     set_target_picture(g_pic_index);
-    triggerNextTransition();
     digitalWrite(LED_BUILTIN, true);
 }
 
@@ -355,7 +354,7 @@ void process_TRANSITION_MODE()
 
     }
     #ifdef TRACE_LOGIC 
-    delay(500);
+    //delay(500);
     #endif
 }
 
@@ -402,6 +401,8 @@ bool triggerNextTransition()
 {
   #ifdef TRACE_LOGIC
     Serial.println(F("TRACE_LOGIC::triggerNextTransition "));
+    Serial.print(millis()/1000);
+    Serial.println(F(" seconds uptime"));
   #endif
   int on_count=0;
   int off_count=0;
@@ -435,25 +436,24 @@ bool triggerNextTransition()
   #endif
   if(g_picture_lamp[trigger_lamp].getTransitionType()==TT_BLEND) return true;  // for a blend, one lamp is enough
 
-  int additional_on_lamps=min(3,off_count>0?on_count/off_count:on_count);  // determine ratio between on and off, use all on when there is no off, but never more then 3
-  int additional_off_lamps=min(3,on_count>0?off_count/on_count:off_count);
-
-  if(g_picture_lamp[trigger_lamp].getTransitionType()==TT_ON) additional_on_lamps--;  // Remove already triggered lamp from count
-  else additional_off_lamps--;
-
-  #ifdef TRACE_LOGIC
-    Serial.print(F("TRACE_LOGIC::additional_on_lamps="));Serial.print(additional_on_lamps);
-    Serial.print(F(" additional_off_lamps="));Serial.println(additional_off_lamps);
-  #endif
-  
-  for(int i=0;i<additional_on_lamps;i++)
-  {
-    g_picture_lamp[getRandomLampOfTransitionType(TT_ON)].startTransition(duration);  
-  }
-
-  for(int i=0;i<additional_off_lamps;i++)
-  {
-    g_picture_lamp[getRandomLampOfTransitionType(TT_OFF)].startTransition(duration);   
+  if(g_picture_lamp[trigger_lamp].getTransitionType()==TT_ON && off_count>0 ) {// There is a partner to switch off available
+    if(random(on_count)<=off_count) {
+      trigger_lamp=getRandomLampOfTransitionType(TT_OFF);
+      g_picture_lamp[trigger_lamp].startTransition(duration);
+      #ifdef TRACE_LOGIC
+          Serial.print(F("TRACE_LOGIC::triggered additional off lamp ")); Serial.println(trigger_lamp);
+      #endif  
+    }
+  } else {  // it is not an on transitioning lamp
+    if(g_picture_lamp[trigger_lamp].getTransitionType()==TT_OFF && on_count>0 ) {// There is a partner to switch on available
+      if(random(off_count)<=on_count) {
+        trigger_lamp=getRandomLampOfTransitionType(TT_ON);
+        g_picture_lamp[trigger_lamp].startTransition(duration);
+        #ifdef TRACE_LOGIC
+            Serial.print(F("TRACE_LOGIC::triggered additional on lamp ")); Serial.println(trigger_lamp);
+        #endif  
+      }
+    }
   }
   return true;
 }

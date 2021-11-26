@@ -8,11 +8,11 @@
 #ifdef TRACE_ON
 //#define TRACE_LOGIC
 //#define TRACE_PICTURES
-#define TRACE_RND_COL_GEN
+#define ENTER_TESTMODE_IMMEDIATLY
 #define TRACE_MODES
 //#define TRACE_TIMING
-#define TRACE_CLOCK
-#define TRACE_CLOCK_TIME
+//#define TRACE_CLOCK
+//#define TRACE_CLOCK_TIME
 #endif 
 
 #define LAMP_COUNT 24
@@ -42,6 +42,8 @@ Particle g_firework_particle[PARTICLE_COUNT];
 #define SHOW_DURATION_VARIANCE 1500
 #endif
 
+#define BLEND_IN_DURATION 1500
+
 #define LONG_PRESS_DURATION 1500
 
 #define CLOCK_SECOND_LIVE_INTERVAL 60000
@@ -67,7 +69,7 @@ const byte pic_snow_man[24]    PROGMEM ={   0, 0, 7, 7, 0,  7, 0, 0, 0, 0,  0, 0
 const byte pic_moon[24]        PROGMEM ={   0, 0, 7, 7, 0,  0, 0, 0, 0, 0, 12,12,12,12,12,12,12,12,12,12,  0, 0, 0, 5}; // Moon
 const byte pic_flake_1[24]     PROGMEM ={   0, 0, 0, 0, 0, 30,30,30,30,30,  0,30, 0,30, 0,30, 0,30, 0,30,  0, 0, 0,40}; // flake_1
 const byte pic_flake_2[24]     PROGMEM ={   0, 0, 0, 0, 0, 30,30,30,30,30, 30, 0,30, 0,30, 0,30, 0,30, 0,  0, 0, 0,40}; // flake_2
-const byte pic_bell[24]        PROGMEM ={   0,12,12,12,12,  0, 0, 0, 0, 0,  0, 0, 0, 0,12,12,12,12, 0, 0,  7, 0, 0, 0}; // Bell
+const byte pic_bell[24]        PROGMEM ={   0,12,12,12,12,  0, 0, 0, 0, 0,  0, 0, 0, 0,12,12,12,12, 0, 0,  1, 0, 0, 0}; // Bell
 const byte pic_tree[24]        PROGMEM ={   3, 3, 3, 3, 3,  3, 0, 0, 0, 0,  3, 3, 0, 0, 3, 0, 0, 3, 0, 0,  4, 0, 0, 3}; // Tree
 const byte pic_ichtys[24]      PROGMEM ={   6, 6, 0, 6, 6,  6, 0, 6, 0, 6,  0, 0, 0, 0, 6, 6, 0, 7, 6, 6,  0, 0, 6, 0}; // ychtis
 const byte pic_3_wise[24]      PROGMEM ={  11, 0, 0, 0, 0,  7, 0, 0, 0, 0,  0, 0, 9, 9, 0, 0, 0, 0, 3, 3,  0, 0, 0,11}; // pic_3_wise
@@ -121,9 +123,12 @@ float g_color_palette[][3]={
           {1  ,0.3,0  },    // 9 = orange
           {0  ,1  ,0  },    // 10 (A)= bright green
           {0.1  ,0  ,0.75 },// 11 (B)= dark purple
-          {1, 0.55,0},      // 12 (C)= gold
+          {1, 0.45,0},      // 12 (C)= gold
           {0.5,0.0,0.07},   // 13 (D)= low pastell red
 };
+
+#define COLOR_PALETTE_COUNT 14
+
 //                       GFEDCBA9, 87654321 
 byte g_color_set[] =  { B00000011,B10110011,  // 0 = all saturated full colors
                         B00001000,B01000010,  // 1 = Gold, White, Cyan
@@ -161,6 +166,7 @@ enum PROCESS_MODES {
   CLOCK_SET_MINUTE_MODE,
   FIREWORK_RUN,
   TEST_MODE_PLACEMENT,
+  TEST_MODE_PALETTE,
   TEST_MODE_PICTURES,
   TEST_MODE_FADE_SOLO,
   TEST_MODE_FADE_IN_ENSEMBLE,
@@ -177,25 +183,43 @@ void setup() {
     Serial.begin(9600);
     Serial.println(compile_signature); 
   #endif
-  
+
+  // Init all Pins and interfaces
   pinMode(LED_BUILTIN, OUTPUT);
   output_setup();
-
   input_setup();
-  
+
+   for(int i=0;i<LAMP_COUNT;i++)  /* Initialize all lamps */
+   {
+         g_picture_lamp[i].setCurrentColor(0,0.3,0);
+         g_picture_lamp[i].updateOutput(i);
+   }
+   output_show();
+   
+  // wait for chains to power up completetly
+  delay(1500);
+
+  // Init the pciture Lamps
+  for(int i=0;i<LAMP_COUNT;i++)  /* Initialize all lamps */
+  {
+         g_picture_lamp[i].setCurrentColor(0,0,0);
+         g_picture_lamp[i].updateOutput(i);
+  }
+   output_show();
+   
+  // Init the first picture 
   for (int i=0;i<PICTURE_HISTORY_COUNT;i++) {
       g_picture_history[i]=0;
   };
-  set_target_picture( g_pic_index);
   randomSeed(analogRead(0));
 
- for(int p=0;p<PARTICLE_COUNT;p++)
+  // provide picture lamp array to the particle engine 
+  for(int p=0;p<PARTICLE_COUNT;p++)
         g_firework_particle[p].init(g_picture_lamp);
 
-  delay(700); // wait for chains to power up completetly
-
-  #ifdef TRACE_RND_COL_GEN
-    enter_TEST_MODE_PICTURES();
+  // switch to normal operation
+  #ifdef ENTER_TESTMODE_IMMEDIATLY
+    enter_TEST_MODE_PALETTE();
     return;
   #endif
   enter_SHOW_MODE();
@@ -214,6 +238,7 @@ void loop()
     case CLOCK_SET_MINUTE_MODE:process_CLOCK_SET_MODE();break;
     case FIREWORK_RUN:process_FIREWORK_RUN();break;
     case TEST_MODE_PLACEMENT:process_TEST_MODE_PLACEMENT();break;
+    case TEST_MODE_PALETTE:process_TEST_MODE_PALETTE();break;
     case TEST_MODE_PICTURES:process_TEST_MODE_PICTURES();break;
     case TEST_MODE_FADE_SOLO:process_TEST_MODE_FADE_SOLO();break;
     case TEST_MODE_FADE_IN_ENSEMBLE:process_TEST_MODE_FADE_IN_ENSEMBLE();break;
@@ -234,9 +259,17 @@ void enter_SHOW_MODE()
 
     
     if(g_process_mode!=TRANSITION_MODE) {  // When not coming from Transition, init a random picture
-            g_pic_index=random(PICTURE_COUNT);
-            set_picture( g_pic_index);
-            output_show();
+        g_pic_index=random(PICTURE_COUNT);
+        set_target_picture( g_pic_index);
+        for(int i=0;i<LAMP_COUNT;i++)  /* Initialize all lamps */
+        {
+         g_picture_lamp[i].setCurrentColor(0,0,0);
+         g_picture_lamp[i].updateOutput(i);
+         g_picture_lamp[i].startTransition(BLEND_IN_DURATION);  
+        }
+        output_show();
+        enter_TRANSITION_MODE();
+        return;
     } else { 
             // immediate end of transition (Picture will fully displayed)
             for(int i=0;i<LAMP_COUNT;i++) 
@@ -591,9 +624,6 @@ int getTransitionsPendingCount()
   return theCount;
 }
 
-
-
-
 /* ========= TEST_MODE_PLACEMENT ======== */
 
 void enter_TEST_MODE_PLACEMENT() 
@@ -619,7 +649,7 @@ void process_TEST_MODE_PLACEMENT()
 {
     
     if(input_selectGotPressed()) {
-      enter_TEST_MODE_PICTURES();
+      enter_TEST_MODE_PALETTE();
       return;
     }
     
@@ -660,6 +690,49 @@ void process_TEST_MODE_PLACEMENT()
            output_setLightColor(23,0,255,255);
            break;
       }// switch
+      output_show();
+    } // select_got_pressed
+    
+}
+
+
+/* ========= TEST_MODE_PALETTE ======== */
+
+void enter_TEST_MODE_PALETTE() 
+{
+    #ifdef TRACE_MODES
+      Serial.println(F("#TEST_MODE_PALETTE"));
+    #endif
+    g_process_mode=TEST_MODE_PALETTE;
+    input_IgnoreUntilRelease();
+    digitalWrite(LED_BUILTIN, false);
+    g_pic_index=0;   // Using pic_index as position in palette to show center lamp color
+    for(int i=0;i<LAMP_COUNT;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
+    output_show();
+    for(int i=1;i<COLOR_PALETTE_COUNT;i++) {  // Starting with logical lamp 6, set every lamp to one color of the palette until end of palette
+     g_picture_lamp[i+4].setCurrentColor(g_color_palette[i][iRED],g_color_palette[i][iGREEN],g_color_palette[i][iBLUE]);
+     g_picture_lamp[i+4].updateOutput(i+4);
+    }
+    output_show();
+}
+
+void process_TEST_MODE_PALETTE()
+{
+    
+    if(input_selectGotPressed()) {
+      enter_TEST_MODE_PICTURES();
+      return;
+    }
+    
+    if(input_stepGotPressed()) {  // foreward one pattern
+      if(++g_pic_index>=COLOR_PALETTE_COUNT) g_pic_index=0;
+      for(int i=0;i<5;i++) {  // set color on lamp 1 to 5
+         g_picture_lamp[i].setCurrentColor(g_color_palette[g_pic_index][iRED],g_color_palette[g_pic_index][iGREEN],g_color_palette[g_pic_index][iBLUE]);
+         g_picture_lamp[i].updateOutput(i);
+      }
+      // set color of center lamp
+      g_picture_lamp[23].setCurrentColor(g_color_palette[g_pic_index][iRED],g_color_palette[g_pic_index][iGREEN],g_color_palette[g_pic_index][iBLUE]);
+      g_picture_lamp[23].updateOutput(23);
       output_show();
     } // select_got_pressed
     

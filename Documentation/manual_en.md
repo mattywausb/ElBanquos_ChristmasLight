@@ -19,8 +19,8 @@ Comprehensive mode change table:
 |Fireworks|>Show|Next Effect|>Tst: Placement||
 |Set Hour|Hour up|Hour Down||>Set Minute|
 |Set Minute|Minute up|Minute Down||>Countdown|
-|Tst: Placement|>Tst: Colors|Switch Lamp group||
-|Tst: Colors|>Tst: Pictures|Switch main color||
+|Tst: Placement|>Tst: Palette|Switch Lamp group||
+|Tst: Palette|>Tst: Pictures|Switch colo of inner lamps||
 |Tst: Picture|Previous Picture|Next Picture|>Tst: Fade Solo||
 |Tst: Fade Solo|>Tst: Fade Ensemble|Next Lamp||
 |Tst: Fade Ensemble|>Tst: Scaling|Next Lamp||
@@ -96,9 +96,18 @@ The circles are: Inner Pentagon, outer Pentagon, inbetween circle, additonal Lam
 
 Status LED: OFF
 
-Press MODE-> Switch to Picture Test
+Press MODE-> Switch to Palette Test
 
 Press STEP-> Switch to next circle
+
+### Palette Test
+The palette test shows every palette color on a single lamp (Starting with lamp 6), and allows swithching through all palette colors on the inner ring and center lamp.
+
+Status LED: OFF
+
+Press MODE-> Switch to Picture Test
+
+Press STEP-> Switch inner lamps to next palette color
 
 ### Picture Test
 The Picture Test shows a picture until it is stopped.

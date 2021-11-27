@@ -9,14 +9,23 @@ Especially for assembly and installation there are multiple test programs to ver
 
 The build in LED on the Arduino board is used to give feedback about the mode.
 
-Comprehensive Mode Change Table:
-|Mode|Buttons:| Mode|Mode Long| Step |Step Long|
-|Show||Clountdown||Transition||
-|Transition||Countdown||Show||
-|Countdown||Fireworks||Set Hour||
-|Set Hour||Hour up||Hour Down|Set Minute|
-|Set Minute||Minute up||Minute Down|Countdown|
-|Fireworks||Show|Test Position|Next Effect||
+Comprehensive mode change table:
+
+|Current Mode|Press "Mode"|Press "Step"|Hold "Mode" Long|Hold "Step" Long|
+|---|---|---|---|---|
+|Show|>Countdown|>Transition||
+|Transition|>Countdown|>Show||
+|Countdown|>Fireworks|>Set Hour||
+|Fireworks|>Show|Next Effect|>Tst: Placement||
+|Set Hour|Hour up|Hour Down||>Set Minute|
+|Set Minute|Minute up|Minute Down||>Countdown|
+|Tst: Placement|>Tst: Colors|Switch Lamp group||
+|Tst: Colors|>Tst: Pictures|Switch main color||
+|Tst: Picture|Previous Picture|Next Picture|>Tst: Fade Solo||
+|Tst: Fade Solo|>Tst: Fade Ensemble|Next Lamp||
+|Tst: Fade Ensemble|>Tst: Scaling|Next Lamp||
+|Tst: Scaling Current|>Show|Add Lamp||
+
 
 
 ### Show Mode (Default Mode when switched on)

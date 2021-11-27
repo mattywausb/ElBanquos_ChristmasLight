@@ -9,6 +9,16 @@ Especially for assembly and installation there are multiple test programs to ver
 
 The build in LED on the Arduino board is used to give feedback about the mode.
 
+Comprehensive Mode Change Table:
+|Mode|Buttons:| Mode|Mode Long| Step |Step Long|
+|Show||Clountdown||Transition||
+|Transition||Countdown||Show||
+|Countdown||Fireworks||Set Hour||
+|Set Hour||Hour up||Hour Down|Set Minute|
+|Set Minute||Minute up||Minute Down|Countdown|
+|Fireworks||Show|Test Position|Next Effect||
+
+
 ### Show Mode (Default Mode when switched on)
 The show mode shows the static picture for a random number of seconds. After the wait time is over, a random new picture is determined and the program switches to transition mode.
 

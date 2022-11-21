@@ -2,7 +2,7 @@
 
 #ifdef TRACE_ON
 //#define TRACE_FIREWORK
-#define TRACE_FIREWORK_HIGH
+//#define TRACE_FIREWORK_HIGH
 
 #endif 
 
@@ -17,10 +17,10 @@
 #define FW_PATH_BANK_COUNT 5
 byte g_fw_path_buffer[FW_PATH_BANK_COUNT][FW_PATH_BUFFER_LENGTH];
 
+                                                                      // lamp and duration(4 bit fade, 4 bit framelenth)  for particle
                                                                       // fade=0-F = 10-535ms 35ms steps
                                                                       // framelength=0-F = 10-535ms 35ms steps  
                                                                       // Lamp 255 = Endmarker
-                                                                      // lamp and duration(4 bit fade, 4 bit framelenth)  for particle
 //                                1       2       3       4       6       6       7       8        9      10
 const byte fw_path_long_arc[] PROGMEM ={ 9,0x51,18,0x51, 2,0x62, 3,0x73,12,0x73,13,0x62, 14,0x62,255};   
 const byte fw_path_central_arc[] PROGMEM ={ 21,0x51,1,0x62, 24,0x62, 3,0x73,18,0x73,9,0x62,255}; 

@@ -73,17 +73,28 @@ void PictureLamp::updateOutput(byte light_index)
 
 void PictureLamp::setCurrentColor(float red, float green, float blue)
 {
-  current_red=red*FLOAT_CONVERSION;
-  current_green=green*FLOAT_CONVERSION;
-  current_blue=blue*FLOAT_CONVERSION;
+  this->setCurrentColor_int( current_red=red*FLOAT_CONVERSION,green*FLOAT_CONVERSION, current_blue=blue*FLOAT_CONVERSION);
+}
+
+void PictureLamp::setCurrentColor_int(int red, int green, int blue)
+{
+  current_red=red;
+  current_green=green;
+  current_blue=blue;
   transition_type=TT_NONE;
 }
 
 void PictureLamp::setTargetColor(float red, float green, float blue)
 {
-  target_red=red*FLOAT_CONVERSION;
-  target_green=green*FLOAT_CONVERSION;
-  target_blue=blue*FLOAT_CONVERSION;
+  setTargetColor_int(red*FLOAT_CONVERSION, green*FLOAT_CONVERSION,  blue*FLOAT_CONVERSION);
+}
+
+
+void PictureLamp::setTargetColor_int(int red, int green, int blue)
+{
+  target_red=red;
+  target_green=green;
+  target_blue=blue;
   transition_type=TT_BLEND;
   if(target_red==0 && target_green==0 && target_blue==0) transition_type=TT_OFF;
   if(current_red==0 && current_green==0 && current_blue==0) transition_type=TT_ON;

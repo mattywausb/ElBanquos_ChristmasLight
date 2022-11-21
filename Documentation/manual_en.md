@@ -16,17 +16,16 @@ Comprehensive mode change table:
 |Show|>Countdown|>Transition||
 |Transition|>Countdown|>Show||
 |Countdown|>Fireworks|>Set Hour||
-|Fireworks|>Show|Next Effect|>Tst: Placement||
+|Fireworks|>Show|Next Effect|>Tst: Sensor Calibration||
 |Set Hour|Hour up|Hour Down||>Set Minute|
 |Set Minute|Minute up|Minute Down||>Countdown|
+|Tst: Sensor Calibration|>Tst: Placement|||
 |Tst: Placement|>Tst: Palette|Switch Lamp group||
 |Tst: Palette|>Tst: Pictures|Switch colo of inner lamps||
 |Tst: Picture|Previous Picture|Next Picture|>Tst: Fade Solo||
 |Tst: Fade Solo|>Tst: Fade Ensemble|Next Lamp||
 |Tst: Fade Ensemble|>Tst: Scaling|Next Lamp||
 |Tst: Scaling Current|>Show|Add Lamp||
-
-
 
 ### Show Mode (Default Mode when switched on)
 The show mode shows the static picture for a random number of seconds. After the wait time is over, a random new picture is determined and the program switches to transition mode.
@@ -36,6 +35,11 @@ Status LED: OFF
 Press MODE-> Countdown Mode
 
 Press STEP-> Start transition to next picture in list
+
+#### Daylight detection
+The show mode uses a photocell to detect the ambient light situation. Only during low light, the show mode will choose one of the normal pictures. During "dailight", the show mode will activate one single lamp as an power indicator.
+
+The threshold to determine "dailight" is set by the potentiometer. For adustment see Tst: Light sensor calibration.
 
 ### Transition Mode
 The Transition Mode modifies the lamps slowly in random order to transition to the next picture. After it is done, the mode switches to Show Mode.
@@ -88,7 +92,14 @@ Press MODE-> Switch to Show Mode
 
 Press STEP-> Change to next fireworks pattern
 
-MODE Hold 2 sec and release: Switch to Placement Test
+MODE Hold 2 sec and release: Switch to Sensor Calibration
+
+### Sensor Calibration
+Sensor calibration activate most of the lamps in white and display the deviation between the current light sensor value and the threshold as a red lamp. The scale is , formed by yellow Lamps 10,20,3,11,6,12,4,13,7. Every lamp represents one histereris interval, having lamp 6 as the center = match of sensor an threshold value. 
+
+Press MODE -> Switch to Placement Test
+
+Press STEP -> no function
 
 ### Placement Test
 The placement test shows a rainbow color pattern on the different circles, starting with red on the upper lamp and forwarding clockwise.

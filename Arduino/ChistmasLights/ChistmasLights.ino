@@ -6,9 +6,9 @@
 //#define DEBUG_ON
 
 #ifdef TRACE_ON
-//#define TRACE_LOGIC
-//#define TRACE_PICTURES
-#define ENTER_TESTMODE_IMMEDIATLY
+#define TRACE_TRANSITION
+#define TRACE_PICTURES
+//#define ENTER_TESTMODE_IMMEDIATLY
 #define TRACE_MODES
 //#define TRACE_TIMING
 //#define TRACE_CLOCK
@@ -23,6 +23,14 @@
 Particle g_firework_particle[PARTICLE_COUNT];
 
 
+// TRANSITION_RYTHM_MINIMAL ms until next transition will be initiated 
+// TRANSITION_RYTHM_VARIANCE maximum random addon to TRANSITION_RYTHM_MINIMAL 
+// TRANSITION_DURATION_MINIMAL ms Duration of a single lamp transition 
+// TRANSITION_DURATION_VARIANCE maximim random addon to TRANSITION_DURATION_MINIMAL
+// SHOW_DURATION_MINIMAL ms until change to text picture will be triggered
+// SHOW_DURATION_VARIANCE maximun random addon to SHOW_DURATION_MINIMAL
+
+
 #ifndef DEBUG_ON
 // normal timing setting
 #define TRANSITION_RYTHM_MINIMAL 3000
@@ -34,12 +42,12 @@ Particle g_firework_particle[PARTICLE_COUNT];
 
 #else
 // debug timing setting
-#define TRANSITION_RYTHM_MINIMAL 700
-#define TRANSITION_RYTHM_VARIANCE 5000
+#define TRANSITION_RYTHM_MINIMAL 1000
+#define TRANSITION_RYTHM_VARIANCE 1000
 #define TRANSITION_DURATION_MINIMAL 1500
 #define TRANSITION_DURATION_VARIANCE 4000
-#define SHOW_DURATION_MINIMAL 3000  
-#define SHOW_DURATION_VARIANCE 1500
+#define SHOW_DURATION_MINIMAL 5000  
+#define SHOW_DURATION_VARIANCE 7000
 #endif
 
 #define BLEND_IN_DURATION 1500
@@ -110,21 +118,35 @@ const byte* const g_pic_table [] ={pic_cassiopeia,
 
 
 
-float g_color_palette[][3]={
+int g_color_palette[][3]={
+//          {0  ,0  ,0  },    // 0 = black
           {0  ,0  ,0  },    // 0 = black
-          {1  ,0.65,0  },   // 1 = yellow
-          {0  ,0.8  ,0.8  },// 2 = cyan
-          {0  ,0.5,0.08},   // 3 = mid green
-          {0.2,0.1,0 },     // 4 = dark brown
-          {1,0.0,0  },      // 5 = red
-          {0  ,0  ,0.8},    // 6 = blue
-          {1  ,1  ,1  },    // 7 = white
-          {0.8  ,0  ,0.8  },// 8 = pink
-          {1  ,0.3,0  },    // 9 = orange
-          {0  ,1  ,0  },    // 10 (A)= bright green
-          {0.1  ,0  ,0.75 },// 11 (B)= dark purple
-          {1, 0.45,0},      // 12 (C)= gold
-          {0.5,0.0,0.07},   // 13 (D)= low pastell red
+//          {1  ,0.65,0  },   // 1 = yellow
+          {10000  ,6500,0  },   // 1 = yellow
+//          {0  ,0.8  ,0.8  },// 2 = cyan
+          {0  ,8000  ,8  },// 2 = cyan
+//          {0  ,0.5,0.08},   // 3 = mid green
+          {0  ,5000,800},   // 3 = mid green
+//          {0.2,0.1,0 },     // 4 = dark brown
+          {2000,1000,0 },     // 4 = dark brown
+//          {1,0.0,0  },      // 5 = red
+          {10000,0,0  },      // 5 = red
+//          {0  ,0  ,0.8},    // 6 = blue
+          {0  ,0  ,8000},    // 6 = blue
+//          {1  ,1  ,1  },    // 7 = white
+          {10000  ,10000  ,10000  },    // 7 = white
+//          {0.8  ,0  ,0.8  },// 8 = pink
+          {8000  ,0  ,8000  },// 8 = pink
+//          {1  ,0.3,0  },    // 9 = orange
+          {10000  ,3000,0  },    // 9 = orange
+//          {0  ,1  ,0  },    // 10 (A)= bright green
+          {0  ,10000  ,0  },    // 10 (A)= bright green
+//          {0.1  ,0  ,0.75 },// 11 (B)= dark purple
+          {1000  ,0  ,7500 },// 11 (B)= dark purple
+//          {1, 0.45,0},      // 12 (C)= gold
+          {10000, 4500,0},      // 12 (C)= gold
+//          {0.5,0.0,0.07},   // 13 (D)= low pastell red
+          {5000,0,700},   // 13 (D)= low pastell red
 };
 
 #define COLOR_PALETTE_COUNT 14
@@ -308,6 +330,7 @@ void process_SHOW_MODE()
 
      if(millis()-g_picture_start_time > g_picture_duration_time) {  // start transition to a random picture 
       g_pic_index=255;
+     
       while (g_pic_index==255)
       {
         g_pic_index=random(PICTURE_COUNT);
@@ -339,8 +362,10 @@ void enter_TRANSITION_MODE()
     #endif
     g_process_mode=TRANSITION_MODE;
     input_IgnoreUntilRelease();
-    
-    set_target_picture(g_pic_index);
+
+    if(!input_getDaylightState()) { // normal operation
+        set_target_picture(g_pic_index);
+    } else set_daylight_target_picture();
     digitalWrite(LED_BUILTIN, true);
 }
 
@@ -375,15 +400,15 @@ void process_TRANSITION_MODE()
     {
       triggerNextTransition();
       if ( getTransitionsRunningCount()==0 ) enter_SHOW_MODE();
-      #ifdef TRACE_LOGIC
-        Serial.print(F("TRACE_LOGIC::transitions running: "));
+      #ifdef TRACE_TRANSITION
+        Serial.print(F("TRACE_TRANSITION::transitions running: "));
         Serial.println(getTransitionsRunningCount());
       #endif
       g_transition_start_time=millis();
       g_transition_follow_up_duration=TRANSITION_RYTHM_MINIMAL+random(TRANSITION_RYTHM_VARIANCE);
 
     }
-    #ifdef TRACE_LOGIC 
+    #ifdef TRACE_TRANSITION 
     //delay(500);
     #endif
 }
@@ -471,7 +496,7 @@ void set_picture(int picture_index)
   populate_random_color_map(picture_index);
   for (int i=0;i<LAMP_COUNT;i++) {
      byte c_index=get_mapped_color_number(PICTURE_POINT(picture_index,i));
-     g_picture_lamp[i].setCurrentColor(g_color_palette[c_index][iRED],g_color_palette[c_index][iGREEN],g_color_palette[c_index][iBLUE]);
+     g_picture_lamp[i].setCurrentColor_int(g_color_palette[c_index][iRED],g_color_palette[c_index][iGREEN],g_color_palette[c_index][iBLUE]);
      g_picture_lamp[i].updateOutput(i);
   }
 }
@@ -488,8 +513,22 @@ void set_target_picture(int picture_index)
   populate_random_color_map(picture_index);
   for (int i=0;i<LAMP_COUNT;i++) {
      byte  c_index=get_mapped_color_number(PICTURE_POINT(picture_index,i));
-     g_picture_lamp[i].setTargetColor(g_color_palette[c_index][iRED],g_color_palette[c_index][iGREEN],g_color_palette[c_index][iBLUE]);
+     g_picture_lamp[i].setTargetColor_int(g_color_palette[c_index][iRED],g_color_palette[c_index][iGREEN],g_color_palette[c_index][iBLUE]);
   }
+}
+
+/* Set dailight Picture
+ *  Sets the target values of all lamp to the energy saving dailight picture
+ */
+
+void set_daylight_target_picture(){
+    #ifdef TRACE_PICTURES 
+     Serial.print(F("TRACE_PICTURES::set_target_picture "));
+    #endif
+    for (int i=0;i<LAMP_COUNT;i++) { // set all to black
+       g_picture_lamp[i].setTargetColor(0,0,0);
+    }
+    g_picture_lamp[5].setTargetColor_int(g_color_palette[9][iRED],g_color_palette[9][iGREEN],g_color_palette[9][iBLUE]); // set upper tip to orange
 }
 
 /*  triggerNextTransotion
@@ -498,8 +537,8 @@ void set_target_picture(int picture_index)
  */
 bool triggerNextTransition()
 {
-  #ifdef TRACE_LOGIC
-    Serial.println(F("TRACE_LOGIC::triggerNextTransition "));
+  #ifdef TRACE_TRANSITION
+    Serial.println(F("TRACE_TRANSITION::triggerNextTransition "));
     Serial.print(millis()/1000);
     Serial.println(F(" seconds uptime"));
   #endif
@@ -520,8 +559,8 @@ bool triggerNextTransition()
     }
   } // for LAMP_COUNT
 
-  #ifdef TRACE_LOGIC
-    Serial.print(F("TRACE_LOGIC::total_count="));Serial.print(total_count);
+  #ifdef TRACE_TRANSITION
+    Serial.print(F("TRACE_TRANSITION::total_count="));Serial.print(total_count);
     Serial.print(F(" on_count="));Serial.print(on_count);
     Serial.print(F(" off_count="));Serial.println(off_count);
   #endif
@@ -530,8 +569,8 @@ bool triggerNextTransition()
 
   int trigger_lamp=getRandomPendingLamp();  // start transition of a random lamp
   g_picture_lamp[trigger_lamp].startTransition(duration);  
-  #ifdef TRACE_LOGIC
-    Serial.print(F("TRACE_LOGIC::trigger_lamp ")); Serial.println(trigger_lamp);
+  #ifdef TRACE_TRANSITION
+    Serial.print(F("TRACE_TRANSITION::trigger_lamp ")); Serial.println(trigger_lamp);
   #endif
   if(g_picture_lamp[trigger_lamp].getTransitionType()==TT_BLEND) return true;  // for a blend, one lamp is enough
 
@@ -539,8 +578,8 @@ bool triggerNextTransition()
     if(random(on_count)<=off_count) {
       trigger_lamp=getRandomLampOfTransitionType(TT_OFF);
       g_picture_lamp[trigger_lamp].startTransition(duration);
-      #ifdef TRACE_LOGIC
-          Serial.print(F("TRACE_LOGIC::triggered additional off lamp ")); Serial.println(trigger_lamp);
+      #ifdef TRACE_TRANSITION
+          Serial.print(F("TRACE_TRANSITION::triggered additional off lamp ")); Serial.println(trigger_lamp);
       #endif  
     }
   } else {  // it is not an on transitioning lamp
@@ -548,8 +587,8 @@ bool triggerNextTransition()
       if(random(off_count)<=on_count) {
         trigger_lamp=getRandomLampOfTransitionType(TT_ON);
         g_picture_lamp[trigger_lamp].startTransition(duration);
-        #ifdef TRACE_LOGIC
-            Serial.print(F("TRACE_LOGIC::triggered additional on lamp ")); Serial.println(trigger_lamp);
+        #ifdef TRACE_TRANSITION
+            Serial.print(F("TRACE_TRANSITION::triggered additional on lamp ")); Serial.println(trigger_lamp);
         #endif  
       }
     }
@@ -571,9 +610,9 @@ byte getRandomPendingLamp()
     if(++random_lamp>=LAMP_COUNT) random_lamp=0;
   }
   
-  #ifdef TRACE_LOGIC
+  #ifdef TRACE_TRANSITION
   if(i>=LAMP_COUNT) 
-    Serial.println(F("TRACE_LOGIC::getRandomPendingLamp-ERROR - no pending lamp found "));
+    Serial.println(F("TRACE_TRANSITION::getRandomPendingLamp-ERROR - no pending lamp found "));
   #endif
 
   return random_lamp;
@@ -591,9 +630,9 @@ byte getRandomLampOfTransitionType(transition_type_t wanted_type)
     if(g_picture_lamp[random_lamp].getTransitionType()==wanted_type && !g_picture_lamp[random_lamp].is_in_transition()) break;  // leave loop when lamp is found
     if(++random_lamp>=LAMP_COUNT) random_lamp=0;
   }
-  #ifdef TRACE_LOGIC
+  #ifdef TRACE_TRANSITION
   if(i>=LAMP_COUNT) 
-    Serial.println(F("TRACE_LOGIC::getRandomLampOfTransitionType-ERROR - no lamp of desired transition type found "));
+    Serial.println(F("TRACE_TRANSITION::getRandomLampOfTransitionType-ERROR - no lamp of desired transition type found "));
   #endif
 
   return random_lamp;
@@ -710,7 +749,7 @@ void enter_TEST_MODE_PALETTE()
     for(int i=0;i<LAMP_COUNT;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
     output_show();
     for(int i=1;i<COLOR_PALETTE_COUNT;i++) {  // Starting with logical lamp 6, set every lamp to one color of the palette until end of palette
-     g_picture_lamp[i+4].setCurrentColor(g_color_palette[i][iRED],g_color_palette[i][iGREEN],g_color_palette[i][iBLUE]);
+     g_picture_lamp[i+4].setCurrentColor_int(g_color_palette[i][iRED],g_color_palette[i][iGREEN],g_color_palette[i][iBLUE]);
      g_picture_lamp[i+4].updateOutput(i+4);
     }
     output_show();
@@ -727,11 +766,11 @@ void process_TEST_MODE_PALETTE()
     if(input_stepGotPressed()) {  // foreward one pattern
       if(++g_pic_index>=COLOR_PALETTE_COUNT) g_pic_index=0;
       for(int i=0;i<5;i++) {  // set color on lamp 1 to 5
-         g_picture_lamp[i].setCurrentColor(g_color_palette[g_pic_index][iRED],g_color_palette[g_pic_index][iGREEN],g_color_palette[g_pic_index][iBLUE]);
+         g_picture_lamp[i].setCurrentColor_int(g_color_palette[g_pic_index][iRED],g_color_palette[g_pic_index][iGREEN],g_color_palette[g_pic_index][iBLUE]);
          g_picture_lamp[i].updateOutput(i);
       }
       // set color of center lamp
-      g_picture_lamp[23].setCurrentColor(g_color_palette[g_pic_index][iRED],g_color_palette[g_pic_index][iGREEN],g_color_palette[g_pic_index][iBLUE]);
+      g_picture_lamp[23].setCurrentColor_int(g_color_palette[g_pic_index][iRED],g_color_palette[g_pic_index][iGREEN],g_color_palette[g_pic_index][iBLUE]);
       g_picture_lamp[23].updateOutput(23);
       output_show();
     } // select_got_pressed

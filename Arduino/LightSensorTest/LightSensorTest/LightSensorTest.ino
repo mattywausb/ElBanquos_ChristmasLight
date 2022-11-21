@@ -33,7 +33,7 @@ void loop() {
   if(input_normalized_light_sensor_value<-1) g_daylight=0;
 
   digitalWrite(LED_BUILTIN, g_daylight);
-  sprintf(stringBuffer,"input_normalized_light_sensor_value=%2d  daylight=%1d\n",input_normalized_light_sensor_value,g_daylight);
+  sprintf(stringBuffer," daylight=%1d\n",g_daylight);
   Serial.print(stringBuffer);
   delay(200);  
   
@@ -47,6 +47,6 @@ void input_determine_normalized_light_sensor_value()
 
 
   input_normalized_light_sensor_value=(sensor_value-treshold_base_value)/INPUT_HISTERESYS_GAP;
-  sprintf(stringBuffer,"sensor=%5d  threshold=%5d | ",sensor_value,treshold_base_value);
+  sprintf(stringBuffer,"s=%5d t=%5d nlv=%2d",sensor_value,treshold_base_value,input_normalized_light_sensor_value);
   Serial.print(stringBuffer);
 }

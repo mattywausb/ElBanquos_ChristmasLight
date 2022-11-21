@@ -3,13 +3,15 @@
 #include "mainSettings.h"
 #include "particle.h"
 
-//#define DEBUG_ON
+#define DEBUG_ON
 
 #ifdef TRACE_ON
 #define TRACE_TRANSITION
-#define TRACE_PICTURES
-//#define ENTER_TESTMODE_IMMEDIATLY
+//#define TRACE_PICTURES
+#define ENTER_TESTMODE_IMMEDIATLY
+//#define ENTER_CALIBRATION_IMMEDIATLY
 #define TRACE_MODES
+//#define TRACE_CALIBRATION
 //#define TRACE_TIMING
 //#define TRACE_CLOCK
 //#define TRACE_CLOCK_TIME
@@ -63,7 +65,7 @@ Particle g_firework_particle[PARTICLE_COUNT];
 
 // Picture description
 // number beginning at 30 define varaible palette. Defineing the group of same color in first digit and the color set to use in second
-
+#define MAIN_STAR_LAMP_LIMIT 20
 //                                         01 02 03 04 05  06 07 08 09 10  11 12 13 14 15 16 17 18 19 20  21 22 23 24
 
 const byte pic_cassiopeia[24]  PROGMEM ={   0, 0, 0, 0, 6,  0, 6, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 6, 6, 0,  0, 0, 0, 6}; // cassiopeia
@@ -116,7 +118,9 @@ const byte* const g_pic_table [] ={pic_cassiopeia,
 #define iGREEN 1
 #define iBLUE 2
 
-
+#define COLOR_IX_ORANGE 9
+#define COLOR_IX_RED 5
+#define COLOR_IX_WHITE 7
 
 int g_color_palette[][3]={
 //          {0  ,0  ,0  },    // 0 = black
@@ -124,9 +128,9 @@ int g_color_palette[][3]={
 //          {1  ,0.65,0  },   // 1 = yellow
           {10000  ,6500,0  },   // 1 = yellow
 //          {0  ,0.8  ,0.8  },// 2 = cyan
-          {0  ,8000  ,8  },// 2 = cyan
+          {0  ,8000  ,8000  },// 2 = cyan
 //          {0  ,0.5,0.08},   // 3 = mid green
-          {0  ,5000,800},   // 3 = mid green
+          {0  ,3500,250},     // 3 = mid green
 //          {0.2,0.1,0 },     // 4 = dark brown
           {2000,1000,0 },     // 4 = dark brown
 //          {1,0.0,0  },      // 5 = red
@@ -142,7 +146,7 @@ int g_color_palette[][3]={
 //          {0  ,1  ,0  },    // 10 (A)= bright green
           {0  ,10000  ,0  },    // 10 (A)= bright green
 //          {0.1  ,0  ,0.75 },// 11 (B)= dark purple
-          {1000  ,0  ,7500 },// 11 (B)= dark purple
+          {1000  ,0  ,7000 },// 11 (B)= dark purple
 //          {1, 0.45,0},      // 12 (C)= gold
           {10000, 4500,0},      // 12 (C)= gold
 //          {0.5,0.0,0.07},   // 13 (D)= low pastell red
@@ -178,6 +182,18 @@ byte g_pic_index=0; //
 byte g_picture_history [PICTURE_HISTORY_COUNT];
 byte g_picture_history_next_entry_index=0;
 
+// lamp path buffers
+
+#define LAMP_PATH_MAX_STEPS 10
+#define LAMP_PATH_BUFFER_LENGTH LAMP_PATH_MAX_STEPS*2+1
+#define LAMP_PATH_BANK_COUNT 5
+byte g_lamp_path_buffer[LAMP_PATH_BANK_COUNT][LAMP_PATH_BUFFER_LENGTH];
+
+// lamp path to display calibration                      1  2 3  4 5  6 7  8 9  10
+const byte lamp_path_for_calibration_scale[] PROGMEM ={ 10,20,3,11,6,12,4,13,7,255};  
+#define CALIBRATION_SCALE_LAMP_COUNT 9
+#define CALIBRATION_SCALE_CENTER_INDEX 4
+
 
 /* Control */
 enum PROCESS_MODES {
@@ -187,6 +203,7 @@ enum PROCESS_MODES {
   CLOCK_SET_HOUR_MODE,
   CLOCK_SET_MINUTE_MODE,
   FIREWORK_RUN,
+  SENSOR_CALIBRATION,
   TEST_MODE_PLACEMENT,
   TEST_MODE_PALETTE,
   TEST_MODE_PICTURES,
@@ -240,6 +257,10 @@ void setup() {
         g_firework_particle[p].init(g_picture_lamp);
 
   // switch to normal operation
+  #ifdef ENTER_CALIBRATION_IMMEDIATLY
+    enter_SENSOR_CALIBRATION();
+    return;
+  #endif
   #ifdef ENTER_TESTMODE_IMMEDIATLY
     enter_TEST_MODE_PALETTE();
     return;
@@ -259,6 +280,7 @@ void loop()
     case CLOCK_SET_HOUR_MODE:process_CLOCK_SET_MODE();break;
     case CLOCK_SET_MINUTE_MODE:process_CLOCK_SET_MODE();break;
     case FIREWORK_RUN:process_FIREWORK_RUN();break;
+    case SENSOR_CALIBRATION:process_SENSOR_CALIBRATION();break;
     case TEST_MODE_PLACEMENT:process_TEST_MODE_PLACEMENT();break;
     case TEST_MODE_PALETTE:process_TEST_MODE_PALETTE();break;
     case TEST_MODE_PICTURES:process_TEST_MODE_PICTURES();break;
@@ -523,12 +545,12 @@ void set_target_picture(int picture_index)
 
 void set_daylight_target_picture(){
     #ifdef TRACE_PICTURES 
-     Serial.print(F("TRACE_PICTURES::set_target_picture "));
+     Serial.println(F("TRACE_PICTURES::set_daylight_target_picture"));
     #endif
     for (int i=0;i<LAMP_COUNT;i++) { // set all to black
-       g_picture_lamp[i].setTargetColor(0,0,0);
+       g_picture_lamp[i].setTargetColor_int(0,0,0);
     }
-    g_picture_lamp[5].setTargetColor_int(g_color_palette[9][iRED],g_color_palette[9][iGREEN],g_color_palette[9][iBLUE]); // set upper tip to orange
+    g_picture_lamp[5].setTargetColor_int(g_color_palette[COLOR_IX_ORANGE][iRED],g_color_palette[COLOR_IX_ORANGE][iGREEN],g_color_palette[COLOR_IX_ORANGE][iBLUE]); // set upper tip to orange
 }
 
 /*  triggerNextTransotion
@@ -661,6 +683,62 @@ int getTransitionsPendingCount()
     if(!g_picture_lamp[i].is_transition_pending()) theCount++;
   }
   return theCount;
+}
+
+/* ========= SENSOR_CALIBRATION ======== */
+
+void enter_SENSOR_CALIBRATION() 
+{
+    #ifdef TRACE_MODES
+      Serial.println(F("#SENSOR_CALIBRATION"));
+    #endif
+    g_process_mode=SENSOR_CALIBRATION;
+    input_IgnoreUntilRelease();
+    memcpy_P(g_lamp_path_buffer[0],lamp_path_for_calibration_scale ,LAMP_PATH_BUFFER_LENGTH);
+    for (int i=0;i<LAMP_COUNT;i++) { // set all to black
+      if(i<MAIN_STAR_LAMP_LIMIT) g_picture_lamp[i].setCurrentColor_int(g_color_palette[COLOR_IX_WHITE][iRED],g_color_palette[COLOR_IX_WHITE][iGREEN],g_color_palette[COLOR_IX_WHITE][iBLUE]); // set upper tip to orange
+      else g_picture_lamp[i].setCurrentColor_int(0,0,0);
+      g_picture_lamp[i].updateOutput(i);
+    }
+    output_show(); 
+}
+
+void process_SENSOR_CALIBRATION()
+{
+   
+    if(input_selectGotPressed()) {
+      enter_TEST_MODE_PLACEMENT();
+      return;
+    }
+
+    if(input_stepGotPressed()) {
+      enter_SHOW_MODE();
+      return;      
+    }
+
+    int current_normalized_sensor_value=input_get_normalized_light_sensor_value();
+
+    int scale_index=CALIBRATION_SCALE_CENTER_INDEX+current_normalized_sensor_value;
+    if(scale_index<0) scale_index=0;
+    else if(scale_index>= CALIBRATION_SCALE_LAMP_COUNT) scale_index=CALIBRATION_SCALE_LAMP_COUNT-1;
+
+    byte lx=0;
+    for (byte i;i< CALIBRATION_SCALE_LAMP_COUNT;i++)
+    {
+      lx=g_lamp_path_buffer[0][i]-1;
+      if(i==scale_index) {
+        g_picture_lamp[lx].setCurrentColor_int(g_color_palette[COLOR_IX_RED][iRED],g_color_palette[COLOR_IX_RED][iGREEN],g_color_palette[COLOR_IX_RED][iBLUE]);
+        #ifdef TRACE_CALIBRATION
+          Serial.print(F("TRACE_CALIBRATION::scale_index="));  Serial.print(scale_index);
+          Serial.print(F("red_lamp="));  Serial.println(lx);
+        #endif
+      }
+      else g_picture_lamp[lx].setCurrentColor_int(g_color_palette[COLOR_IX_WHITE][iRED],g_color_palette[COLOR_IX_WHITE][iGREEN],g_color_palette[COLOR_IX_WHITE][iBLUE]);
+      g_picture_lamp[lx].updateOutput(lx);
+    }
+
+    output_show();
+
 }
 
 /* ========= TEST_MODE_PLACEMENT ======== */

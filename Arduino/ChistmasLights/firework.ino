@@ -12,10 +12,7 @@
 #define FW_SHOW_TYPE_COUNT 7
 
 
-#define FW_PATH_MAX_STEPS 10
-#define FW_PATH_BUFFER_LENGTH FW_PATH_MAX_STEPS*2+1
-#define FW_PATH_BANK_COUNT 5
-byte g_fw_path_buffer[FW_PATH_BANK_COUNT][FW_PATH_BUFFER_LENGTH];
+
 
                                                                       // lamp and duration(4 bit fade, 4 bit framelenth)  for particle
                                                                       // fade=0-F = 10-535ms 35ms steps
@@ -91,7 +88,7 @@ void process_FIREWORK_RUN()
 
     if(input_selectGotReleased()) {  
       if(input_getLastPressDuration()>LONG_PRESS_DURATION)   // Long press
-         enter_TEST_MODE_PLACEMENT();
+         enter_SENSOR_CALIBRATION();
       else 
          enter_SHOW_MODE();
       return;
@@ -193,56 +190,56 @@ void fw_init_show() {
   switch(g_fw_show_type) {
     case 1:           // Sparkle from left and right bottom
            g_fw_show_shot_limit=100+random(30); 
-           memcpy_P(g_fw_path_buffer[0],fw_path_long_arc,FW_PATH_BUFFER_LENGTH);
-           g_fw_path_buffer[0][FW_PATH_BUFFER_LENGTH-1]=255; //guarantee final stop of pattern
+           memcpy_P(g_lamp_path_buffer[0],fw_path_long_arc,LAMP_PATH_BUFFER_LENGTH);
+           g_lamp_path_buffer[0][LAMP_PATH_BUFFER_LENGTH-1]=255; //guarantee final stop of pattern
            break;
     case 2:          // single Rockets
            g_fw_show_shot_limit=10+random(4)*2;   // 5(+2) Rockets
-           memcpy_P(g_fw_path_buffer[0],fw_path_straigth_accellerating,FW_PATH_BUFFER_LENGTH);  // We use long arc for liftoff
-           g_fw_path_buffer[0][8]=255; // Limit the path at explosion point
-           memcpy_P(g_fw_path_buffer[1],fw_path_circle,FW_PATH_BUFFER_LENGTH);  // This is the colorfull circle
+           memcpy_P(g_lamp_path_buffer[0],fw_path_straigth_accellerating,LAMP_PATH_BUFFER_LENGTH);  // We use long arc for liftoff
+           g_lamp_path_buffer[0][8]=255; // Limit the path at explosion point
+           memcpy_P(g_lamp_path_buffer[1],fw_path_circle,LAMP_PATH_BUFFER_LENGTH);  // This is the colorfull circle
            break;
     case 3:          // Sunflower
            g_fw_show_shot_limit=3000;   // about 60 seconds with 15 ms per shot
-           memcpy_P(g_fw_path_buffer[0],fw_path_beam_3h ,FW_PATH_BUFFER_LENGTH);
-           memcpy_P(g_fw_path_buffer[1],fw_path_beam_5h ,FW_PATH_BUFFER_LENGTH);   
-           memcpy_P(g_fw_path_buffer[2],fw_path_beam_7h ,FW_PATH_BUFFER_LENGTH);  
-           memcpy_P(g_fw_path_buffer[3],fw_path_beam_9h ,FW_PATH_BUFFER_LENGTH); 
-           memcpy_P(g_fw_path_buffer[4],fw_path_beam_0h ,FW_PATH_BUFFER_LENGTH);
+           memcpy_P(g_lamp_path_buffer[0],fw_path_beam_3h ,LAMP_PATH_BUFFER_LENGTH);
+           memcpy_P(g_lamp_path_buffer[1],fw_path_beam_5h ,LAMP_PATH_BUFFER_LENGTH);   
+           memcpy_P(g_lamp_path_buffer[2],fw_path_beam_7h ,LAMP_PATH_BUFFER_LENGTH);  
+           memcpy_P(g_lamp_path_buffer[3],fw_path_beam_9h ,LAMP_PATH_BUFFER_LENGTH); 
+           memcpy_P(g_lamp_path_buffer[4],fw_path_beam_0h ,LAMP_PATH_BUFFER_LENGTH);
            g_fw_main_color=random(360); 
            break;
     case 4:          // Joker
            g_fw_show_shot_limit=50+random(12);   
-           memcpy_P(g_fw_path_buffer[0],fw_path_beam_3h ,FW_PATH_BUFFER_LENGTH);
-           memcpy_P(g_fw_path_buffer[1],fw_path_beam_5h ,FW_PATH_BUFFER_LENGTH);   
-           memcpy_P(g_fw_path_buffer[2],fw_path_beam_7h ,FW_PATH_BUFFER_LENGTH);  
-           memcpy_P(g_fw_path_buffer[3],fw_path_beam_9h ,FW_PATH_BUFFER_LENGTH); 
-           memcpy_P(g_fw_path_buffer[4],fw_path_beam_0h ,FW_PATH_BUFFER_LENGTH);
+           memcpy_P(g_lamp_path_buffer[0],fw_path_beam_3h ,LAMP_PATH_BUFFER_LENGTH);
+           memcpy_P(g_lamp_path_buffer[1],fw_path_beam_5h ,LAMP_PATH_BUFFER_LENGTH);   
+           memcpy_P(g_lamp_path_buffer[2],fw_path_beam_7h ,LAMP_PATH_BUFFER_LENGTH);  
+           memcpy_P(g_lamp_path_buffer[3],fw_path_beam_9h ,LAMP_PATH_BUFFER_LENGTH); 
+           memcpy_P(g_lamp_path_buffer[4],fw_path_beam_0h ,LAMP_PATH_BUFFER_LENGTH);
            break;
   case 5:          // Roman lights
            g_fw_show_shot_limit=2*(6+random(4)); // one cycle needs 2 steps
-           memcpy_P(g_fw_path_buffer[0],fw_path_straigth_decellerating ,FW_PATH_BUFFER_LENGTH);  
-           memcpy_P(g_fw_path_buffer[1],fw_path_peak_explode_1 ,FW_PATH_BUFFER_LENGTH);  
-           memcpy_P(g_fw_path_buffer[2],fw_path_peak_explode_2 ,FW_PATH_BUFFER_LENGTH);
+           memcpy_P(g_lamp_path_buffer[0],fw_path_straigth_decellerating ,LAMP_PATH_BUFFER_LENGTH);  
+           memcpy_P(g_lamp_path_buffer[1],fw_path_peak_explode_1 ,LAMP_PATH_BUFFER_LENGTH);  
+           memcpy_P(g_lamp_path_buffer[2],fw_path_peak_explode_2 ,LAMP_PATH_BUFFER_LENGTH);
            break;
   case 6:          // Glitterbomb
            g_fw_show_shot_limit=5*7; // one cycle needs 7 shots
             
-           memcpy_P(g_fw_path_buffer[0],fw_path_middle_up,FW_PATH_BUFFER_LENGTH);
-           g_fw_path_buffer[0][6]=255; // Stop after 3rd element (middle led)
+           memcpy_P(g_lamp_path_buffer[0],fw_path_middle_up,LAMP_PATH_BUFFER_LENGTH);
+           g_lamp_path_buffer[0][6]=255; // Stop after 3rd element (middle led)
              
            for(step=0;step<10;step++) { //Put all innter and outer star lamps into the pattern
-            g_fw_path_buffer[1][step*2]=step+1;
-            g_fw_path_buffer[1][step*2+1]=0xf0;
+            g_lamp_path_buffer[1][step*2]=step+1;
+            g_lamp_path_buffer[1][step*2+1]=0xf0;
            }
-           g_fw_path_buffer[1][4*2+1]=0xff; // set long step time from inner to outer ring so we can insert the middle
-           g_fw_path_buffer[1][20]=255;
+           g_lamp_path_buffer[1][4*2+1]=0xff; // set long step time from inner to outer ring so we can insert the middle
+           g_lamp_path_buffer[1][20]=255;
 
            for(step=0;step<10;step++) { //Put all 10 "minute ring" leds into the pattern
-            g_fw_path_buffer[2][step*2]=step+11;
-            g_fw_path_buffer[2][step*2+1]=0xf0;
+            g_lamp_path_buffer[2][step*2]=step+11;
+            g_lamp_path_buffer[2][step*2+1]=0xf0;
            }
-           g_fw_path_buffer[2][20]=255;
+           g_lamp_path_buffer[2][20]=255;
 
            break;
   }  
@@ -250,14 +247,14 @@ void fw_init_show() {
 
 void fw_trace_paths_to_serial()
 {
-  for(int bank=0;bank<FW_PATH_BANK_COUNT;bank++) {
+  for(int bank=0;bank<LAMP_PATH_BANK_COUNT;bank++) {
               Serial.print(F("Path Bank "));
               Serial.print(bank);
               Serial.print(F(" : "));
-      for(byte step=0;step<FW_PATH_MAX_STEPS;step++) {
-              Serial.print(g_fw_path_buffer[bank][step*2]);
+      for(byte step=0;step<LAMP_PATH_MAX_STEPS;step++) {
+              Serial.print(g_lamp_path_buffer[bank][step*2]);
               Serial.print(F(","));
-              Serial.print(g_fw_path_buffer[bank][step*2+1],HEX);
+              Serial.print(g_lamp_path_buffer[bank][step*2+1],HEX);
               Serial.print(F(" / "));
       }
       Serial.println();
@@ -270,7 +267,7 @@ void show_1_next_particle()  // Sparkle from left and right bottom
       color.h=40; // mostly yello with little Orange
       color.s=random(60)/100.0; // Nearly white
       color.v=1;  // Brightest
-      g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[0],4+random(3),random(2),3,color,255,0.7);
+      g_firework_particle[g_next_free_particle].start(g_lamp_path_buffer[0],4+random(3),random(2),3,color,255,0.7);
       if(++g_next_free_particle>=PARTICLE_COUNT)g_next_free_particle=0;
       g_picture_duration_time=150+random(400);
       g_fw_show_shot++;
@@ -284,14 +281,14 @@ void show_2_next_particle()  // Launch Rockets
           color.s=0.8; 
           color.v=0.4; 
           g_mirror=random(2);
-          g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[0],g_mirror,5,color);
+          g_firework_particle[g_next_free_particle].start(g_lamp_path_buffer[0],g_mirror,5,color);
           if(++g_next_free_particle>=PARTICLE_COUNT)g_next_free_particle=0;
           g_picture_duration_time=1000+random(200);
       } else {          // Explode
           color.h=random(360); 
           color.s=1; 
           color.v=1; 
-          g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[1],9-random(6),g_mirror,5,color,255,1);
+          g_firework_particle[g_next_free_particle].start(g_lamp_path_buffer[1],9-random(6),g_mirror,5,color,255,1);
           if(++g_next_free_particle>=PARTICLE_COUNT)g_next_free_particle=0;
           g_picture_duration_time=3000+random(1500);    
       }
@@ -310,7 +307,7 @@ void show_3_next_particle()  // Sunflower Particle
       byte lfo=shotsLeft/800; // Counting slowly to 0 over runtime of show
       int pathIndex=(g_fw_show_shot/(2+(lfo/3)))%5;
       if(g_mirror)pathIndex=4-pathIndex;  // flip rotation in mirror mode
-      g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[pathIndex],g_mirror,1,color);
+      g_firework_particle[g_next_free_particle].start(g_lamp_path_buffer[pathIndex],g_mirror,1,color);
       if(++g_next_free_particle>=PARTICLE_COUNT)g_next_free_particle=0;
       g_picture_duration_time=12;
       g_fw_show_shot++;
@@ -322,7 +319,7 @@ void show_4_next_particle()  // Joker
       color.h=30+random(15); // mostly Orange to yello
       color.s=0.9-random(20)/100.0; // more colorful
       color.v=1;  // Brightness
-      g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[random(5)],random(2),2,color);
+      g_firework_particle[g_next_free_particle].start(g_lamp_path_buffer[random(5)],random(2),2,color);
       if(++g_next_free_particle>=PARTICLE_COUNT)g_next_free_particle=0;
       g_picture_duration_time=350+random(400); // time to next new particle
       g_fw_show_shot++;
@@ -336,14 +333,14 @@ void show_5_next_particle()  // Roman Lights
           color.s=1;
           color.v=1;  // Brightness
           g_mirror=random(2);
-          g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[0],g_mirror,2,color);
+          g_firework_particle[g_next_free_particle].start(g_lamp_path_buffer[0],g_mirror,2,color);
           if(++g_next_free_particle>=PARTICLE_COUNT)g_next_free_particle=0;
           g_picture_duration_time=450;  
       } else {  // explode 
           color.h=35; // orange
           color.s=1;
           color.v=0.3;  // Brightness
-          g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[1+random(2)],g_mirror,3,color);
+          g_firework_particle[g_next_free_particle].start(g_lamp_path_buffer[1+random(2)],g_mirror,3,color);
           if(++g_next_free_particle>=PARTICLE_COUNT)g_next_free_particle=0;
           g_picture_duration_time=1500+random(500); 
       }
@@ -361,12 +358,12 @@ void show_6_next_particle()  // Glitterbomb
     #endif
     switch (phase) {
       case 0:  // Launch
-            for(byte bank=3;bank<FW_PATH_BANK_COUNT;bank++){  // Create glitter Pattern in bank 3-4
-              for(step=0;step<FW_PATH_MAX_STEPS;step++) {
-                g_fw_path_buffer[bank][step*2]=random(LAMP_COUNT)+1;
-                g_fw_path_buffer[bank][step*2+1]=0x01|((10+random(5))<<4);
+            for(byte bank=3;bank<LAMP_PATH_BANK_COUNT;bank++){  // Create glitter Pattern in bank 3-4
+              for(step=0;step<LAMP_PATH_MAX_STEPS;step++) {
+                g_lamp_path_buffer[bank][step*2]=random(LAMP_COUNT)+1;
+                g_lamp_path_buffer[bank][step*2+1]=0x01|((10+random(5))<<4);
               }
-              g_fw_path_buffer[bank][step*2]=255;
+              g_lamp_path_buffer[bank][step*2]=255;
             }
             #ifdef TRACE_FIREWORK_HIGH
                  fw_trace_paths_to_serial();
@@ -374,7 +371,7 @@ void show_6_next_particle()  // Glitterbomb
             color.h=15; // nearly red
             color.s=1;
             color.v=0.3;  // Brightness
-            g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[0],false,2,color);
+            g_firework_particle[g_next_free_particle].start(g_lamp_path_buffer[0],false,2,color);
             if(++g_next_free_particle>=PARTICLE_COUNT)g_next_free_particle=0;
             g_picture_duration_time=1300;
             break;
@@ -383,7 +380,7 @@ void show_6_next_particle()  // Glitterbomb
             color.h=g_fw_main_color;
             color.s=1;
             color.v=1;
-            g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[1],false,8,color);
+            g_firework_particle[g_next_free_particle].start(g_lamp_path_buffer[1],false,8,color);
             if(++g_next_free_particle>=PARTICLE_COUNT)g_next_free_particle=0;
             g_picture_duration_time=1000;
             break;          
@@ -391,7 +388,7 @@ void show_6_next_particle()  // Glitterbomb
             color.h=g_fw_main_color;
             color.s=1;
             color.v=1;
-            g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[2],false,8,color);
+            g_firework_particle[g_next_free_particle].start(g_lamp_path_buffer[2],false,8,color);
             if(++g_next_free_particle>=PARTICLE_COUNT)g_next_free_particle=0;
             g_picture_duration_time=1000;
             break;
@@ -402,7 +399,7 @@ void show_6_next_particle()  // Glitterbomb
             color.h=30; // gold
             color.s=1-random(50)/100.0;  // Slight saturation differences
             color.v=0.8;  // Brightness
-            g_firework_particle[g_next_free_particle].start(g_fw_path_buffer[3+(phase%2)],phase%4,4,color);
+            g_firework_particle[g_next_free_particle].start(g_lamp_path_buffer[3+(phase%2)],phase%4,4,color);
             if(++g_next_free_particle>=PARTICLE_COUNT)g_next_free_particle=0;
             if(phase<6) g_picture_duration_time=150;
             else g_picture_duration_time=2000+random(1500);

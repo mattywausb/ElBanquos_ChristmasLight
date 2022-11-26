@@ -3,7 +3,6 @@
 #include "mainSettings.h"
 #include "particle.h"
 
-#define DEBUG_ON
 
 #ifdef TRACE_ON
 #define TRACE_TRANSITION
@@ -11,6 +10,7 @@
 #define ENTER_TESTMODE_IMMEDIATLY
 //#define ENTER_CALIBRATION_IMMEDIATLY
 #define TRACE_MODES
+#define DEBUG_ON
 //#define TRACE_CALIBRATION
 //#define TRACE_TIMING
 //#define TRACE_CLOCK
@@ -85,6 +85,11 @@ const byte pic_ichtys[24]      PROGMEM ={   6, 6, 0, 6, 6,  6, 0, 6, 0, 6,  0, 0
 const byte pic_3_wise[24]      PROGMEM ={  11, 0, 0, 0, 0,  7, 0, 0, 0, 0,  0, 0, 9, 9, 0, 0, 0, 0, 3, 3,  0, 0, 0,11}; // pic_3_wise
 const byte pic_krippe[24]      PROGMEM ={   0, 9, 0, 0, 9,  0, 0, 9, 9, 0,  0, 0, 0, 0, 9, 0, 0, 9, 0, 0,  1, 0, 7, 9}; // krippe
 const byte pic_half_moon[24]   PROGMEM ={   1, 0, 0, 1, 1,  0, 0, 0, 0, 0,  0, 1, 1, 1, 1, 1, 1, 1, 0, 0,  1, 0, 0, 0}; // half_moon
+const byte pic_pyramid[24]     PROGMEM ={  12, 0, 0, 0, 0,  0, 0,12,12, 0,  0, 0, 0, 0, 0,12,12, 0, 0, 0,  0, 0, 0, 0}; // half_moon
+const byte pic_fade_star[24]   PROGMEM ={   9, 9, 9, 9, 9,  7, 7, 7, 7, 7,  1, 0, 1, 0, 1, 0, 1, 0, 1, 0,  0, 0, 0, 5}; // fade star
+const byte pic_fade_arrow[24]  PROGMEM ={   5, 9, 1, 1, 9,  7, 0, 8, 8, 0,  1, 1, 0, 0, 5, 0, 0, 5, 0, 0,  8, 0, 0, 9}; // fade arrow
+
+//                                         01 02 03 04 05  06 07 08 09 10  11 12 13 14 15 16 17 18 19 20  21 22 23 24
 
 //const byte pic_heart[24]     PROGMEM ={   0, 0, 5, 5, 0,  0, 0, 0, 0, 0,  0, 0, 5, 5, 5, 5, 5, 5, 5, 5,  5, 0, 0, 5}; // Heart
 
@@ -92,24 +97,27 @@ const byte pic_half_moon[24]   PROGMEM ={   1, 0, 0, 1, 1,  0, 0, 0, 0, 0,  0, 1
 
 //const byte pic_######[24]      PROGMEM ={   0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0}; //## #####
 
-                                                     // on: off rate (to test transition algorythm)
-const byte* const g_pic_table [] ={pic_cassiopeia,  
-                                   pic_star_uni,     // 16:1
-                                   pic_star_color,   // 0:0
-                                   pic_pentagons,    // 0:10
-                                   pic_center_star,  // 1:5
-                                   pic_gingerbread,  // 13:0
-                                   pic_angel,        // 4:8
-                                   pic_snow_man,     // 0:6
-                                   pic_moon,         // 7:4
-                                   pic_flake_1,      // 6:7
-                                   pic_flake_2,      // 5:5
-                                   pic_bell,         // 7:9
-                                   pic_tree,         // 5:2
-                                   pic_ichtys,       // 5:4
-                                   pic_3_wise,       // 3:9
-                                   pic_krippe,       // 8:6
-                                   pic_half_moon     // 7:4                            
+                                                     
+const byte* const g_pic_table [] ={pic_pyramid, 
+                                   pic_fade_star,     
+                                   pic_fade_arrow,
+                                   pic_cassiopeia,  
+                                   pic_star_uni,     
+                                   pic_star_color,   
+                                   pic_pentagons,    
+                                   pic_center_star,  
+                                   pic_gingerbread,  
+                                   pic_angel,        
+                                   pic_snow_man,     
+                                   pic_moon,         
+                                   pic_flake_1,      
+                                   pic_flake_2,      
+                                   pic_bell,         
+                                   pic_tree,         
+                                   pic_ichtys,       
+                                   pic_3_wise,       
+                                   pic_krippe,       
+                                   pic_half_moon,    
                                    }; 
 
 #define PICTURE_POINT(pic,lamp) pgm_read_byte_near(g_pic_table[pic]+lamp*sizeof(byte))
@@ -118,6 +126,7 @@ const byte* const g_pic_table [] ={pic_cassiopeia,
 #define iGREEN 1
 #define iBLUE 2
 
+#define COLOR_IX_BROWN 4
 #define COLOR_IX_ORANGE 9
 #define COLOR_IX_RED 5
 #define COLOR_IX_WHITE 7
@@ -262,7 +271,7 @@ void setup() {
     return;
   #endif
   #ifdef ENTER_TESTMODE_IMMEDIATLY
-    enter_TEST_MODE_PALETTE();
+    enter_TEST_MODE_PICTURES();
     return;
   #endif
   enter_SHOW_MODE();
@@ -550,7 +559,7 @@ void set_daylight_target_picture(){
     for (int i=0;i<LAMP_COUNT;i++) { // set all to black
        g_picture_lamp[i].setTargetColor_int(0,0,0);
     }
-    g_picture_lamp[5].setTargetColor_int(g_color_palette[COLOR_IX_ORANGE][iRED],g_color_palette[COLOR_IX_ORANGE][iGREEN],g_color_palette[COLOR_IX_ORANGE][iBLUE]); // set upper tip to orange
+    g_picture_lamp[20].setTargetColor_int(g_color_palette[COLOR_IX_BROWN][iRED],g_color_palette[COLOR_IX_BROWN][iGREEN],g_color_palette[COLOR_IX_BROWN][iBLUE]); // set upper tip to orange
 }
 
 /*  triggerNextTransotion

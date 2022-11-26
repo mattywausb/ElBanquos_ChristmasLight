@@ -95,11 +95,13 @@ Press STEP-> Change to next fireworks pattern
 MODE Hold 2 sec and release: Switch to Sensor Calibration
 
 ### Sensor Calibration
-Sensor calibration activate most of the lamps in white and display the deviation between the current light sensor value and the threshold as a red lamp. The scale is , formed by yellow Lamps 10,20,3,11,6,12,4,13,7. Every lamp represents one histereris interval, having lamp 6 as the center = match of sensor an threshold value. 
+Sensor calibration activates most of the lamps in white and display the deviation between the current light sensor value and the threshold as a red lamp. The scale is formed by lamps 10,20,3,11,6,12,4,13,7. The middle lamp(6), represents the current sensor value. The red indicated postion shows the current threshold, defined by the potentiometer. Setting the threshold to the left (10,20,3,11) defines the current sensor value as lowlight. Setting it to the right (12,4,13,7) , defines the current sensor value as daylight. One lamp stands for one histeresys interval. Value changes inside the histeresys interval will not change the current low/day state.
 
 Press MODE -> Switch to Placement Test
 
-Press STEP -> no function
+Press STEP -> Switch to Show Mode
+
+This Calibration mode is only for easy search of the threshold.  The setting of the threshold is measured independently at every change of a picture. 
 
 ### Placement Test
 The placement test shows a rainbow color pattern on the different circles, starting with red on the upper lamp and forwarding clockwise.

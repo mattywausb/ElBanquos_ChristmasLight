@@ -73,10 +73,14 @@ bool input_enabled=true;
 #define INPUT_ANALOG_PORT_SENSOR 1
 
 #define INPUT_HISTERESYS_GAP 50
-#define INPUT_THRESHOLD_BASE INPUT_HISTERESYS_GAP+10
+#define INPUT_THRESHOLD_BASE INPUT_HISTERESYS_GAP+3
+#define INPUT_NOISE_TOLERANCE 3
 
 byte input_daylight=0;
+
 int input_normalized_light_sensor_value=0;
+int input_light_sensor_value_denoised=0;
+int input_threshold_base_value_denoised=0;
 
 /* General state variables */
 volatile bool setupComplete = false;
@@ -182,17 +186,19 @@ int input_get_normalized_light_sensor_value()
 
 void input_determine_normalized_light_sensor_value()
 {
-  int sensor_value=analogRead(INPUT_ANALOG_PORT_SENSOR);
-  int treshold_base_value=analogRead(INPUT_ANALOG_PORT_THRESHOLD)+INPUT_THRESHOLD_BASE;
   #ifdef TRACE_INPUT_LIGHTSENSOR
     char stringBuffer[30];
   #endif
+  int sensor_value=analogRead(INPUT_ANALOG_PORT_SENSOR);
+  int threshold_base_value=analogRead(INPUT_ANALOG_PORT_THRESHOLD)+INPUT_THRESHOLD_BASE;
 
+  if(abs(input_light_sensor_value_denoised-sensor_value)>=INPUT_NOISE_TOLERANCE)input_light_sensor_value_denoised=sensor_value;
+  if(abs(input_threshold_base_value_denoised-threshold_base_value)>=INPUT_NOISE_TOLERANCE)input_threshold_base_value_denoised=threshold_base_value;
 
-  input_normalized_light_sensor_value=(sensor_value-treshold_base_value)/INPUT_HISTERESYS_GAP;
+  input_normalized_light_sensor_value=(input_light_sensor_value_denoised-input_threshold_base_value_denoised)/INPUT_HISTERESYS_GAP;
   #ifdef TRACE_INPUT_LIGHTSENSOR
       Serial.print(F("TRACE_INPUT_LIGHTSENSOR"));
-      sprintf(stringBuffer,"s=%5d t=%5d nlv=%2d\n",sensor_value,treshold_base_value,input_normalized_light_sensor_value);
+      sprintf(stringBuffer,"s=%5d t=%5d nlv=%2d\n",input_light_sensor_value_denoised,input_threshold_base_value_denoised,input_normalized_light_sensor_value);
       Serial.print(stringBuffer);
   #endif      
 }

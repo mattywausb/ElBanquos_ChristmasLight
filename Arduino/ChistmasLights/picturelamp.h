@@ -12,6 +12,8 @@ class PictureLamp
       void updateOutput(byte light_index);
       void setCurrentColor(float red, float green, float blue);
       void setTargetColor(float red, float green, float blue);
+      void setCurrentColor_int(int red, int green, int blue);
+      void setTargetColor_int(int red, int green, int blue);
       void startTransition(unsigned long duration);
       void endTransition();
 

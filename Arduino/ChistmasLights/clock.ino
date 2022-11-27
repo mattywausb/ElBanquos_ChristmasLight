@@ -29,7 +29,9 @@ unsigned long g_clock_sync_time=0;  // Time to calibrate "zeropoint" of systemcl
 void enter_CLOCK_MODE() 
 {
     #ifdef TRACE_MODES
-      Serial.println(F("#CLOCK_MODE"));
+      Serial.print(F("#CLOCK_MODE: "));
+      Serial.print(freeMemory());
+      Serial.println(F(" bytes free memory"));
     #endif
     g_process_mode=CLOCK_MODE;
     digitalWrite(LED_BUILTIN, false);
@@ -214,12 +216,12 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
              #ifdef TRACE_CLOCK
               Serial.print(color1);
              #endif
-          g_picture_lamp[i].setTargetColor(g_color_palette[color1][iRED],g_color_palette[color1][iGREEN],g_color_palette[color1][iBLUE]);
+          g_picture_lamp[i].setTargetColor_int(g_color_palette[color1][iRED],g_color_palette[color1][iGREEN],g_color_palette[color1][iBLUE]);
         } else { 
              #ifdef TRACE_CLOCK
               Serial.print(color0);
              #endif
-          g_picture_lamp[i].setTargetColor(g_color_palette[color0][iRED],g_color_palette[color0][iGREEN],g_color_palette[color0][iBLUE]);
+          g_picture_lamp[i].setTargetColor_int(g_color_palette[color0][iRED],g_color_palette[color0][iGREEN],g_color_palette[color0][iBLUE]);
         }
     
        g_picture_lamp[i].startTransition(transitionTime);
@@ -271,7 +273,7 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
       if(i>5) { lamp= i!=10 ? i+10 : 10;}
        else { if(i==5) lamp=20; }     
     } else if(i>9) {       // in second mode after 10 lamps switch of lamp 20 and bail out 
-        g_picture_lamp[20].setTargetColor(0,0,0);
+        g_picture_lamp[20].setTargetColor_int(0,0,0);
         g_picture_lamp[20].startTransition(transitionTime);
         break; 
     }
@@ -279,7 +281,7 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
     if(i<color1_border) colorIndex=color0;
       else if(i<color2_border) colorIndex=color1;
         else colorIndex=color2;
-    g_picture_lamp[lamp].setTargetColor(g_color_palette[colorIndex][iRED],g_color_palette[colorIndex][iGREEN],g_color_palette[colorIndex][iBLUE]);
+    g_picture_lamp[lamp].setTargetColor_int(g_color_palette[colorIndex][iRED],g_color_palette[colorIndex][iGREEN],g_color_palette[colorIndex][iBLUE]);
     g_picture_lamp[lamp].startTransition(transitionTime);
     #ifdef TRACE_CLOCK
           Serial.print(F("/"));
@@ -308,7 +310,7 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
        } else {
         if(currentHour>=18) {   // Slow Animation
            colorIndex=GET_SECOND_6_COLOR(currentSecond/10); 
-           g_picture_lamp[23].setTargetColor(g_color_palette[colorIndex][iRED],g_color_palette[colorIndex][iGREEN],g_color_palette[colorIndex][iBLUE]);
+           g_picture_lamp[23].setTargetColor_int(g_color_palette[colorIndex][iRED],g_color_palette[colorIndex][iGREEN],g_color_palette[colorIndex][iBLUE]);
            g_picture_lamp[23].startTransition(transitionTime);
            #ifdef TRACE_CLOCK
                  Serial.print(F(">order_next_clock_picture SECOND: >"));Serial.print(colorIndex);Serial.println(F("<"));
@@ -316,7 +318,7 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
         }
        }
    } else  {   // seconds are on the minute ring
-         g_picture_lamp[23].setTargetColor(0,0,0);   // Switch off the center
+         g_picture_lamp[23].setTargetColor_int(0,0,0);   // Switch off the center
          g_picture_lamp[23].startTransition(transitionTime);
    }
 
@@ -331,7 +333,7 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
     lamp=i<2?i+3:i-2;
     if(i<color1_border) colorIndex=color0;
       else  colorIndex=color1;
-    g_picture_lamp[lamp].setTargetColor(g_color_palette[colorIndex][iRED],g_color_palette[colorIndex][iGREEN],g_color_palette[colorIndex][iBLUE]);
+    g_picture_lamp[lamp].setTargetColor_int(g_color_palette[colorIndex][iRED],g_color_palette[colorIndex][iGREEN],g_color_palette[colorIndex][iBLUE]);
     g_picture_lamp[lamp].startTransition(transitionTime);
     #ifdef TRACE_CLOCK
           Serial.print(F("/"));

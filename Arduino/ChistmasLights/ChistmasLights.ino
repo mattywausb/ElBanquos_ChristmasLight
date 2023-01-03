@@ -314,17 +314,17 @@ void enter_SHOW_MODE()
     #endif
 
     
-    if(g_process_mode!=TRANSITION_MODE) {  // When not coming from Transition, init a random picture
-        g_pic_index=random(PICTURE_COUNT);
-        set_target_picture( g_pic_index);
-        for(int i=0;i<LAMP_COUNT;i++)  /* Initialize all lamps */
+    if(g_process_mode!=TRANSITION_MODE) {  // When not coming from transition,
+        for(int i=0;i<LAMP_COUNT;i++)  // Initialize all lamps to black
         {
          g_picture_lamp[i].setCurrentColor(0,0,0);
          g_picture_lamp[i].updateOutput(i);
          g_picture_lamp[i].startTransition(BLEND_IN_DURATION);  
         }
         output_show();
-        enter_TRANSITION_MODE();
+        g_pic_index=random(PICTURE_COUNT); // chose a picture regardless of the history
+        store_picture_in_history(g_pic_index);
+        enter_TRANSITION_MODE(); // this will blend in the chosen picture
         return;
     } else { 
             // immediate end of transition (Picture will fully displayed)
@@ -378,10 +378,7 @@ void process_SHOW_MODE()
         }
       }
       
-      // finally a valid choice
-      g_picture_history[g_picture_history_next_entry_index]=g_pic_index; // put choice into the history
-      if(++g_picture_history_next_entry_index>=PICTURE_HISTORY_COUNT) g_picture_history_next_entry_index=0;
-      
+      store_picture_in_history(g_pic_index);
       enter_TRANSITION_MODE();
       return;  
      }
@@ -568,6 +565,12 @@ void set_daylight_target_picture(){
     }
     g_picture_lamp[20].setTargetColor_int(g_color_palette[COLOR_IX_BROWN][iRED],g_color_palette[COLOR_IX_BROWN][iGREEN],g_color_palette[COLOR_IX_BROWN][iBLUE]); // set one lamp to brown
 }
+
+void store_picture_in_history(byte pic_index) {
+      g_picture_history[g_picture_history_next_entry_index]=pic_index; // put choice into the history
+      if(++g_picture_history_next_entry_index>=PICTURE_HISTORY_COUNT) g_picture_history_next_entry_index=0;
+}
+
 
 /*  triggerNextTransotion
  *   Searched for the next lamp that needs a transition and instructs the lamp to start the transition

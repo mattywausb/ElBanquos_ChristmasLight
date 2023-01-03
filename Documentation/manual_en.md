@@ -9,7 +9,7 @@ Especially for assembly and installation there are multiple test programs to ver
 
 The build in LED on the Arduino board is used to give feedback about the mode.
 
-Comprehensive mode change table:
+### Comprehensive mode change table:
 
 |Current Mode|Press "Mode"|Press "Step"|Hold "Mode" Long|Hold "Step" Long|
 |---|---|---|---|---|
@@ -21,11 +21,38 @@ Comprehensive mode change table:
 |Set Minute|Minute up|Minute Down||>Countdown|
 |Tst: Sensor Calibration|>Tst: Placement|||
 |Tst: Placement|>Tst: Palette|Switch Lamp group||
-|Tst: Palette|>Tst: Pictures|Switch colo of inner lamps||
+|Tst: Palette|>Tst: Pictures|Switch color of inner lamps||
 |Tst: Picture|Previous Picture|Next Picture|>Tst: Fade Solo||
 |Tst: Fade Solo|>Tst: Fade Ensemble|Next Lamp||
 |Tst: Fade Ensemble|>Tst: Scaling|Next Lamp||
 |Tst: Scaling Current|>Show|Add Lamp||
+
+## Components and setup
+
+* LED Light chains (currently 3 chains with 8 lamps each)
+* controller board with
+   * arduino
+   * connectors for the light chains
+   * Buttons
+   * light sensor
+   * light threshold control
+   * USB Power cable Plug (Delivers power only, not data of arduino)
+* USB Power Supply (5 V with at least 1.5 A)
+
+This will not work with USB power supplies, which provide higher current only after been requested. (most USB power supplies don't care)
+
+Maximum power consumption: LEDS (24x60mA) + Controllerboard (80mA) = 1.5 A 
+
+
+## Setup
+* Position light chains on the window
+* connect light chains to controller board
+* connect power
+
+Never connect/disconnect light chains, when board has power. After disconnect from power, wait 1 Minute until connectin/disconnecting the light chains. This guarantees full discarge of the controller boards buffer 1000uF capacitor.
+   
+
+## Mode descriptions
 
 ### Show Mode (Default Mode when switched on)
 The show mode shows the static picture for a random number of seconds. After the wait time is over, a random new picture is determined and the program switches to transition mode.
@@ -62,7 +89,7 @@ Press MODE-> Switch to Fireworks (Will be done automatically when reaching 00:00
 Press STEP-> Switch to Set Hour
 
 ### Set Hour Mode
-The Set Hour Mode is used to set the Hour of the countdown. (Indicated by blue blinking Middle light)
+The Set Hour Mode is used to set the Hour of the countdown. 
 
 Status LED: Blinking (2 per Second)
 
@@ -74,7 +101,7 @@ STEP Hold 2 sec and release: Switch to Set Minute Mode
 
 
 ### Set Minute Mode
-The Set Hour Mode is used to set the Hour of the countdown. (Indicated by blue blinking Middle light)
+The Set Hour Mode is used to set the Hour of the countdown. 
 
 Status LED: Blinking (4 per Second)
 

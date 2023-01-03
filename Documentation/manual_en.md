@@ -16,10 +16,10 @@ The build in LED on the Arduino board is used to give feedback about the mode.
 |Show|>Countdown|>Transition||
 |Transition|>Countdown|>Show||
 |Countdown|>Fireworks|>Set Hour||
-|Fireworks|>Show|Next Effect|>Tst: Sensor Calibration||
-|Set Hour|Hour up|Hour Down||>Set Minute|
-|Set Minute|Minute up|Minute Down||>Countdown|
-|Tst: Sensor Calibration|>Tst: Placement|||
+|Set Hour|Hour down|Hour up||>Set Minute|
+|Set Minute|Minute down|Minute up||>Countdown|
+|Fireworks|>Show|Next Effect|>Sensor Calibration||
+|Sensor Calibration|>Show|>Tst: Placement|||
 |Tst: Placement|>Tst: Palette|Switch Lamp group||
 |Tst: Palette|>Tst: Pictures|Switch color of inner lamps||
 |Tst: Picture|Previous Picture|Next Picture|>Tst: Fade Solo||

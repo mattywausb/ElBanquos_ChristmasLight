@@ -725,12 +725,12 @@ void enter_SENSOR_CALIBRATION()
 void process_SENSOR_CALIBRATION()
 {
    
-    if(input_modeGotPressed()) {
+    if(input_stepGotPressed()) {
       enter_TEST_MODE_PLACEMENT();
       return;
     }
 
-    if(input_stepGotPressed()) {
+    if(input_modeGotPressed()) {
       enter_SHOW_MODE();
       return;      
     }

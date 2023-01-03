@@ -40,6 +40,7 @@ Press STEP-> Start transition to next picture in list
 The show mode uses a photocell to detect the ambient light situation. Only during low light, the show mode will choose one of the normal pictures. During "dailight", the show mode will activate one single lamp as an power indicator.
 
 The threshold to determine "dailight" is set by the potentiometer. For adustment see Tst: Light sensor calibration.
+When in daylight opreration, the sensor will be checked for a change every 60 seconds.
 
 ### Transition Mode
 The Transition Mode modifies the lamps slowly in random order to transition to the next picture. After it is done, the mode switches to Show Mode.

@@ -5,10 +5,10 @@
 
 
 #ifdef TRACE_ON
-#define TRACE_TRANSITION
-//#define TRACE_PICTURES
+//#define TRACE_TRANSITION
+#define TRACE_PICTURES
 //#define ENTER_TESTMODE_IMMEDIATLY
-#define ENTER_CALIBRATION_IMMEDIATLY
+//#define ENTER_CALIBRATION_IMMEDIATLY
 #define TRACE_MODES
 #define DEBUG_ON
 //#define TRACE_CALIBRATION
@@ -41,6 +41,7 @@ Particle g_firework_particle[PARTICLE_COUNT];
 #define TRANSITION_DURATION_VARIANCE 4000
 #define SHOW_DURATION_MINIMAL 400000  
 #define SHOW_DURATION_VARIANCE 200000
+#define SHOW_DAYLIGHT_CHECK_INTERVAL 60000
 
 #else
 // debug timing setting
@@ -50,6 +51,7 @@ Particle g_firework_particle[PARTICLE_COUNT];
 #define TRANSITION_DURATION_VARIANCE 4000
 #define SHOW_DURATION_MINIMAL 5000  
 #define SHOW_DURATION_VARIANCE 7000
+#define SHOW_DAYLIGHT_CHECK_INTERVAL 15000
 #endif
 
 #define BLEND_IN_DURATION 1500
@@ -186,6 +188,7 @@ unsigned long g_transition_follow_up_duration=5000;
 
 
 byte g_pic_index=0; //
+bool g_in_daylight=false;
 
 #define PICTURE_HISTORY_COUNT 4
 byte g_picture_history [PICTURE_HISTORY_COUNT];
@@ -338,7 +341,8 @@ void enter_SHOW_MODE()
     input_IgnoreUntilRelease();
     digitalWrite(LED_BUILTIN, false);
     g_picture_start_time=millis();
-    g_picture_duration_time=SHOW_DURATION_MINIMAL+random(SHOW_DURATION_VARIANCE);
+    if(!g_in_daylight)    g_picture_duration_time=SHOW_DURATION_MINIMAL+random(SHOW_DURATION_VARIANCE);
+    else g_picture_duration_time=SHOW_DAYLIGHT_CHECK_INTERVAL;
     #ifdef TRACE_TIMING
       Serial.print(F("TRACE_TIMING:g_picture_duration_time="));
       Serial.println(g_picture_duration_time/1000);
@@ -394,10 +398,13 @@ void enter_TRANSITION_MODE()
     g_process_mode=TRANSITION_MODE;
     input_IgnoreUntilRelease();
 
-    if(!input_getDaylightState()) { // normal operation
+    g_in_daylight=input_getDaylightState();
+    if(!g_in_daylight) { // normal operation
         set_target_picture(g_pic_index);
     } else set_daylight_target_picture();
     digitalWrite(LED_BUILTIN, true);
+
+
 }
 
 void process_TRANSITION_MODE()
@@ -559,7 +566,7 @@ void set_daylight_target_picture(){
     for (int i=0;i<LAMP_COUNT;i++) { // set all to black
        g_picture_lamp[i].setTargetColor_int(0,0,0);
     }
-    g_picture_lamp[20].setTargetColor_int(g_color_palette[COLOR_IX_BROWN][iRED],g_color_palette[COLOR_IX_BROWN][iGREEN],g_color_palette[COLOR_IX_BROWN][iBLUE]); // set upper tip to orange
+    g_picture_lamp[20].setTargetColor_int(g_color_palette[COLOR_IX_BROWN][iRED],g_color_palette[COLOR_IX_BROWN][iGREEN],g_color_palette[COLOR_IX_BROWN][iBLUE]); // set one lamp to brown
 }
 
 /*  triggerNextTransotion

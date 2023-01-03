@@ -259,7 +259,7 @@ void setup() {
   for (int i=0;i<PICTURE_HISTORY_COUNT;i++) {
       g_picture_history[i]=0;
   };
-  randomSeed(analogRead(4));
+  randomSeed(analogRead(INPUT_ANALOG_PORT_SENSOR)); // 
 
   // provide picture lamp array to the particle engine 
   for(int p=0;p<PARTICLE_COUNT;p++)

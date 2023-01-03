@@ -86,7 +86,7 @@ void enter_FIREWORK_RUN()
 void process_FIREWORK_RUN()
 {
 
-    if(input_selectGotReleased()) {  
+    if(input_modeGotReleased()) {  
       if(input_getLastPressDuration()>LONG_PRESS_DURATION)   // Long press
          enter_SENSOR_CALIBRATION();
       else 

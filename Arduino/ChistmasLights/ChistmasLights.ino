@@ -351,7 +351,7 @@ void enter_SHOW_MODE()
 
 void process_SHOW_MODE()
 {
-    if(input_selectGotPressed()) 
+    if(input_modeGotPressed()) 
     {
       enter_CLOCK_MODE();
       return;
@@ -408,7 +408,7 @@ void process_TRANSITION_MODE()
 {
     int transitionsRunningCount=0;
 
-    if(input_selectGotPressed()) 
+    if(input_modeGotPressed()) 
     {
       enter_CLOCK_MODE();
       return;
@@ -725,7 +725,7 @@ void enter_SENSOR_CALIBRATION()
 void process_SENSOR_CALIBRATION()
 {
    
-    if(input_selectGotPressed()) {
+    if(input_modeGotPressed()) {
       enter_TEST_MODE_PLACEMENT();
       return;
     }
@@ -784,7 +784,7 @@ void enter_TEST_MODE_PLACEMENT()
 void process_TEST_MODE_PLACEMENT()
 {
     
-    if(input_selectGotPressed()) {
+    if(input_modeGotPressed()) {
       enter_TEST_MODE_PALETTE();
       return;
     }
@@ -855,7 +855,7 @@ void enter_TEST_MODE_PALETTE()
 void process_TEST_MODE_PALETTE()
 {
     
-    if(input_selectGotPressed()) {
+    if(input_modeGotPressed()) {
       enter_TEST_MODE_PICTURES();
       return;
     }
@@ -890,7 +890,7 @@ void enter_TEST_MODE_PICTURES()
 
 void process_TEST_MODE_PICTURES()
 {
-     if(input_selectGotReleased()) {  
+     if(input_modeGotReleased()) {  
       if(input_getLastPressDuration()>LONG_PRESS_DURATION) {   // Long press
                     enter_TEST_MODE_FADE_SOLO();
                    return;
@@ -932,7 +932,7 @@ void process_TEST_MODE_FADE_SOLO()
     byte green=(current_time/10)%255;
     byte blue=0;
 
-    if(input_selectGotPressed()) {
+    if(input_modeGotPressed()) {
       enter_TEST_MODE_FADE_IN_ENSEMBLE();
       return;
     }
@@ -967,7 +967,7 @@ void process_TEST_MODE_FADE_IN_ENSEMBLE()
     byte green=0;
     byte blue=0;
 
-    if(input_selectGotPressed()) {
+    if(input_modeGotPressed()) {
       enter_TEST_MODE_SCALING();
       return;
     }
@@ -1003,7 +1003,7 @@ void process_TEST_MODE_SCALING()
     byte green=(current_time/10)%255;
     byte blue=(current_time/10)%255;
 
-    if(input_selectGotPressed()) {
+    if(input_modeGotPressed()) {
       enter_SHOW_MODE();
       return;
     }

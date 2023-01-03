@@ -50,7 +50,7 @@ void enter_CLOCK_MODE()
 void process_CLOCK_MODE()
 {
     long secondOfTheDay=0;
-    if(input_selectGotPressed()) {
+    if(input_modeGotPressed()) {
        enter_FIREWORK_RUN() ;
       return;
     } // Select got pressed
@@ -116,7 +116,7 @@ void process_CLOCK_SET_MODE()
      if(g_process_mode==CLOCK_SET_HOUR_MODE)    digitalWrite(LED_BUILTIN, millis()%500<250);
      else digitalWrite(LED_BUILTIN, millis()%250<125);
     
-     if(input_selectGotPressed()) {
+     if(input_modeGotPressed()) {
        if(g_process_mode==CLOCK_SET_HOUR_MODE) g_clock_base_time-=3600;
        else g_clock_base_time-=60;
        if (g_clock_base_time<0)g_clock_base_time+=SECONDS_PER_DAY;

@@ -14,7 +14,7 @@
 
 
 /* Button constants */ 
-const byte switch_pin_list[] = {3,    // Mode Select 
+const byte switch_pin_list[] = {3,    // Mode 
                                 2    // Step
                                };
                                 
@@ -105,18 +105,18 @@ int input_getSecondsSinceLastEvent() {
 
 /* ------------- Button events --------------- */
 
-bool input_selectGotPressed()
+bool input_modeGotPressed()
 {
 
   return input_enabled && ((button_tick_state & INPUT_BUTTON_A_BITS) == INPUT_BUTTON_A_GOT_PRESSED_PATTERN);
 }
 
-bool input_selectIsPressed()
+bool input_modeIsPressed()
 {
   return input_enabled && ((button_tick_state & INPUT_BUTTON_A_BITS) == INPUT_BUTTON_A_IS_PRESSED_PATTERN); 
 }
 
-byte input_selectGotReleased()
+byte input_modeGotReleased()
 {
   return input_enabled && ((button_tick_state & INPUT_BUTTON_A_BITS) == INPUT_BUTTON_A_GOT_RELEASED_PATTERN); 
 }

@@ -1,4 +1,4 @@
-#define TRACE_ON 
+//#define TRACE_ON 
 
 
 // need this here to provide definition also in ChristmasLights.ino

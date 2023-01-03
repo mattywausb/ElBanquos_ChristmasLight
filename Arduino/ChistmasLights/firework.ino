@@ -44,13 +44,13 @@ float  g_fw_main_color;
 boolean g_mirror=false;
 byte g_prev_fw_show_type=0;
 
-// used create an uneven probabilty pattern. Lon interval = high probability
-const byte show_probabilty_hitrange[] PROGMEM = {20,  // Sparkle left right
-                                                 40,  // Single random rockets
-                                                 50,  // sunflower
-                                                 65,  // Joker
-                                                 85,  // roman lights
-                                                 100};  // Glitter bomb
+// interval map that is used to create an uneven probabilty pattern. longer interval = higher probability
+const byte show_probabilty_hitrange[] PROGMEM = {20,  // Sparkle left right  (20%)
+                                                 40,  // Single random rockets (20%)
+                                                 50,  // sunflower (10%)
+                                                 65,  // Joker (15%)
+                                                 85,  // roman lights (20%)
+                                                 100};  // Glitter bomb (15%)
 
 
 /* ========= FIREWORK_RUN ======== */
@@ -102,7 +102,7 @@ void process_FIREWORK_RUN()
       fw_init_show();
     } 
     
-    if(g_fw_show_type==0 && ( millis()-g_picture_start_time )> g_picture_duration_time) {       //start next show
+    if(g_fw_show_type==0 && ( millis()-g_picture_start_time )> g_picture_duration_time) {       //start next random show after a pause show
       byte probabiliy_hitrange[FW_SHOW_TYPE_COUNT];
       byte dice100;
 
@@ -132,7 +132,7 @@ void process_FIREWORK_RUN()
       g_fw_show_shot=0;
       g_fw_show_shot_limit=1;
       g_picture_start_time=millis();
-      g_picture_duration_time=1000*random(6)+5000;
+      g_picture_duration_time=1000*random(6)+5000;  // choose a random pause time
      
       #ifdef TRACE_FIREWORK
         Serial.print(F(">TRACE_FIREWORK: pausing for "));
@@ -200,7 +200,7 @@ void fw_init_show() {
            memcpy_P(g_lamp_path_buffer[1],fw_path_circle,LAMP_PATH_BUFFER_LENGTH);  // This is the colorfull circle
            break;
     case 3:          // Sunflower
-           g_fw_show_shot_limit=3000;   // about 60 seconds with 15 ms per shot
+           g_fw_show_shot_limit=1500;   // about 22 seconds with 15 ms per shot
            memcpy_P(g_lamp_path_buffer[0],fw_path_beam_3h ,LAMP_PATH_BUFFER_LENGTH);
            memcpy_P(g_lamp_path_buffer[1],fw_path_beam_5h ,LAMP_PATH_BUFFER_LENGTH);   
            memcpy_P(g_lamp_path_buffer[2],fw_path_beam_7h ,LAMP_PATH_BUFFER_LENGTH);  
@@ -299,11 +299,11 @@ void show_3_next_particle()  // Sunflower Particle
 {
       t_color_hsv color;
       int shotsLeft=g_fw_show_shot_limit-g_fw_show_shot;
-      float run_ramp=shotsLeft>250?1:shotsLeft/250.0;
+      float value_ramp=shotsLeft>250?1:shotsLeft/250.0; // set intensitiy to 1 unless for last 250 particles fade to 0
       
-      color.h=shotsLeft>250?g_fw_main_color:30;
-      color.s=shotsLeft>250?(random(8)?1:0):0.8; //1/8 chance  to get white; orage in the end
-      color.v=run_ramp; 
+      color.h=shotsLeft>250?g_fw_main_color:30; // Set color unless for 250 particles set to orange
+      color.s=shotsLeft>250?(random(12)?1:0):0.8; //1/12 chance  to get white; stick to color for last 250 particles
+      color.v=value_ramp; 
       byte lfo=shotsLeft/800; // Counting slowly to 0 over runtime of show
       int pathIndex=(g_fw_show_shot/(2+(lfo/3)))%5;
       if(g_mirror)pathIndex=4-pathIndex;  // flip rotation in mirror mode

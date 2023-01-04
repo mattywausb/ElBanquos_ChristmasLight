@@ -96,6 +96,7 @@ Status LED: Blinking (2 per Second)
 Press MODE-> 1 Hour Backward
 
 Press STEP-> 1 Hour Forward
+Press STEP-> 1 Hour Forward
 
 STEP Hold 2 sec and release: Switch to Set Minute Mode
 

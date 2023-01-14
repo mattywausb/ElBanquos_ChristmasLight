@@ -133,6 +133,8 @@ const byte* const g_pic_table [] ={
 #define COLOR_IX_ORANGE 9
 #define COLOR_IX_RED 5
 #define COLOR_IX_WHITE 7
+#define COLOR_IX_YELLOW 1
+#define COLOR_IX_BLUE 6
 
 int g_color_palette[][3]={
 //          {0  ,0  ,0  },    // 0 = black
@@ -773,12 +775,9 @@ void enter_TEST_MODE_PLACEMENT()
     digitalWrite(LED_BUILTIN, false);
     g_pic_index=0;
     for(int i=0;i<LAMP_COUNT;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
-    output_show();
-    output_setLightColor(0,255,0,0);
-    output_setLightColor(1,255,255,0);
-    output_setLightColor(2,0,255,0);
-    output_setLightColor(3,0,255,255);
-    output_setLightColor(4,0,0,255);
+    output_setLightColor(18,255,0,0);
+    output_setLightColor(23,0,255,0);
+    output_setLightColor(13,0,0,255);
     output_show();
 }
 
@@ -791,15 +790,13 @@ void process_TEST_MODE_PLACEMENT()
     }
     
     if(input_stepGotPressed()) {  // foreward one patter
-      if(++g_pic_index>3) g_pic_index=0;
+      if(++g_pic_index>4) g_pic_index=0;
       for(int i=0;i<LAMP_COUNT;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
       switch(g_pic_index) {
-       case 0:       // inner pentagon
-           output_setLightColor(0,255,0,0);
-           output_setLightColor(1,255,255,0);
-           output_setLightColor(2,0,255,0);
-           output_setLightColor(3,0,255,255);
-           output_setLightColor(4,0,0,255);
+       case 0:     // Chain identification
+           output_setLightColor(18,255,0,0);
+           output_setLightColor(23,0,255,0);
+           output_setLightColor(13,0,0,255);
            break;
        case 1:       // outer pentagon
            output_setLightColor(5,255,0,0);
@@ -809,23 +806,31 @@ void process_TEST_MODE_PLACEMENT()
            output_setLightColor(9,0,0,255);
            break;
        case 2:       // the circle
-           output_setLightColor(10,128,0,0);
+           output_setLightColor(10,40,0,0);
            output_setLightColor(11,255,0,0);
-           output_setLightColor(12,128,128,0);
+           output_setLightColor(12,40,40,0);
            output_setLightColor(13,255,255,0);
-           output_setLightColor(14,0,128,0);
+           output_setLightColor(14,0,40,0);
            output_setLightColor(15,0,255,0);
-           output_setLightColor(16,0,128,128);
+           output_setLightColor(16,0,40,40);
            output_setLightColor(17,0,255,255);
-           output_setLightColor(18,0,0,128);
+           output_setLightColor(18,0,0,40);
            output_setLightColor(19,0,0,255);
            break;
-       case 3:       // the additionals
-           output_setLightColor(20,255,0,0);
-           output_setLightColor(21,255,255,0);
-           output_setLightColor(22,0,255,0);
-           output_setLightColor(23,0,255,255);
+       case 3:       // inner pentagon
+           output_setLightColor(0,255,0,0);
+           output_setLightColor(1,255,255,0);
+           output_setLightColor(2,0,255,0);
+           output_setLightColor(3,0,255,255);
+           output_setLightColor(4,0,0,255);
            break;
+       case 4:       // the additionals
+           output_setLightColor(20,255,0,0); // Bottom
+           output_setLightColor(23,255,255,0);  // Center
+           output_setLightColor(21,0,255,0);  // Head left
+           output_setLightColor(22,0,0,255);  // Head Right
+           break;
+
       }// switch
       output_show();
     } // select_got_pressed

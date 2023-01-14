@@ -5,9 +5,8 @@ The system contains multiple programs, that can be accessed by using the two but
 * Mode
 * Step
  
-Especially for assembly and installation there are multiple test programs to verify the electrical function and the correct arrangement of the lamps.
+Especially for assembly and installation there are various test programs to verify the electrical function and the correct arrangement of the lamps.
 
-The build in LED on the Arduino board is used to give feedback about the mode.
 
 ### Comprehensive mode change table:
 
@@ -50,6 +49,8 @@ Maximum power consumption: LEDS (24x60mA) + Controllerboard (80mA) = 1.5 A
 * connect power
 
 Never connect/disconnect light chains, when board has power. After disconnect from power, wait 1 Minute until connectin/disconnecting the light chains. This guarantees full discarge of the controller boards buffer 1000uF capacitor.
+
+After connecting, check out the Testprogramm
    
 
 ## Mode descriptions
@@ -57,7 +58,6 @@ Never connect/disconnect light chains, when board has power. After disconnect fr
 ### Show Mode (Default Mode when switched on)
 The show mode shows the static picture for a random number of seconds. After the wait time is over, a random new picture is determined and the program switches to transition mode.
 
-Status LED: OFF
 
 Press MODE-> Countdown Mode
 
@@ -72,7 +72,6 @@ When in daylight opreration, the sensor will be checked for a change every 60 se
 ### Transition Mode
 The Transition Mode modifies the lamps slowly in random order to transition to the next picture. After it is done, the mode switches to Show Mode.
 
-Status LED: ON
 
 Press MODE->  Countdown Mode
 
@@ -80,9 +79,7 @@ Press STEP-> Foreward transition to target picture an switch to show mode.
 
 ### Countdown Mode
 The Countdown Mode will display time of an internal clock and switch to fireworks automatically at 00:00. 
-To undersatnd the time display, see description below.
-
-Status LED: OFF
+To understand the time display, see description "Hot the countdown time is displayed" below or check the table on the userpanel.
 
 Press MODE-> Switch to Fireworks (Will be done automatically when reaching 00:00:00)
 
@@ -91,32 +88,29 @@ Press STEP-> Switch to Set Hour
 ### Set Hour Mode
 The Set Hour Mode is used to set the Hour of the countdown. 
 
-Status LED: Blinking (2 per Second)
+During the Set Hour Mode, the center lamp is **blinking red**
 
 Press MODE-> 1 Hour Backward
 
 Press STEP-> 1 Hour Forward
-Press STEP-> 1 Hour Forward
 
-STEP Hold 2 sec and release: Switch to Set Minute Mode
+STEP Hold 2 sec (center lamp turns white) and release: Switch to Set Minute Mode
 
 
 ### Set Minute Mode
 The Set Hour Mode is used to set the Hour of the countdown. 
-
-Status LED: Blinking (4 per Second)
+During the Set Hour Mode, the center lamp is **blinking blue**
 
 Press MODE-> 1 Minute Backward
 
 Press STEP-> 1 Minute Forward
 
-STEP Hold 2 sec and release: Start Clock (with 0 Seconds) and switch to Countdown Mode
+Hold STEP for at least 2 sec (center lamp turns white): The release will start Clock (with 0 Seconds) and switch to Countdown Mode
 
 
 ### Fireworks Mode
 The Fireworks Mode plays randomly chosen firework animations
 
-Status LED: ON in show pause, OFF during running pattern
 Press MODE-> Switch to Show Mode
 
 Press STEP-> Change to next fireworks pattern
@@ -124,28 +118,48 @@ Press STEP-> Change to next fireworks pattern
 MODE Hold 2 sec and release: Switch to Sensor Calibration
 
 ### Sensor Calibration
-Sensor calibration activates most of the lamps in white and display the deviation between the current light sensor value and the threshold as a red lamp. The scale is formed by lamps 10,20,3,11,6,12,4,13,7. The middle lamp(6), represents the current sensor value. The red indicated postion shows the current threshold, defined by the potentiometer. Setting the threshold to the left (10,20,3,11) defines the current sensor value as lowlight. Setting it to the right (12,4,13,7) , defines the current sensor value as daylight. One lamp stands for one histeresys interval. Value changes inside the histeresys interval will not change the current low/day state.
+Sensor calibration activates most of the lamps in white and display the 
+deviation between the current light sensor value and the threshold as a red lamp. 
+The scale is formed by lamps E,10,K,11,A,1,G,2,8 (See user panel for lamp identification). The middle lamp on the star tip (A),
+represents the current sensor value. The red indicated postion shows the current threshold, 
+defined by the user setting. Placing the threshold to the left (E,10,K,11) defines the current
+sensor value as lowlight. Setting it to the right (1,G,2,B) , defines the current sensor value as daylight.
+One lamp stands for one histeresys interval. 
+Value changes inside the histeresys interval will not change the current low/day state. 
+To adjust the threshold for a spefic light level, wait for the level to come up and place the red dot 
+in the center (A).
 
 Press MODE -> Switch to Placement Test
 
 Press STEP -> Switch to Show Mode
 
-This Calibration mode is only for easy search of the threshold.  The setting of the threshold is measured independently at every change of a picture. 
+This calibration mode is only for easy search of the threshold.  The setting of the threshold is measured independently at every change of a picture, 
+so adjustments are accepted, event  without using this mode.
+
+Also be shure to place the sensor in a, it is not affected by the light of the christmas pictures. To help you
+when tracing he path of the light, this mode switches most of the lights to white.
+Placing some shade over the sensor, might be necessary. If the light of the pictures can reach the sensor,
+some pitures might be bright enough to trigger the day mode.
 
 ### Placement Test
-The placement test shows a rainbow color pattern on the different circles, starting with red on the upper lamp and forwarding clockwise.
-The circles are: Inner Pentagon, outer Pentagon, inbetween circle, additonal Lamps
-
-Status LED: OFF
+The placement test shows a rainbow color pattern on the different groups of lamps:
 
 Press MODE-> Switch to Palette Test
 
-Press STEP-> Switch to next circle
+Press STEP-> Switch to next group
+
+The groups are:
+* Chain identification: Three lamps in the center should be red,green,blue from left to right (if not you might have swapped cables when plugging)
+* outer Pentagon/Star tips: Red on 12 o'clock, going clockwise to yellow, green, cyan, blue
+* Middle circle: Red on 12 o'clock, going clockwise to yellow, green, cyan, blue (the 2nd lamp of a pair will be brighter)
+* Inner Pentagon: Red on 6 o'clock, going clockwise to yellow, green, cyan, blue
+* Bottom: Red, Middle yellow, "Head left" green, "Head right" blue
+
+Should this be mixed up you need to check cables or placement of the lamps
+
 
 ### Palette Test
 The palette test shows every palette color on a single lamp (Starting with lamp 6), and allows swithching through all palette colors on the inner ring and center lamp.
-
-Status LED: OFF
 
 Press MODE-> Switch to Picture Test
 
@@ -154,16 +168,14 @@ Press STEP-> Switch inner lamps to next palette color
 ### Picture Test
 The Picture Test shows a picture until it is stopped.
 
-Status LED: OFF
-
 Press MODE-> Switch to Fade Solo Test
 
 Press STEP-> Switch to next picture
 
+Hold MODE for 2 Seconds -> Swith to Fade Solo Test
+
 ### Fade Solo Test
 The Fade Solo Test fades one lamp fading green value from 0 to 255. Should be used while assembling the chain, to test added lamps.
-
-Status LED: OFF
 
 Press MODE-> Switch to Fade Ensemble Test
 
@@ -172,16 +184,16 @@ Press STEP-> Switch to next lamp in the physical chain
 ### Fade Ensemble Test
 The Fade Ensemble Test lights all lamps in cyan and a selected lamp with a fading red. Should be used while assembling the chain, to approve conductivity.
 
-Status LED: OFF
-
 Press MODE-> Switch to Scaling Test
 
 Press STEP-> Switch to next lamp in physical chain
 
 ### Scaling Current Test
-The Scaling test lights lamps in with fading white, starting with one lamp. Should be used to check, if assemble cables and power supply will provide enough current. When all lamps are running, you have reached the worst case consumption scenario. Fading must still be smooth and steady-
-
-Status LED: OFF
+The scaling current test lights lamps in with fading white, starting with one lamp. 
+Should be used to check, if assemble cables and power supply will provide enough current. 
+When all lamps are running, you have reached the highest power consumption possible. 
+Fading must still be smooth and steady on all lamps an the should be no change in the white color. 
+(When white is getting warmer, this indicates unsufficient power)
 
 Press MODE-> Switch to Show Mode
 
@@ -220,4 +232,14 @@ The minute lamps have some easy to recognize  positions/color as follows:
 30 - bottom middle white
 45 - 3rd left white
 
+# Mode indication on the built in LED
+The built in LED should not be visible in the final casing, but can be helpful during development:
+
+* Show Mode: OFF
+* Transition running: ON
+* Countdown Mode: OFF
+* Set Hour Mode: Blinking 2 per Second
+* Set Minute Mode: Blinking 4 per Second
+* Fireworks Mode: ON in show pause, OFF during running pattern
+* All Tests: OFF
 

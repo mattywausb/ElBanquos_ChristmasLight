@@ -100,26 +100,27 @@ const byte pic_fade_arrow[24]  PROGMEM ={   5, 9, 1, 1, 9,  7, 0, 8, 8, 0,  1, 1
 //const byte pic_######[24]      PROGMEM ={   0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0}; //## #####
 
                                                      
-const byte* const g_pic_table [] ={pic_pyramid, 
-                                   pic_fade_star,     
-                                   pic_fade_arrow,
-                                   pic_cassiopeia,  
+const byte* const g_pic_table [] ={
                                    pic_star_uni,     
                                    pic_star_color,   
-                                   pic_pentagons,    
+                                   pic_fade_star,     
+                                   pic_flake_1,      
+                                   pic_flake_2,      
                                    pic_center_star,  
+                                   pic_pentagons,    
+                                   pic_moon,         
                                    pic_gingerbread,  
                                    pic_angel,        
                                    pic_snow_man,     
-                                   pic_moon,         
-                                   pic_flake_1,      
-                                   pic_flake_2,      
                                    pic_bell,         
                                    pic_tree,         
-                                   pic_ichtys,       
+                                   pic_fade_arrow,
                                    pic_3_wise,       
                                    pic_krippe,       
+                                   pic_pyramid, 
                                    pic_half_moon,    
+                                   pic_ichtys,       
+                                   pic_cassiopeia  
                                    }; 
 
 #define PICTURE_POINT(pic,lamp) pgm_read_byte_near(g_pic_table[pic]+lamp*sizeof(byte))

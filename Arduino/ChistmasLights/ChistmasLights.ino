@@ -9,6 +9,7 @@
 #define TRACE_PICTURES
 //#define ENTER_TESTMODE_IMMEDIATLY
 //#define ENTER_CALIBRATION_IMMEDIATLY
+#define ENTER_FIREWORKS_IMMEDIATLY
 #define TRACE_MODES
 #define DEBUG_ON
 //#define TRACE_CALIBRATION
@@ -272,6 +273,10 @@ void setup() {
         g_firework_particle[p].init(g_picture_lamp);
 
   // switch to normal operation
+  #ifdef ENTER_FIREWORKS_IMMEDIATLY
+    enter_FIREWORK_RUN();
+    return;
+  #endif
   #ifdef ENTER_CALIBRATION_IMMEDIATLY
     enter_SENSOR_CALIBRATION();
     return;

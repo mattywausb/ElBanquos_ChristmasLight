@@ -6,7 +6,7 @@
 
 #ifdef TRACE_ON
 //#define TRACE_INPUT 
-#define TRACE_INPUT_LIGHTSENSOR
+//#define TRACE_INPUT_LIGHTSENSOR
 //#define TRACE_INPUT_HIGH
 //#define TRACE_INPUT_TIMING 
 #endif
@@ -14,8 +14,8 @@
 
 
 /* Button constants */ 
-const byte switch_pin_list[] = {11,    // Mode Select 
-                                12    // Step
+const byte switch_pin_list[] = {3,    // Mode 
+                                2    // Step
                                };
                                 
 #define INPUT_PORT_COUNT sizeof(switch_pin_list)
@@ -69,8 +69,8 @@ bool input_enabled=true;
 
 /* Light Sensor */
 
-#define INPUT_ANALOG_PORT_THRESHOLD 0
-#define INPUT_ANALOG_PORT_SENSOR 1
+// Porst are dfined in main settings
+
 
 #define INPUT_HISTERESYS_GAP 50
 #define INPUT_THRESHOLD_BASE INPUT_HISTERESYS_GAP+3
@@ -105,18 +105,18 @@ int input_getSecondsSinceLastEvent() {
 
 /* ------------- Button events --------------- */
 
-bool input_selectGotPressed()
+bool input_modeGotPressed()
 {
 
   return input_enabled && ((button_tick_state & INPUT_BUTTON_A_BITS) == INPUT_BUTTON_A_GOT_PRESSED_PATTERN);
 }
 
-bool input_selectIsPressed()
+bool input_modeIsPressed()
 {
   return input_enabled && ((button_tick_state & INPUT_BUTTON_A_BITS) == INPUT_BUTTON_A_IS_PRESSED_PATTERN); 
 }
 
-byte input_selectGotReleased()
+byte input_modeGotReleased()
 {
   return input_enabled && ((button_tick_state & INPUT_BUTTON_A_BITS) == INPUT_BUTTON_A_GOT_RELEASED_PATTERN); 
 }

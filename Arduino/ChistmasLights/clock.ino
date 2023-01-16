@@ -23,6 +23,7 @@ const byte clock_second_12_color[13]   PROGMEM ={0,11,6,11,8,6,2,10,7,1,9,5,0}; 
 long g_clock_base_time=(18l*60l+57l)*60l;  // Time in seconds to add to systemclock to get realtime (18:58 as default)
 unsigned long g_clock_sync_time=0;  // Time to calibrate "zeropoint" of systemclock 
 
+#define LAMP_IX_CENTER 23
 
 /* ========= CLOCK_MODE ======== */
 
@@ -50,7 +51,7 @@ void enter_CLOCK_MODE()
 void process_CLOCK_MODE()
 {
     long secondOfTheDay=0;
-    if(input_selectGotPressed()) {
+    if(input_modeGotPressed()) {
        enter_FIREWORK_RUN() ;
       return;
     } // Select got pressed
@@ -95,8 +96,13 @@ void enter_CLOCK_SET_HOUR_MODE()
     g_clock_base_time=(g_clock_base_time/60)*60; //Remove seconds from time
     input_IgnoreUntilRelease();
 
-     // TODO: Switch on central lamp
-
+    /* Set seconds ring 4-5,1-3 to black */ 
+    int lamp=0;
+    for (int i=0;i<5;i++) {  /* Iterate over seconds ring */
+      lamp=i<2?i+3:i-2;
+      g_picture_lamp[lamp].setCurrentColor(0,0,0);
+      g_picture_lamp[lamp].updateOutput(lamp);
+    }      
 }
 
 void enter_CLOCK_SET_MINUTE_MODE() 
@@ -106,17 +112,17 @@ void enter_CLOCK_SET_MINUTE_MODE()
     #endif
     g_process_mode=CLOCK_SET_MINUTE_MODE;
     input_IgnoreUntilRelease();
-     // TODO: Switch on central lamp
 }
 
 void process_CLOCK_SET_MODE()
 {
     boolean changed=false;
-     // Blink Builtin LED
-     if(g_process_mode==CLOCK_SET_HOUR_MODE)    digitalWrite(LED_BUILTIN, millis()%500<250);
-     else digitalWrite(LED_BUILTIN, millis()%250<125);
+
+    boolean blink_state;
+    if(g_process_mode==CLOCK_SET_HOUR_MODE) blink_state=millis()%750<375;
+    else blink_state=millis()%500<250;
     
-     if(input_selectGotPressed()) {
+     if(input_modeGotPressed()) {
        if(g_process_mode==CLOCK_SET_HOUR_MODE) g_clock_base_time-=3600;
        else g_clock_base_time-=60;
        if (g_clock_base_time<0)g_clock_base_time+=SECONDS_PER_DAY;
@@ -139,7 +145,8 @@ void process_CLOCK_SET_MODE()
 
       }
     } // Step got pressed
-    
+
+    // Update the clock face
     if (changed) { 
       order_next_clock_picture(g_clock_base_time,1);
       #ifdef TRACE_CLOCK_TIME
@@ -148,6 +155,20 @@ void process_CLOCK_SET_MODE()
           Serial.println();
         #endif
     };  
+
+
+    // Manage the status indication
+     if(input_stepIsPressed() && input_getCurrentPressDuration()>LONG_PRESS_DURATION) { // We started to change mode
+        g_picture_lamp[LAMP_IX_CENTER].setCurrentColor(g_color_palette[COLOR_IX_WHITE][iRED],g_color_palette[COLOR_IX_WHITE][iGREEN],g_color_palette[COLOR_IX_WHITE][iBLUE]);
+     } else {  // indicate current set mode
+        digitalWrite(LED_BUILTIN,blink_state);
+        if(blink_state) {
+          if(g_process_mode==CLOCK_SET_HOUR_MODE) g_picture_lamp[LAMP_IX_CENTER].setCurrentColor(g_color_palette[COLOR_IX_RED][iRED],g_color_palette[COLOR_IX_RED][iGREEN],g_color_palette[COLOR_IX_RED][iBLUE]);
+          else g_picture_lamp[LAMP_IX_CENTER].setCurrentColor(g_color_palette[COLOR_IX_BLUE][iRED],g_color_palette[COLOR_IX_BLUE][iGREEN],g_color_palette[COLOR_IX_BLUE][iBLUE]);
+        } else g_picture_lamp[LAMP_IX_CENTER].setCurrentColor(0,0,0);
+     }
+     g_picture_lamp[LAMP_IX_CENTER].updateOutput(LAMP_IX_CENTER);
+     
     
     // update all transitioning lights
     for(int i=0;i<LAMP_COUNT;i++) 
@@ -294,7 +315,8 @@ void order_next_clock_picture(long secondOfTheDay,int transitionTime)
    #endif
 
 
-   /* SECONDS RING */  /* Lamps 4-5,1-3 */
+   /* SECONDS RING */  /* Lamps 4-5,1-3 or 24 */
+   if(!CLOCK_MODE) return; // We dont show seconds, if in set modes. 
 
    // Black as default
    color0=0;

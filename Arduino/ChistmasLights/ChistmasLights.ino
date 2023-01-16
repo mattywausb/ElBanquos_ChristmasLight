@@ -5,10 +5,11 @@
 
 
 #ifdef TRACE_ON
-#define TRACE_TRANSITION
-//#define TRACE_PICTURES
+//#define TRACE_TRANSITION
+#define TRACE_PICTURES
 //#define ENTER_TESTMODE_IMMEDIATLY
-#define ENTER_CALIBRATION_IMMEDIATLY
+//#define ENTER_CALIBRATION_IMMEDIATLY
+#define ENTER_FIREWORKS_IMMEDIATLY
 #define TRACE_MODES
 #define DEBUG_ON
 //#define TRACE_CALIBRATION
@@ -41,6 +42,7 @@ Particle g_firework_particle[PARTICLE_COUNT];
 #define TRANSITION_DURATION_VARIANCE 4000
 #define SHOW_DURATION_MINIMAL 400000  
 #define SHOW_DURATION_VARIANCE 200000
+#define SHOW_DAYLIGHT_CHECK_INTERVAL 60000
 
 #else
 // debug timing setting
@@ -50,6 +52,7 @@ Particle g_firework_particle[PARTICLE_COUNT];
 #define TRANSITION_DURATION_VARIANCE 4000
 #define SHOW_DURATION_MINIMAL 5000  
 #define SHOW_DURATION_VARIANCE 7000
+#define SHOW_DAYLIGHT_CHECK_INTERVAL 15000
 #endif
 
 #define BLEND_IN_DURATION 1500
@@ -98,26 +101,27 @@ const byte pic_fade_arrow[24]  PROGMEM ={   5, 9, 1, 1, 9,  7, 0, 8, 8, 0,  1, 1
 //const byte pic_######[24]      PROGMEM ={   0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0}; //## #####
 
                                                      
-const byte* const g_pic_table [] ={pic_pyramid, 
-                                   pic_fade_star,     
-                                   pic_fade_arrow,
-                                   pic_cassiopeia,  
+const byte* const g_pic_table [] ={
                                    pic_star_uni,     
                                    pic_star_color,   
-                                   pic_pentagons,    
+                                   pic_fade_star,     
+                                   pic_flake_1,      
+                                   pic_flake_2,      
                                    pic_center_star,  
+                                   pic_pentagons,    
+                                   pic_moon,         
                                    pic_gingerbread,  
                                    pic_angel,        
                                    pic_snow_man,     
-                                   pic_moon,         
-                                   pic_flake_1,      
-                                   pic_flake_2,      
                                    pic_bell,         
                                    pic_tree,         
-                                   pic_ichtys,       
+                                   pic_fade_arrow,
                                    pic_3_wise,       
                                    pic_krippe,       
+                                   pic_pyramid, 
                                    pic_half_moon,    
+                                   pic_ichtys,       
+                                   pic_cassiopeia  
                                    }; 
 
 #define PICTURE_POINT(pic,lamp) pgm_read_byte_near(g_pic_table[pic]+lamp*sizeof(byte))
@@ -130,6 +134,8 @@ const byte* const g_pic_table [] ={pic_pyramid,
 #define COLOR_IX_ORANGE 9
 #define COLOR_IX_RED 5
 #define COLOR_IX_WHITE 7
+#define COLOR_IX_YELLOW 1
+#define COLOR_IX_BLUE 6
 
 int g_color_palette[][3]={
 //          {0  ,0  ,0  },    // 0 = black
@@ -186,6 +192,7 @@ unsigned long g_transition_follow_up_duration=5000;
 
 
 byte g_pic_index=0; //
+bool g_in_daylight=false;
 
 #define PICTURE_HISTORY_COUNT 4
 byte g_picture_history [PICTURE_HISTORY_COUNT];
@@ -259,13 +266,17 @@ void setup() {
   for (int i=0;i<PICTURE_HISTORY_COUNT;i++) {
       g_picture_history[i]=0;
   };
-  randomSeed(analogRead(4));
+  randomSeed(analogRead(INPUT_ANALOG_PORT_SENSOR)); // 
 
   // provide picture lamp array to the particle engine 
   for(int p=0;p<PARTICLE_COUNT;p++)
         g_firework_particle[p].init(g_picture_lamp);
 
   // switch to normal operation
+  #ifdef ENTER_FIREWORKS_IMMEDIATLY
+    enter_FIREWORK_RUN();
+    return;
+  #endif
   #ifdef ENTER_CALIBRATION_IMMEDIATLY
     enter_SENSOR_CALIBRATION();
     return;
@@ -311,17 +322,17 @@ void enter_SHOW_MODE()
     #endif
 
     
-    if(g_process_mode!=TRANSITION_MODE) {  // When not coming from Transition, init a random picture
-        g_pic_index=random(PICTURE_COUNT);
-        set_target_picture( g_pic_index);
-        for(int i=0;i<LAMP_COUNT;i++)  /* Initialize all lamps */
+    if(g_process_mode!=TRANSITION_MODE) {  // When not coming from transition,
+        for(int i=0;i<LAMP_COUNT;i++)  // Initialize all lamps to black
         {
          g_picture_lamp[i].setCurrentColor(0,0,0);
          g_picture_lamp[i].updateOutput(i);
          g_picture_lamp[i].startTransition(BLEND_IN_DURATION);  
         }
         output_show();
-        enter_TRANSITION_MODE();
+        g_pic_index=random(PICTURE_COUNT); // chose a picture regardless of the history
+        store_picture_in_history(g_pic_index);
+        enter_TRANSITION_MODE(); // this will blend in the chosen picture
         return;
     } else { 
             // immediate end of transition (Picture will fully displayed)
@@ -338,7 +349,8 @@ void enter_SHOW_MODE()
     input_IgnoreUntilRelease();
     digitalWrite(LED_BUILTIN, false);
     g_picture_start_time=millis();
-    g_picture_duration_time=SHOW_DURATION_MINIMAL+random(SHOW_DURATION_VARIANCE);
+    if(!g_in_daylight)    g_picture_duration_time=SHOW_DURATION_MINIMAL+random(SHOW_DURATION_VARIANCE);
+    else g_picture_duration_time=SHOW_DAYLIGHT_CHECK_INTERVAL;
     #ifdef TRACE_TIMING
       Serial.print(F("TRACE_TIMING:g_picture_duration_time="));
       Serial.println(g_picture_duration_time/1000);
@@ -347,7 +359,7 @@ void enter_SHOW_MODE()
 
 void process_SHOW_MODE()
 {
-    if(input_selectGotPressed()) 
+    if(input_modeGotPressed()) 
     {
       enter_CLOCK_MODE();
       return;
@@ -374,10 +386,7 @@ void process_SHOW_MODE()
         }
       }
       
-      // finally a valid choice
-      g_picture_history[g_picture_history_next_entry_index]=g_pic_index; // put choice into the history
-      if(++g_picture_history_next_entry_index>=PICTURE_HISTORY_COUNT) g_picture_history_next_entry_index=0;
-      
+      store_picture_in_history(g_pic_index);
       enter_TRANSITION_MODE();
       return;  
      }
@@ -394,17 +403,20 @@ void enter_TRANSITION_MODE()
     g_process_mode=TRANSITION_MODE;
     input_IgnoreUntilRelease();
 
-    if(!input_getDaylightState()) { // normal operation
+    g_in_daylight=input_getDaylightState();
+    if(!g_in_daylight) { // normal operation
         set_target_picture(g_pic_index);
     } else set_daylight_target_picture();
     digitalWrite(LED_BUILTIN, true);
+
+
 }
 
 void process_TRANSITION_MODE()
 {
     int transitionsRunningCount=0;
 
-    if(input_selectGotPressed()) 
+    if(input_modeGotPressed()) 
     {
       enter_CLOCK_MODE();
       return;
@@ -559,8 +571,14 @@ void set_daylight_target_picture(){
     for (int i=0;i<LAMP_COUNT;i++) { // set all to black
        g_picture_lamp[i].setTargetColor_int(0,0,0);
     }
-    g_picture_lamp[20].setTargetColor_int(g_color_palette[COLOR_IX_BROWN][iRED],g_color_palette[COLOR_IX_BROWN][iGREEN],g_color_palette[COLOR_IX_BROWN][iBLUE]); // set upper tip to orange
+    g_picture_lamp[20].setTargetColor_int(g_color_palette[COLOR_IX_BROWN][iRED],g_color_palette[COLOR_IX_BROWN][iGREEN],g_color_palette[COLOR_IX_BROWN][iBLUE]); // set one lamp to brown
 }
+
+void store_picture_in_history(byte pic_index) {
+      g_picture_history[g_picture_history_next_entry_index]=pic_index; // put choice into the history
+      if(++g_picture_history_next_entry_index>=PICTURE_HISTORY_COUNT) g_picture_history_next_entry_index=0;
+}
+
 
 /*  triggerNextTransotion
  *   Searched for the next lamp that needs a transition and instructs the lamp to start the transition
@@ -715,12 +733,12 @@ void enter_SENSOR_CALIBRATION()
 void process_SENSOR_CALIBRATION()
 {
    
-    if(input_selectGotPressed()) {
+    if(input_stepGotPressed()) {
       enter_TEST_MODE_PLACEMENT();
       return;
     }
 
-    if(input_stepGotPressed()) {
+    if(input_modeGotPressed()) {
       enter_SHOW_MODE();
       return;      
     }
@@ -762,33 +780,28 @@ void enter_TEST_MODE_PLACEMENT()
     digitalWrite(LED_BUILTIN, false);
     g_pic_index=0;
     for(int i=0;i<LAMP_COUNT;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
-    output_show();
-    output_setLightColor(0,255,0,0);
-    output_setLightColor(1,255,255,0);
-    output_setLightColor(2,0,255,0);
-    output_setLightColor(3,0,255,255);
-    output_setLightColor(4,0,0,255);
+    output_setLightColor(18,255,0,0);
+    output_setLightColor(23,0,255,0);
+    output_setLightColor(13,0,0,255);
     output_show();
 }
 
 void process_TEST_MODE_PLACEMENT()
 {
     
-    if(input_selectGotPressed()) {
+    if(input_modeGotPressed()) {
       enter_TEST_MODE_PALETTE();
       return;
     }
     
     if(input_stepGotPressed()) {  // foreward one patter
-      if(++g_pic_index>3) g_pic_index=0;
+      if(++g_pic_index>4) g_pic_index=0;
       for(int i=0;i<LAMP_COUNT;i++)  output_setLightColorUnmapped(i,0,0,0);  // shut down all lights
       switch(g_pic_index) {
-       case 0:       // inner pentagon
-           output_setLightColor(0,255,0,0);
-           output_setLightColor(1,255,255,0);
-           output_setLightColor(2,0,255,0);
-           output_setLightColor(3,0,255,255);
-           output_setLightColor(4,0,0,255);
+       case 0:     // Chain identification
+           output_setLightColor(18,255,0,0);
+           output_setLightColor(23,0,255,0);
+           output_setLightColor(13,0,0,255);
            break;
        case 1:       // outer pentagon
            output_setLightColor(5,255,0,0);
@@ -798,23 +811,31 @@ void process_TEST_MODE_PLACEMENT()
            output_setLightColor(9,0,0,255);
            break;
        case 2:       // the circle
-           output_setLightColor(10,128,0,0);
+           output_setLightColor(10,40,0,0);
            output_setLightColor(11,255,0,0);
-           output_setLightColor(12,128,128,0);
+           output_setLightColor(12,40,40,0);
            output_setLightColor(13,255,255,0);
-           output_setLightColor(14,0,128,0);
+           output_setLightColor(14,0,40,0);
            output_setLightColor(15,0,255,0);
-           output_setLightColor(16,0,128,128);
+           output_setLightColor(16,0,40,40);
            output_setLightColor(17,0,255,255);
-           output_setLightColor(18,0,0,128);
+           output_setLightColor(18,0,0,40);
            output_setLightColor(19,0,0,255);
            break;
-       case 3:       // the additionals
-           output_setLightColor(20,255,0,0);
-           output_setLightColor(21,255,255,0);
-           output_setLightColor(22,0,255,0);
-           output_setLightColor(23,0,255,255);
+       case 3:       // inner pentagon
+           output_setLightColor(0,255,0,0);
+           output_setLightColor(1,255,255,0);
+           output_setLightColor(2,0,255,0);
+           output_setLightColor(3,0,255,255);
+           output_setLightColor(4,0,0,255);
            break;
+       case 4:       // the additionals
+           output_setLightColor(20,255,0,0); // Bottom
+           output_setLightColor(23,255,255,0);  // Center
+           output_setLightColor(21,0,255,0);  // Head left
+           output_setLightColor(22,0,0,255);  // Head Right
+           break;
+
       }// switch
       output_show();
     } // select_got_pressed
@@ -845,7 +866,7 @@ void enter_TEST_MODE_PALETTE()
 void process_TEST_MODE_PALETTE()
 {
     
-    if(input_selectGotPressed()) {
+    if(input_modeGotPressed()) {
       enter_TEST_MODE_PICTURES();
       return;
     }
@@ -880,7 +901,7 @@ void enter_TEST_MODE_PICTURES()
 
 void process_TEST_MODE_PICTURES()
 {
-     if(input_selectGotReleased()) {  
+     if(input_modeGotReleased()) {  
       if(input_getLastPressDuration()>LONG_PRESS_DURATION) {   // Long press
                     enter_TEST_MODE_FADE_SOLO();
                    return;
@@ -922,7 +943,7 @@ void process_TEST_MODE_FADE_SOLO()
     byte green=(current_time/10)%255;
     byte blue=0;
 
-    if(input_selectGotPressed()) {
+    if(input_modeGotPressed()) {
       enter_TEST_MODE_FADE_IN_ENSEMBLE();
       return;
     }
@@ -957,7 +978,7 @@ void process_TEST_MODE_FADE_IN_ENSEMBLE()
     byte green=0;
     byte blue=0;
 
-    if(input_selectGotPressed()) {
+    if(input_modeGotPressed()) {
       enter_TEST_MODE_SCALING();
       return;
     }
@@ -993,7 +1014,7 @@ void process_TEST_MODE_SCALING()
     byte green=(current_time/10)%255;
     byte blue=(current_time/10)%255;
 
-    if(input_selectGotPressed()) {
+    if(input_modeGotPressed()) {
       enter_SHOW_MODE();
       return;
     }

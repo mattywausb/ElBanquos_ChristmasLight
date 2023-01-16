@@ -46,12 +46,14 @@ void Particle::start(byte *pathArray,byte pathIndexMax,bool mirror,int time_scal
 
 void Particle::process()
 {
-  if(!inProgress() || ((millis()-m_previousStepMillis)<m_stepDuration)) return;
+  if(!inProgress() || ((millis()-m_previousStepMillis)<m_stepDuration)) return; // Bail out if nothing needs to be done (yet)
   #ifdef TRACE_PARTICLE_HIGH
       Serial.print(F("TRACE_PARTICLE_HIGH> time gone="));Serial.print((millis()-m_previousStepMillis));
       Serial.print(F(" m_pathIndex:"));Serial.println(m_pathIndex);
   #endif
-  byte nextLamp=m_pathArray[m_pathIndex]-1;
+
+  // Determine next lamp
+  byte nextLamp=m_pathArray[m_pathIndex]-1;  // Get the lamp from the path description an turn lamp number into lamp index
   if(nextLamp>=254 || m_pathIndex>=m_pathIndexMax) { // End of path indicator found
     m_pathIndex=255;
     #ifdef TRACE_PARTICLE
@@ -63,17 +65,21 @@ void Particle::process()
   
   if(m_mirror) nextLamp=lamp_mirror_map[nextLamp];
  
+  // Determine timing according to own properties and the path properties
   byte speedByte=m_pathArray[m_pathIndex+1];
   int pixelFadeDuration=(speedByte>>4);
   pixelFadeDuration=m_time_scale*pixelFadeDuration*FIREWORK_FADE_TIME_SCALE+FIREWORK_TIME_SCALE_START;
   m_stepDuration=speedByte&0x000f;
   m_stepDuration=m_time_scale*m_stepDuration*FIREWORK_STEP_TIME_SCALE+FIREWORK_TIME_SCALE_START;
 
-  // TODO: Variance in step speepd and fading
+
+  // push particle color and lamp fade time to the new lamp
   t_color_rgb color=get_color_rgb();
   m_pictureLamp[nextLamp].setCurrentColor(color.r,color.g,color.b);
   m_pictureLamp[nextLamp].setTargetColor(0,0,0);
   m_pictureLamp[nextLamp].startTransition(pixelFadeDuration);
+
+  // fade partice valie
   m_color_hsv.v*=m_pathFadeRate;
   
   m_pathIndex+=2;

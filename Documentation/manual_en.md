@@ -86,7 +86,7 @@ Press MODE-> Switch to Fireworks (Will be done automatically when reaching 00:00
 Press STEP-> Switch to Set Hour
 
 ### Set Hour Mode
-The Set Hour Mode is used to set the Hour of the countdown. 
+The Set Hour Mode is used to set the hours left of the countdown. 
 
 During the Set Hour Mode, the center lamp is **blinking red**
 
@@ -98,7 +98,7 @@ STEP Hold 2 sec (center lamp turns white) and release: Switch to Set Minute Mode
 
 
 ### Set Minute Mode
-The Set Hour Mode is used to set the Hour of the countdown. 
+The Set Minute Mode is used to set the minutes left of the countdown. 
 During the Set Hour Mode, the center lamp is **blinking blue**
 
 Press MODE-> 1 Minute Backward
